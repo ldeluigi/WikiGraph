@@ -1,5 +1,5 @@
 package controller;
 
-public interface Observer {
+interface ViewEventListener {
     void notifyEvent();
 }

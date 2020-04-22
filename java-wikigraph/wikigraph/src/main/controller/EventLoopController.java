@@ -1,6 +1,7 @@
 package controller;
 
-public class ExecutorController implements Controller {
+public class EventLoopController implements Controller {
+
     @Override
     public void notifyEvent() {
 

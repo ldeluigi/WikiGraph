@@ -1,5 +1,5 @@
 package view;
 
-public interface AsyncDisplayer {
+interface AsyncDisplay {
     void display(ViewNode...nodes);
 }

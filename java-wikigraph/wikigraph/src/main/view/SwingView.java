@@ -1,13 +1,15 @@
 package view;
 
 public class SwingView implements View {
+
+
     @Override
-    public void addObserver() {
+    public void display(ViewNode... nodes) {
 
     }
 
     @Override
-    public void display(ViewNode... nodes) {
+    public void addEventListener() {
 
     }
 }
