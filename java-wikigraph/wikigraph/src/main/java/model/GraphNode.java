@@ -4,4 +4,5 @@ import java.util.Map;
 
 public interface GraphNode {
     Map<GraphNode, Integer> children();
+    String term();
 }
