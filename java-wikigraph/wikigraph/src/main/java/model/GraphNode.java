@@ -1,8 +1,8 @@
 package model;
 
-import java.util.Map;
+import java.util.Set;
 
 public interface GraphNode {
-    Map<GraphNode, Integer> children();
+    Set<String> childrenTerms();
     String term();
 }
