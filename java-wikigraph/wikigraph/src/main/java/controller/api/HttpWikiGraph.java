@@ -1,4 +1,4 @@
-package controller;
+package controller.api;
 
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
@@ -19,7 +19,6 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
     private static final String LANGUAGE_ENDPOINT =
             "https://commons.wikimedia.org/w/api.php?action=sitematrix&smtype=language&smsiteprop=url&format=json";
     private String locale = "en";
-
     private String apiEndpoint() {
         return apiEndpoint(this.locale);
     }

@@ -1,9 +1,10 @@
 package model;
 
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-public class WikiGraphFactory {
+public class WikiGraphs {
 
     public static WikiGraph from(Map<String, WikiGraphNode> nodes) {
         return new WikiGraphMap(nodes);
@@ -26,7 +27,9 @@ public class WikiGraphFactory {
 
         @Override
         public Set<String> terms() {
-            return this.nodes.keySet();
+            final HashSet<String> all = new HashSet<>(this.nodes.keySet());
+            this.nodes.values().stream().flatMap(v -> v.childrenTerms().stream()).collect(Collectors.toCollection(()->all));
+            return Collections.unmodifiableSet(all);
         }
 
         @Override
