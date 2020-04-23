@@ -1,10 +1,10 @@
 package model;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -54,11 +54,11 @@ public class HttpGET {
     public String send() {
         checkValidity();
         this.invalid = true;
-        final HttpURLConnection con;
+        final HttpsURLConnection con;
         if (this.base.isPresent()) {
             try {
                 final URL url = new URL(this.base.get());
-                con = (HttpURLConnection) url.openConnection();
+                con = (HttpsURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
                 con.setDoOutput(true);
                 final DataOutputStream out = new DataOutputStream(con.getOutputStream());
