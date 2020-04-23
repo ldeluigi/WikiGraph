@@ -13,6 +13,10 @@ public class WikiGraphFactory {
         return from(nodes.stream().collect(Collectors.toUnmodifiableMap(WikiGraphNode::term, n -> n)));
     }
 
+    public static WikiGraph from(WikiGraphNode... nodes) {
+        return from(Arrays.asList(nodes));
+    }
+
     private static class WikiGraphMap implements WikiGraph {
         private final Map<String, WikiGraphNode> nodes;
 
@@ -30,43 +34,12 @@ public class WikiGraphFactory {
             return Collections.unmodifiableCollection(this.nodes.values());
         }
 
-        private class PairImpl<K, V> implements Pair<K, V> {
-            private final K key;
-            private final V value;
-            public PairImpl(K key, V value) {
-                this.key = key;
-                this.value = value;
-            }
-
-            public K getKey() {
-                return key;
-            }
-
-            public V getValue() {
-                return value;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) return true;
-                if (!(o instanceof Pair)) return false;
-                Pair<?, ?> pair = (Pair<?, ?>) o;
-                return Objects.equals(getKey(), pair.getKey()) &&
-                        Objects.equals(getValue(), pair.getValue());
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(getKey(), getValue());
-            }
-        }
-
         @Override
         public Set<Pair<String, String>> termEdges() {
             return this.nodes.entrySet().stream()
                     .flatMap(e -> e.getValue()
                             .childrenTerms().stream()
-                            .map(c -> new PairImpl(e.getKey(), c)))
+                            .map(c -> new PairImpl<>(e.getKey(), c)))
                     .collect(Collectors.toUnmodifiableSet());
         }
     }

@@ -1,15 +1,16 @@
-package model;
+package controller.api;
 
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import controller.api.HttpWikiGraph;
+import controller.HttpWikiGraph;
+import model.WikiGraphNodeFactory;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class WikiGraphTest {
+public class HttpWikiGraphTest {
 
     @Test
     void testSetLanguage() {

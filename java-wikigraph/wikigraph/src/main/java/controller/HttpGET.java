@@ -1,4 +1,4 @@
-package controller.api;
+package controller;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
