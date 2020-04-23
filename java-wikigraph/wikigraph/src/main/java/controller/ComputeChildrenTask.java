@@ -14,10 +14,11 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
     private final int depth;
 
     public static void computeChildren(String startNode, int maxDepth){
-        new ComputeChildrenTask(null, startNode, maxDepth);
+        new ComputeChildrenTask(null, startNode, maxDepth).invoke();
     }
 
     public ComputeChildrenTask(CountedCompleter<?> t,String node, int depth) {
+        super(t);
         this.node = node;
         this.depth = depth;
     }
@@ -29,7 +30,8 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
         if (depth > 0){
             GraphNode result = wikiGraph.from(node);
             for(String child:  result.childrenTerms()){
-                new ComputeChildrenTask(this, child,this.depth-1);
+                addToPendingCount(1);
+                new ComputeChildrenTask(this, child,this.depth-1).fork();
             }
         }
         propagateCompletion();

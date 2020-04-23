@@ -7,7 +7,7 @@ public class ExecutorController implements Controller {
 
     private final int depth;
 
-    public ExecutorController(int depth, int poolSize){
+    public ExecutorController(int depth){
         this.depth= depth;
 
     }
@@ -18,5 +18,10 @@ public class ExecutorController implements Controller {
     @Override
     public void notifyEvent() {
 
+    }
+
+    public static void main(String[] args){
+        ExecutorController controller = new ExecutorController(2);
+        controller.compute("Enciclopedia");
     }
 }
