@@ -93,7 +93,7 @@ public class HttpWikiGraph implements WikiGraph {
                     terms.add(linkTerm);
                 }
             }
-            return new HttpWikiGraphNode(this, termResult, sameTerm, terms);
+            return new HttpWikiGraphNode(termResult, sameTerm, terms);
         } else {
             return null;
         }
