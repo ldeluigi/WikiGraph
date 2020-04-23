@@ -1,6 +1,8 @@
 package controller;
 
 
+import java.util.concurrent.ForkJoinPool;
+
 import static controller.ComputeChildrenTask.computeChildren;
 
 public class ExecutorController implements Controller {
@@ -12,6 +14,8 @@ public class ExecutorController implements Controller {
 
     }
     public void compute(String node){
+//        ForkJoinPool.commonPool().invoke(
+//                new ComputeChildrenTask(null, node,this.depth));
         computeChildren(node,depth);
     }
 
@@ -21,7 +25,7 @@ public class ExecutorController implements Controller {
     }
 
     public static void main(String[] args){
-        ExecutorController controller = new ExecutorController(2);
+        ExecutorController controller = new ExecutorController(6);
         controller.compute("Enciclopedia");
     }
 }

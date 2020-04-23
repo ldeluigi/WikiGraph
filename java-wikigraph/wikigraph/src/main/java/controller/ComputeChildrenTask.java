@@ -28,12 +28,23 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
     public void compute() {
         WikiGraph wikiGraph = new HttpWikiGraph();
         if (depth > 0){
-            GraphNode result = wikiGraph.from(node);
+            GraphNode result = wikiGraph.from(this.node);
             for(String child:  result.childrenTerms()){
                 addToPendingCount(1);
                 new ComputeChildrenTask(this, child,this.depth-1).fork();
             }
+
         }
-        propagateCompletion();
+
+        //propagateCompletion();
+       tryComplete();
+    }
+
+    @Override
+    public void onCompletion (CountedCompleter<?> caller) {
+        if (caller == this) {
+            System.out.printf("completed thread : %s", Thread
+                    .currentThread().getName());
+        }
     }
 }
