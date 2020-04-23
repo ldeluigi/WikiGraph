@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
-public class WikiGraphNodeImpl implements WikiGraphNode {
+public class        WikiGraphNodeImpl implements WikiGraphNode {
     private final String name;
     private final Set<String> synonyms;
     private final Set<String> children;
