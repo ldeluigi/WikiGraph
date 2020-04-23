@@ -1,6 +1,5 @@
-package controller.api;
+package controller;
 
-import controller.api.HttpGET;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
 import model.WikiGraphNodeImpl;

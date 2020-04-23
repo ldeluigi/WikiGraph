@@ -1,9 +1,7 @@
 package controller;
 
-import controller.api.HttpWikiGraph;
 import model.WikiGraphNode;
-
-
+import model.WikiGraphNodeFactory;
 
 import java.util.concurrent.CountedCompleter;
 
@@ -27,7 +25,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
 
     @Override
     public void compute() {
-        HttpWikiGraph wikiGraph = new HttpWikiGraph();
+        WikiGraphNodeFactory wikiGraph = new HttpWikiGraph();
         if (depth > 0){
             WikiGraphNode result = wikiGraph.from(this.node);
             for(String child:  result.childrenTerms()){
