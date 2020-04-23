@@ -31,4 +31,12 @@ public class PairImpl<K, V> implements Pair<K, V> {
     public int hashCode() {
         return Objects.hash(getKey(), getValue());
     }
+
+    @Override
+    public String toString() {
+        return "(" +
+                "" + key +
+                ", " + value +
+                ')';
+    }
 }
