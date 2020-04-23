@@ -1,6 +1,7 @@
 package model;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 public class HttpWikiGraphNode implements GraphNode {
@@ -31,11 +32,32 @@ public class HttpWikiGraphNode implements GraphNode {
     }
 
     @Override
+    public boolean equals(GraphNode other) {
+        if (other == null) return false;
+        if (other.term().equals(this.term())) return true;
+        if (this.synonyms.contains(other.term())) return true;
+        return false;
+    }
+
+    @Override
     public String toString() {
         return "HttpWikiGraphNode{" +
                 "name='" + name + '\'' +
                 ", synonyms=" + synonyms +
                 ", children=" + children +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof GraphNode)) return false;
+        GraphNode that = (GraphNode) o;
+        return this.equals(that);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, synonyms, children, graph);
     }
 }

@@ -47,4 +47,10 @@ public class WikiGraphTest {
         assertEquals(HttpWikiGraph.SEARCH_RESULT_SIZE, g.search("Uk").size());
         System.out.println( g.search("Uk"));
     }
+
+    @Test
+    void testSynonyms() {
+        final WikiGraph g = new HttpWikiGraph();
+        assertEquals(g.from("UK"), g.from("United Kingdom"));
+    }
 }
