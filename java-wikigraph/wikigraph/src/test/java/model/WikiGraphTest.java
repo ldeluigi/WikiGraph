@@ -2,6 +2,8 @@ package model;
 
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import controller.api.HttpWikiGraph;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
@@ -11,7 +13,7 @@ public class WikiGraphTest {
 
     @Test
     void testSetLanguage() {
-        final WikiGraph g = new HttpWikiGraph();
+        final WikiGraphNodeFactory g = new HttpWikiGraph();
         assertTrue(g.setLanguage("en"));
         assertTrue(g.setLanguage("it"));
         assertFalse(g.setLanguage("???"));
@@ -19,7 +21,7 @@ public class WikiGraphTest {
 
     @Test
     void testFrom() {
-        final WikiGraph g = new HttpWikiGraph();
+        final WikiGraphNodeFactory g = new HttpWikiGraph();
         assertNull(g.from(""));
         assertNotNull(g.from("UK"));
         assertNotNull(g.from("Albert Einstein"));
@@ -29,7 +31,7 @@ public class WikiGraphTest {
 
     @Test
     void testFromURL() {
-        final WikiGraph g = new HttpWikiGraph();
+        final WikiGraphNodeFactory g = new HttpWikiGraph();
         try {
             assertNotNull(g.from(new URL("https://en.wikipedia.org/wiki/Introduction_to_quantum_mechanics#Wave%E2%80%93particle_duality")));
             assertNull(g.from(new URL("https://en.wikipedia.org/wiki/Test_dummy#42")));
@@ -42,14 +44,14 @@ public class WikiGraphTest {
 
     @Test
     void testSearch() {
-        final WikiGraph g = new HttpWikiGraph();
+        final WikiGraphNodeFactory g = new HttpWikiGraph();
         assertEquals(0, g.search("asigkadgshjs").size());
         assertEquals(HttpWikiGraph.SEARCH_RESULT_SIZE, g.search("Uk").size());
     }
 
     @Test
     void testSynonyms() {
-        final WikiGraph g = new HttpWikiGraph();
+        final WikiGraphNodeFactory g = new HttpWikiGraph();
         assertEquals(g.from("UK"), g.from("United Kingdom"));
     }
 }
