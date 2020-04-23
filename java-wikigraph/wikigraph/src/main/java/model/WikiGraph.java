@@ -1,11 +1,10 @@
 package model;
 
-import java.net.URL;
-import java.util.Map;
+import java.util.Collection;
+import java.util.Set;
 
 public interface WikiGraph {
-    Map<String, String> search(final String term);
-    GraphNode from(URL url);
-    GraphNode from(String term);
-    boolean setLanguage(String langCode);
+    Set<String> terms();
+    Collection<WikiGraphNode> nodes();
+    Set<Pair<String, String>> termEdges();
 }
