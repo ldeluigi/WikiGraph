@@ -17,15 +17,19 @@ public class HttpWikiGraph implements WikiGraph {
             "https://commons.wikimedia.org/w/api.php?action=sitematrix&smtype=language&smsiteprop=url&format=json";
     private String locale = "en";
 
-    private String API_ENDPOINT() {
-        return "https://" + this.locale + ".wikipedia.org/w/api.php";
+    private String apiEndpoint() {
+        return apiEndpoint(this.locale);
+    }
+
+    private String apiEndpoint(final String lang) {
+        return "https://" + lang + ".wikipedia.org/w/api.php";
     }
 
     @Override
     public Map<String, String> search(String term) {
         final String URLTerm = URLEncoder.encode(term.replace(" ", "_"),
                 StandardCharsets.UTF_8);
-        final HttpGET req = new HttpGET().setBaseURL(API_ENDPOINT())
+        final HttpGET req = new HttpGET().setBaseURL(apiEndpoint())
                 .addParameter("format", "json")
                 .addParameter("action", "query")
                 .addParameter("list", "search")
@@ -54,17 +58,23 @@ public class HttpWikiGraph implements WikiGraph {
     public GraphNode from(final URL url) {
         final Pattern pattern = Pattern.compile(".+wiki/([^/#]+).*");
         final Matcher matcher = pattern.matcher(url.getPath());
-        if (matcher.find()) {
-            return this.from(matcher.group(1));
+        final Pattern langPattern = Pattern.compile(".*?(\\w+)\\.wikipedia\\..+");
+        final Matcher langMatch = langPattern.matcher(url.getHost());
+        if (matcher.find() && langMatch.find()) {
+            return this.from(matcher.group(1), langMatch.group(1));
         }
         return null;
     }
 
     @Override
     public GraphNode from(final String term) {
+        return this.from(term, this.locale);
+    }
+
+    private GraphNode from(final String term, final String lang) {
         final String URLTerm = URLEncoder.encode(term.replace(" ", "_"),
                 StandardCharsets.UTF_8);
-        final HttpGET req = new HttpGET().setBaseURL(API_ENDPOINT())
+        final HttpGET req = new HttpGET().setBaseURL(apiEndpoint(lang))
                 .addParameter("format", "json")
                 .addParameter("action", "parse")
                 .addParameter("page", URLTerm)
@@ -93,7 +103,7 @@ public class HttpWikiGraph implements WikiGraph {
                     terms.add(linkTerm);
                 }
             }
-            return new HttpWikiGraphNode(this, termResult, sameTerm, terms);
+            return new HttpWikiGraphNode(termResult, sameTerm, terms);
         } else {
             return null;
         }
