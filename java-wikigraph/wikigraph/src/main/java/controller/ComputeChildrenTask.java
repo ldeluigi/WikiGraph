@@ -36,10 +36,9 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
             if (result != null) {
                 if (this.nodeMap.put(result.term(), result) == null) {
                     for (String child : result.childrenTerms()) {
-                        System.out.println(child);
+                       //System.out.println(child);
                         addToPendingCount(1);
                         new ComputeChildrenTask(this, child, this.depth - 1, this.nodeFactory, this.nodeMap).fork();
-
                     }
                 } else {
                     //aggiungere arco
