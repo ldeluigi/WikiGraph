@@ -2,7 +2,10 @@ package model;
 
 import java.util.Set;
 
-public interface GraphNode {
+/**
+ * A structural (non-leaf) node of a {@link WikiGraph}.
+ */
+public interface WikiGraphNode {
     /**
      * Returns the list of terms that are linked from this node Wiki page.
      * @return every term as Set of String
@@ -16,9 +19,9 @@ public interface GraphNode {
     String term();
 
     /**
-     * Should return true only if o is a {@link GraphNode} of the same term.
+     * Should return true only if o is a {@link WikiGraphNode} of the same term.
      * @param other the other node
      * @return true if it's the same node
      */
-    boolean equals(GraphNode other);
+    boolean equals(WikiGraphNode other);
 }

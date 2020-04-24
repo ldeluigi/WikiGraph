@@ -1,5 +1,6 @@
-package model;
+package controller.api;
 
+import model.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -11,12 +12,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
-public class HttpWikiGraph implements WikiGraph {
+public class HttpWikiGraph implements WikiGraphNodeFactory {
     public static final int SEARCH_RESULT_SIZE = 10;
     private static final String LANGUAGE_ENDPOINT =
             "https://commons.wikimedia.org/w/api.php?action=sitematrix&smtype=language&smsiteprop=url&format=json";
     private String locale = "en";
-
     private String apiEndpoint() {
         return apiEndpoint(this.locale);
     }
@@ -26,7 +26,7 @@ public class HttpWikiGraph implements WikiGraph {
     }
 
     @Override
-    public Map<String, String> search(String term) {
+    public List<Pair<String, String>> search(String term) {
         final String URLTerm = URLEncoder.encode(term.replace(" ", "_"),
                 StandardCharsets.UTF_8);
         final HttpGET req = new HttpGET().setBaseURL(apiEndpoint())
@@ -42,12 +42,12 @@ public class HttpWikiGraph implements WikiGraph {
         if (result.has("query")) {
             final JSONObject query = result.getJSONObject("query");
             final JSONArray searchResults = query.getJSONArray("search");
-            final Map<String, String> finalResults = new LinkedHashMap<>();
+            final List<Pair<String, String>> finalResults = new LinkedList<>();
             for (int i = 0; i < searchResults.length(); i++) {
                 final JSONObject resultObj = searchResults.getJSONObject(i);
-                finalResults.put(resultObj.getString("title"),
+                finalResults.add(new PairImpl<>(resultObj.getString("title"),
                         resultObj.getString("snippet")
-                                .replaceAll("<.*?>|\\(.*?\\)|\\[.*?]|&.+?;", ""));
+                                .replaceAll("<.*?>|\\(.*?\\)|\\[.*?]|&.+?;", "")));
             }
             return finalResults;
         }
@@ -55,7 +55,7 @@ public class HttpWikiGraph implements WikiGraph {
     }
 
     @Override
-    public GraphNode from(final URL url) {
+    public WikiGraphNode from(final URL url) {
         final Pattern pattern = Pattern.compile(".+wiki/([^/#]+).*");
         final Matcher matcher = pattern.matcher(url.getPath());
         final Pattern langPattern = Pattern.compile(".*?(\\w+)\\.wikipedia\\..+");
@@ -67,11 +67,11 @@ public class HttpWikiGraph implements WikiGraph {
     }
 
     @Override
-    public GraphNode from(final String term) {
+    public WikiGraphNode from(final String term) {
         return this.from(term, this.locale);
     }
 
-    private GraphNode from(final String term, final String lang) {
+    private WikiGraphNode from(final String term, final String lang) {
         final String URLTerm = URLEncoder.encode(term.replace(" ", "_"),
                 StandardCharsets.UTF_8);
         final HttpGET req = new HttpGET().setBaseURL(apiEndpoint(lang))
@@ -103,7 +103,7 @@ public class HttpWikiGraph implements WikiGraph {
                     terms.add(linkTerm);
                 }
             }
-            return new HttpWikiGraphNode(termResult, sameTerm, terms);
+            return new WikiGraphNodeImpl(termResult, sameTerm, terms);
         } else {
             return null;
         }

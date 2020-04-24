@@ -4,16 +4,16 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
-public class HttpWikiGraphNode implements GraphNode {
+public class WikiGraphNodeImpl implements WikiGraphNode {
     private final String name;
     private final Set<String> synonyms;
     private final Set<String> children;
 
-    public HttpWikiGraphNode(final String term, Set<String> children) {
+    public WikiGraphNodeImpl(final String term, Set<String> children) {
         this(term, Collections.emptySet(), children);
     }
 
-    public HttpWikiGraphNode(final String term, Set<String> synonyms, Set<String> children) {
+    public WikiGraphNodeImpl(final String term, Set<String> synonyms, Set<String> children) {
         this.name = term;
         this.synonyms = synonyms;
         this.children = children;
@@ -30,11 +30,10 @@ public class HttpWikiGraphNode implements GraphNode {
     }
 
     @Override
-    public boolean equals(GraphNode other) {
+    public boolean equals(WikiGraphNode other) {
         if (other == null) return false;
         if (other.term().equals(this.term())) return true;
-        if (this.synonyms.contains(other.term())) return true;
-        return false;
+        return this.synonyms.contains(other.term());
     }
 
     @Override
@@ -49,8 +48,8 @@ public class HttpWikiGraphNode implements GraphNode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof GraphNode)) return false;
-        GraphNode that = (GraphNode) o;
+        if (!(o instanceof WikiGraphNode)) return false;
+        WikiGraphNode that = (WikiGraphNode) o;
         return this.equals(that);
     }
 
