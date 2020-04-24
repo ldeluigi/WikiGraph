@@ -11,6 +11,9 @@ import org.graphstream.ui.view.Viewer;
 public class SwingView extends JFrame implements View  {
 
     private static final float DIMENSION_ADAPTER = 0.5f;
+    private static final int MAXNUMDEPTH = 8;
+
+    Graph graph;
 
     public SwingView(){
         super();
@@ -25,19 +28,21 @@ public class SwingView extends JFrame implements View  {
         topPanel.add(search);
         JButton casual = new JButton("casual");
         topPanel.add(casual);
-        JSpinner depth = new JSpinner();
-        topPanel.add(casual);
+
+        topPanel.add(new JLabel("Depth:"));
+        JSpinner depth = new JSpinner(new SpinnerNumberModel(
+                                            1,     //initial value
+                                            1, //min
+                                            MAXNUMDEPTH, //max
+                                            1)  //step
+                                    );
+        topPanel.add(depth);
         topPanel.add(new JLabel("AutoUpdate"));
         topPanel.add(new JCheckBox());
         topPanel.add(new JLabel("Refresh Rate"));
+        topPanel.add(new JLabel("val"));
 
-        Graph graph = new SingleGraph("Tutorial 1");
-        graph.addNode("A");
-        graph.addNode("B");
-        graph.addNode("C");
-        graph.addEdge("AB", "A", "B");
-        graph.addEdge("BC", "B", "C");
-        graph.addEdge("CA", "C", "A");
+        graph = new SingleGraph("Tutorial 1");
 
         Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
         viewer.enableAutoLayout(new SpringBox(true));
@@ -50,7 +55,10 @@ public class SwingView extends JFrame implements View  {
 
     @Override
     public void display(ViewNode... nodes) {
-
+        for (ViewNode node: nodes){
+            graph.addNode(node.id());
+            graph.addEdge(node.parent().id()+node.id(), node.parent().id(), node.id(), true);
+        }
     }
 
     @Override
