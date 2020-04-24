@@ -33,7 +33,7 @@ public class ExecutorController implements Controller {
     }
 
     public static void main(String[] args){
-        ExecutorController controller = new ExecutorController(1);
+        ExecutorController controller = new ExecutorController(2);
         HttpWikiGraph nodeFactory = new HttpWikiGraph();
         nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
         ConcurrentHashMap<String, WikiGraphNode> nodeMap = new ConcurrentHashMap<>();

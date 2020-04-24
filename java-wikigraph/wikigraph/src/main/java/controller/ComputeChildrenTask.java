@@ -21,6 +21,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
     }
 
     public ComputeChildrenTask(CountedCompleter<?> t, String node, int depth, HttpWikiGraph nodeFactory, ConcurrentHashMap<String, WikiGraphNode> nodeMap) {
+        super(t);
         this.nodeFactory = nodeFactory;
         this.node = node;
         this.depth = depth;
