@@ -2,9 +2,11 @@ package controller;
 
 
 import controller.api.HttpWikiGraph;
+import model.Pair;
 import model.WikiGraphNode;
 import org.bouncycastle.i18n.LocaleString;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
@@ -20,14 +22,21 @@ public class ExecutorController implements Controller {
         this.depth= depth;
         pool = ForkJoinPool.commonPool();
     }
-    public void compute(String node, HttpWikiGraph nodeFactory,ConcurrentHashMap<String, WikiGraphNode> nodeMap,ForkJoinPool pool){
-
-        pool.invoke(
+    public void compute(String node, HttpWikiGraph nodeFactory,ConcurrentHashMap<String, WikiGraphNode> nodeMap){
+        this.pool.invoke(
                 new ComputeChildrenTask(null, node,this.depth,nodeFactory,nodeMap));
     }
 
     public void exit(){
         pool.shutdown();
+    }
+    public void computeRandom(){
+
+    }
+
+    public void computeSearch(String node, HttpWikiGraph nodeFactory,ConcurrentHashMap<String, WikiGraphNode> nodeMap){
+        List<Pair<String, String>> res =  nodeFactory.search(node);
+        compute(res.get(0).getKey(), nodeFactory, nodeMap);
     }
 
     @Override
@@ -41,6 +50,6 @@ public class ExecutorController implements Controller {
         HttpWikiGraph nodeFactory = new HttpWikiGraph();
         nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
         ConcurrentHashMap<String, WikiGraphNode> nodeMap = new ConcurrentHashMap<>();
-        controller.compute("Enciclopedia",nodeFactory, nodeMap, pool);
+        controller.compute("Enciclopedia",nodeFactory, nodeMap);
     }
 }
