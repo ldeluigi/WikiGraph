@@ -1,8 +1,6 @@
 package controller.api;
 
-import model.WikiGraphNode;
-import model.WikiGraphNodeFactory;
-import model.WikiGraphNodeImpl;
+import model.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -28,7 +26,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
     }
 
     @Override
-    public Map<String, String> search(String term) {
+    public List<Pair<String, String>> search(String term) {
         final String URLTerm = URLEncoder.encode(term.replace(" ", "_"),
                 StandardCharsets.UTF_8);
         final HttpGET req = new HttpGET().setBaseURL(apiEndpoint())
@@ -44,12 +42,12 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
         if (result.has("query")) {
             final JSONObject query = result.getJSONObject("query");
             final JSONArray searchResults = query.getJSONArray("search");
-            final Map<String, String> finalResults = new LinkedHashMap<>();
+            final List<Pair<String, String>> finalResults = new LinkedList<>();
             for (int i = 0; i < searchResults.length(); i++) {
                 final JSONObject resultObj = searchResults.getJSONObject(i);
-                finalResults.put(resultObj.getString("title"),
+                finalResults.add(new PairImpl<>(resultObj.getString("title"),
                         resultObj.getString("snippet")
-                                .replaceAll("<.*?>|\\(.*?\\)|\\[.*?]|&.+?;", ""));
+                                .replaceAll("<.*?>|\\(.*?\\)|\\[.*?]|&.+?;", "")));
             }
             return finalResults;
         }

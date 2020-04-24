@@ -2,9 +2,21 @@ package model;
 
 import java.util.Objects;
 
+/**
+ * Implementation of the {@link Pair} interface
+ *
+ * @param <K> left element type
+ * @param <V> right element type
+ */
 public class PairImpl<K, V> implements Pair<K, V> {
     private final K key;
     private final V value;
+
+    /**
+     * Basic constructor that takes two parameters.
+     * @param key left element
+     * @param value right element
+     */
     public PairImpl(K key, V value) {
         this.key = key;
         this.value = value;
