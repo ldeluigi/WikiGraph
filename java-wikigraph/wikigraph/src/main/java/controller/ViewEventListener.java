@@ -2,6 +2,8 @@ package controller;
 
 import view.ViewEvent;
 
-interface ViewEventListener {
+import java.util.EventListener;
+
+interface ViewEventListener extends EventListener {
     void notifyEvent(ViewEvent event);
 }
