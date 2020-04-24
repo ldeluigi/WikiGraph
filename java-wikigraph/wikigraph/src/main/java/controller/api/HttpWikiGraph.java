@@ -126,4 +126,28 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
         }
         return false;
     }
+
+    @Override
+    public WikiGraphNode random() {
+        final HttpGET req = new HttpGET().setBaseURL(apiEndpoint())
+                .addParameter("format", "json")
+                .addParameter("action", "query")
+                .addParameter("list", "random")
+                .addParameter("rnnamespace", "0");
+        final String out = req.send();
+        final JSONObject obj = new JSONObject(out);
+        if (obj.has("query")) {
+            final JSONObject queryResult = obj.getJSONObject("query");
+            if (queryResult.has("random")) {
+                final JSONArray results = queryResult.getJSONArray("random");
+                if (results.length() > 0) {
+                    final JSONObject result =  results.getJSONObject(0);
+                    if (result.has("title")) {
+                        return from(result.getString("title"));
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }

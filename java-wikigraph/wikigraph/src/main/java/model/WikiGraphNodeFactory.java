@@ -50,4 +50,11 @@ public interface WikiGraphNodeFactory {
      * @return true if language is available and was set correctly
      */
     boolean setLanguage(String langCode);
+
+    /**
+     * Creates a structural {@link WikiGraphNode} from a random wikipedia page.
+     * Blocking behaviour.
+     * @return he node or null if something went wrong
+     */
+    WikiGraphNode random();
 }
