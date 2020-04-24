@@ -47,6 +47,7 @@ public class HttpWikiGraphTest {
         final WikiGraphNodeFactory g = new HttpWikiGraph();
         assertEquals(0, g.search("asigkadgshjs").size());
         assertEquals(HttpWikiGraph.SEARCH_RESULT_SIZE, g.search("Uk").size());
+        assertEquals("United Kingdom", g.search("UK").get(0).getKey());
     }
 
     @Test

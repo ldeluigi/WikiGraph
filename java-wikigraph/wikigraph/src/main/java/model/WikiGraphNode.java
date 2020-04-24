@@ -2,6 +2,9 @@ package model;
 
 import java.util.Set;
 
+/**
+ * A structural (non-leaf) node of a {@link WikiGraph}.
+ */
 public interface WikiGraphNode {
     /**
      * Returns the list of terms that are linked from this node Wiki page.

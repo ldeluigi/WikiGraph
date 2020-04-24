@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
-public class        WikiGraphNodeImpl implements WikiGraphNode {
+public class WikiGraphNodeImpl implements WikiGraphNode {
     private final String name;
     private final Set<String> synonyms;
     private final Set<String> children;
@@ -33,8 +33,7 @@ public class        WikiGraphNodeImpl implements WikiGraphNode {
     public boolean equals(WikiGraphNode other) {
         if (other == null) return false;
         if (other.term().equals(this.term())) return true;
-        if (this.synonyms.contains(other.term())) return true;
-        return false;
+        return this.synonyms.contains(other.term());
     }
 
     @Override
@@ -49,7 +48,7 @@ public class        WikiGraphNodeImpl implements WikiGraphNode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof WikiGraphNode)) return false;
+        if (!(o instanceof WikiGraphNode)) return false;
         WikiGraphNode that = (WikiGraphNode) o;
         return this.equals(that);
     }
