@@ -1,5 +1,5 @@
 package view;
 
-interface View extends EventEmitter, AsyncDisplay {
+interface View extends EventEmitter, GraphDisplay {
 
 }
