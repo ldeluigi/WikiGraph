@@ -55,4 +55,10 @@ public class HttpWikiGraphTest {
         final WikiGraphNodeFactory g = new HttpWikiGraph();
         assertEquals(g.from("UK"), g.from("United Kingdom"));
     }
+
+    @Test
+    void testRandom() {
+        final WikiGraphNodeFactory g = new HttpWikiGraph();
+        assertNotNull(g.random());
+    }
 }

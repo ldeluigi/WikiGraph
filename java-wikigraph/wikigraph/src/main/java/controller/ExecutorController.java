@@ -5,6 +5,7 @@ import controller.api.HttpWikiGraph;
 import model.Pair;
 import model.WikiGraphNode;
 import org.bouncycastle.i18n.LocaleString;
+import view.ViewEvent;
 
 import java.util.List;
 import java.util.Locale;
@@ -40,13 +41,13 @@ public class ExecutorController implements Controller {
     }
 
     @Override
-    public void notifyEvent() {
+    public void notifyEvent(ViewEvent event) {
         //check evt
         exit();
     }
 
     public static void main(String[] args){
-        ExecutorController controller = new ExecutorController(3);
+        ExecutorController controller = new ExecutorController(2);
         HttpWikiGraph nodeFactory = new HttpWikiGraph();
         nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
         ConcurrentHashMap<String, WikiGraphNode> nodeMap = new ConcurrentHashMap<>();

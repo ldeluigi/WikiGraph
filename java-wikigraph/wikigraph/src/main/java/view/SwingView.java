@@ -3,6 +3,7 @@ package view;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.EventListener;
 
 import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.*;
@@ -63,10 +64,7 @@ public class SwingView extends JFrame implements View  {
         this.setVisible(true);
     }
 
-    @Override
-    public void addEventListener() {
 
-    }
 
     @Override
     public void newNode(final String id) {
@@ -86,6 +84,11 @@ public class SwingView extends JFrame implements View  {
     @Override
     public void removeEdge(final String idFrom, final String idTo) {
         this.graph.removeEdge(idFrom, idTo);
+    }
+
+    @Override
+    public void addEventListener(EventListener listener) {
+
     }
 
     class WikiGraphMouseListener implements MouseListener, MouseMotionListener {

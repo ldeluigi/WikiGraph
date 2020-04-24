@@ -1,5 +1,7 @@
 package controller;
 
+import view.ViewEvent;
+
 interface ViewEventListener {
-    void notifyEvent();
+    void notifyEvent(ViewEvent event);
 }
