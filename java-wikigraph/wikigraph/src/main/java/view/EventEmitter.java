@@ -1,7 +1,8 @@
 package view;
 
-import java.util.EventListener;
+import controller.ViewEventListener;
+
 
 interface EventEmitter {
-    void addEventListener(EventListener listener);
+    void addEventListener(ViewEventListener listener);
 }
