@@ -1,13 +1,9 @@
 package start;
 
 import controller.ExecutorController;
-import controller.api.HttpWikiGraph;
-import model.WikiGraphNode;
 import view.SwingView;
 import view.View;
 
-import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class WikiGraphStart {
 
