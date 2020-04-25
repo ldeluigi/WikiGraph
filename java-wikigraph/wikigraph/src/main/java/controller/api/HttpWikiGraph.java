@@ -5,7 +5,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -27,8 +26,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
 
     @Override
     public List<Pair<String, String>> search(String term) {
-        final String URLTerm = URLEncoder.encode(term.replace(" ", "_"),
-                StandardCharsets.UTF_8);
+        final String URLTerm = term.replace(" ", "_");
         final HttpGET req = new HttpGET().setBaseURL(apiEndpoint())
                 .addParameter("format", "json")
                 .addParameter("action", "query")
@@ -73,8 +71,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
 
     private WikiGraphNode from(final String term, final String lang) {
         System.out.println("Called from " + term);
-        final String URLTerm = URLEncoder.encode(term.replace(" ", "_"),
-                StandardCharsets.UTF_8);
+        final String URLTerm = term.replace(" ", "_");
         final HttpGET req = new HttpGET().setBaseURL(apiEndpoint(lang))
                 .addParameter("format", "json")
                 .addParameter("action", "parse")
@@ -86,7 +83,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
                 .addParameter("disabletoc", "1");
         final String rawJSON = req.send();
         final JSONObject result = new JSONObject(rawJSON);
-        System.out.println("Parsed");
+        System.out.println("Parsed " + rawJSON);
         if (result.has("parse")) {
             System.out.println("Parsed part 2");
             final JSONObject json = result.getJSONObject("parse");

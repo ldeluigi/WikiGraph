@@ -16,6 +16,8 @@ import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 
+import static java.lang.Runtime.*;
+
 public class ExecutorController implements Controller {
 
     private static ForkJoinPool pool;

@@ -35,37 +35,48 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
 
     @Override
     public void compute() {
+        final WikiGraphNode result;
+
         if (this.first) {
             if (this.node == null) {//random
-                this.node = nodeFactory.random().term();
+                result = nodeFactory.random();
+                this.node = result.term();
             } else {//search
-                this.node = this.nodeFactory.search(node).get(0).getKey();
+                result = this.nodeFactory.from(this.node);
+                this.node = result.term();
+                //this.node = this.nodeFactory.search(node).get(0).getKey();
             }
+            System.out.println("found : " + this.node);
             view.addNode(this.node);
+        } else {
+            result = nodeFactory.from(this.node);
         }
 
 
-        if (depth > 0) {
-            WikiGraphNode result = nodeFactory.from(this.node);
-            if (result != null) {
-                if (this.nodeMap.put(result.term(), result) == null) {
-                    for (String child : result.childrenTerms()) {
-                        view.addNode(child);
-                        view.addEdge(result.term(), child);
-                        //System.out.println(child);
-                        addToPendingCount(1);
-                        new ComputeChildrenTask(this, child, this.depth - 1, this.nodeFactory, this.nodeMap, this.view, false).fork();
-                    }
-                } else {
-                    for (String child : result.childrenTerms()) {
-                        view.addEdge(result.term(), child); //aggiungere arco
-                    }
+        if (depth > 0 && result != null) {
+            if (this.nodeMap.put(result.term(), result) == null) {
+                for (String child : result.childrenTerms()) {
+                    view.addNode(child);
+                    view.addEdge(result.term(), child);
+                    //System.out.println(child);
+                    addToPendingCount(1);
+                    new ComputeChildrenTask(this, child, this.depth - 1, this.nodeFactory, this.nodeMap, this.view, false).fork();
+                }
+            } else {
+                for (String child : result.childrenTerms()) {
+                    view.addEdge(result.term(), child); //aggiungere arco
                 }
             }
         }
 
         propagateCompletion();
         //tryComplete();
+    }
+
+    @Override
+    public boolean onExceptionalCompletion(Throwable ex, CountedCompleter<?> caller) {
+        System.err.println(ex);
+        return false;
     }
 
     @Override
