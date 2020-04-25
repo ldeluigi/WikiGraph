@@ -2,7 +2,6 @@ package controller;
 
 import controller.api.HttpWikiGraph;
 import model.WikiGraphNode;
-import model.WikiGraphNodeFactory;
 import view.SwingView;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,7 +33,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
 
     @Override
     public void compute() {
-        view.newNode(this.node);
+        view.addNode(this.node);
         if (depth > 0) {
             WikiGraphNode result = nodeFactory.from(this.node);
             if (result != null) {
@@ -46,8 +45,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
                     }
                 } else {
                     for (String child : result.childrenTerms()){
-                        view.newEdge(result.term(),child);
-                        //aggiungere arco
+                        view.addEdge(result.term(),child); //aggiungere arco
                     }
                 }
             }
