@@ -3,7 +3,6 @@ package view;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.EventListener;
 
 import controller.ViewEventListener;
 import org.graphstream.graph.*;
@@ -19,7 +18,6 @@ public class SwingView extends JFrame implements View  {
     private static final int MAX_DEPTH = 8;
     private static final int MAX_DELAY = 300;
     private final ViewPanel view;
-    private EventListener listener;
     private final JTextField textOrUrl = new JTextField(20);
     private final JButton searchButton = new JButton("search");
     private final JButton randomButton = new JButton("random");
@@ -49,9 +47,7 @@ public class SwingView extends JFrame implements View  {
 
         this.graph = new SingleGraph("Tutorial 1");
         this.graph.addAttribute("ui.stylesheet","node {text-mode:normal; text-background-mode: plain;}");
-        this.graph.addNode("A");
-        this.graph.addNode("B");
-        this.graph.addEdge("AB","A","B", true);
+
         Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
         viewer.enableAutoLayout(new SpringBox(true));
         this.view = viewer.addDefaultView(false);
@@ -61,7 +57,6 @@ public class SwingView extends JFrame implements View  {
         this.view.setMinimumSize(new Dimension(Math.round(screenSize.width * DIMENSION_ADAPTER),Math.round(screenSize.height * DIMENSION_ADAPTER)));
         pane.add(topPanel,BorderLayout.PAGE_END);
         pane.add(this.view, BorderLayout.CENTER);
-        this.setVisible(true);
     }
 
 
@@ -119,10 +114,15 @@ public class SwingView extends JFrame implements View  {
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                listener.notifyEvent( () -> {return ViewEvent.EventType.EXIT;});
+                listener.notifyEvent( () -> ViewEvent.EventType.EXIT);
             }
         });
 
+    }
+
+    @Override
+    public void start() {
+        this.setVisible(true);
     }
 
     class WikiGraphMouseListener implements MouseListener, MouseMotionListener {
