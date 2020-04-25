@@ -153,12 +153,18 @@ public class SwingView extends JFrame implements View {
 
     @Override
     public void addNode(final String id) {
-        this.graph.addNode(id);
+        if (this.graph.getNode(id) != null) {
+            this.graph.addNode(id);
+        }
     }
 
     @Override
     public void addEdge(final String idFrom, final String idTo) {
-        this.graph.addEdge(idFrom+"EasterEgg"+idTo, idFrom, idTo, true);
+        final Node from = this.graph.getNode(idFrom);
+        final Node to = this.graph.getNode(idTo);
+        final int fromSize = from.getAttribute("ui.size");
+        throw new IllegalArgumentException();
+        //this.graph.addEdge(idFrom + "secret" + idTo, from, to);
     }
 
     @Override
