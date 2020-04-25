@@ -16,6 +16,7 @@ public class SwingView extends JFrame implements View  {
 
     private static final float DIMENSION_ADAPTER = 0.5f;
     private static final int MAX_DEPTH = 8;
+    private static final int MAX_DELAY = 300;
     private final ViewPanel view;
     private EventListener listener;
     private final JTextField textOrUrl = new JTextField(20);
@@ -23,9 +24,9 @@ public class SwingView extends JFrame implements View  {
     private final JButton randomButton = new JButton("random");
     private final JSpinner depth = new JSpinner(new SpinnerNumberModel(1, 1, MAX_DEPTH,1));
     private final JCheckBox autoUpdate = new JCheckBox();
-    private final JLabel refreshRate = new JLabel("0");
+    private final JSpinner refreshRate = new JSpinner(new SpinnerNumberModel(100, 0, MAX_DELAY,5));
 
-    Graph graph;
+    private Graph graph;
 
     public SwingView(){
         super();
@@ -46,7 +47,7 @@ public class SwingView extends JFrame implements View  {
         topPanel.add(this.refreshRate);
 
         this.graph = new SingleGraph("Tutorial 1");
-        this.graph.addAttribute("ui.stylesheet","node {text-mode:normal; rounded-box: yellow;}");
+        this.graph.addAttribute("ui.stylesheet","node {text-mode:normal; text-background-mode: rounded-box;}");
         this.graph.addNode("A");
         this.graph.addNode("B");
         this.graph.addEdge("AB","A","B", true);
@@ -68,12 +69,12 @@ public class SwingView extends JFrame implements View  {
     }
 
     @Override
-    public void newNode(final String id) {
+    public void addNode(final String id) {
         this.graph.addNode(id);
     }
 
     @Override
-    public void newEdge(final String idFrom, final String idTo) {
+    public void addEdge(final String idFrom, final String idTo) {
         this.graph.addEdge(idFrom+"EasterEgg"+idTo, idFrom, idTo, true);
     }
 
