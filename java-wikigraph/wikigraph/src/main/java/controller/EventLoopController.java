@@ -6,4 +6,9 @@ public class EventLoopController implements Controller {
     public void notifyEvent() {
 
     }
+
+    @Override
+    public void start() {
+        
+    }
 }
