@@ -44,7 +44,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
                 if (this.nodeMap.put(result.term(), result) == null) {
                     for (String child : result.childrenTerms()) {
                         view.addNode(child);
-
+                        view.addEdge(result.term(),child);
                        //System.out.println(child);
                         addToPendingCount(1);
                         new ComputeChildrenTask(this, child, this.depth - 1, this.nodeFactory, this.nodeMap,this.view,false).fork();
