@@ -50,14 +50,20 @@ public class ExecutorController implements Controller {
     private void computeRandom(int depth){
         WikiGraphNode random = nodeFactory.random();
         if (random!=null){
+            System.out.println("random result:" +random.term());
             compute(random.term(),depth);
+        }else{
+            System.out.println("no result");
         }
     }
 
     private void computeSearch(String node, int depth){
         List<Pair<String, String>> res =  this.nodeFactory.search(node);
         if (res!=null){
+            System.out.println("search result:" +res.get(0).getKey());
             compute(res.get(0).getKey(),depth);
+        }else{
+            System.out.println("search failed");
         }
     }
 

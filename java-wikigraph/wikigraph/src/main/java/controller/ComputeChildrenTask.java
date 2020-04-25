@@ -56,8 +56,8 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
                 }
             }
         }
-        //propagateCompletion();
-        tryComplete();
+        propagateCompletion();
+        //tryComplete();
     }
 
     @Override

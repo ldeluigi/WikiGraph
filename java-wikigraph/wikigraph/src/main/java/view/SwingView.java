@@ -1,34 +1,36 @@
 package view;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-
 import controller.ViewEventListener;
-import org.graphstream.graph.*;
-import org.graphstream.graph.implementations.*;
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.graphicGraph.GraphicElement;
 import org.graphstream.ui.layout.springbox.implementations.SpringBox;
 import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
 
-public class SwingView extends JFrame implements View  {
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.LinkedList;
+import java.util.List;
+
+public class SwingView extends JFrame implements View {
 
     private static final float DIMENSION_ADAPTER = 0.5f;
     private static final int MAX_DEPTH = 8;
     private static final int MAX_DELAY = 300;
     private final ViewPanel view;
     private final JTextField textOrUrl = new JTextField(20);
-    private final JButton searchButton = new JButton("search");
-    private final JButton randomButton = new JButton("random");
-    private final JSpinner depth = new JSpinner(new SpinnerNumberModel(1, 1, MAX_DEPTH,1));
-    private final JCheckBox autoUpdate = new JCheckBox();
-    private final JSpinner refreshRate = new JSpinner(new SpinnerNumberModel(100, 0, MAX_DELAY,5));
+    private final JSpinner depth = new JSpinner(new SpinnerNumberModel(1, 1, MAX_DEPTH, 1));
 
-    private Graph graph;
+    private final List<ViewEventListener> listeners = new LinkedList<>();
 
-    public SwingView(){
-        super();
+    private final Graph graph;
+
+    public SwingView() {
+        super("WikiGraph");
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.setSize(Math.round(screenSize.width * DIMENSION_ADAPTER), Math.round(screenSize.height * DIMENSION_ADAPTER));
         Container pane = this.getContentPane();
@@ -36,17 +38,20 @@ public class SwingView extends JFrame implements View  {
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new FlowLayout());
         topPanel.add(this.textOrUrl);
-        topPanel.add(this.searchButton);
-        topPanel.add(this.randomButton);
+        JButton searchButton = new JButton("search");
+        topPanel.add(searchButton);
+        JButton randomButton = new JButton("random");
+        topPanel.add(randomButton);
         topPanel.add(new JLabel("Depth:"));
         topPanel.add(this.depth);
         topPanel.add(new JLabel("AutoUpdate"));
-        topPanel.add(this.autoUpdate);
+        JCheckBox autoUpdate = new JCheckBox();
+        topPanel.add(autoUpdate);
         topPanel.add(new JLabel("Refresh Rate"));
-        topPanel.add(this.refreshRate);
+        JSpinner refreshRate = new JSpinner(new SpinnerNumberModel(100, 0, MAX_DELAY, 5));
+        topPanel.add(refreshRate);
 
-        this.graph = new SingleGraph("Tutorial 1");
-        this.graph.addAttribute("ui.stylesheet","node {text-mode:normal; text-background-mode: plain;}");
+        this.graph = new SingleGraph("WikiGraph");
 
         Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
         viewer.enableAutoLayout(new SpringBox(true));
@@ -54,13 +59,76 @@ public class SwingView extends JFrame implements View  {
         final WikiGraphMouseListener listener = new WikiGraphMouseListener();
         this.view.addMouseListener(listener);
         this.view.addMouseMotionListener(listener);
-        this.view.setMinimumSize(new Dimension(Math.round(screenSize.width * DIMENSION_ADAPTER),Math.round(screenSize.height * DIMENSION_ADAPTER)));
-        pane.add(topPanel,BorderLayout.PAGE_END);
+        this.view.setMinimumSize(new Dimension(Math.round(screenSize.width * DIMENSION_ADAPTER), Math.round(screenSize.height * DIMENSION_ADAPTER)));
+        pane.add(topPanel, BorderLayout.PAGE_END);
         pane.add(this.view, BorderLayout.CENTER);
+
+        searchButton.addActionListener(actionEvent -> this.listeners.forEach(l -> l.notifyEvent(new ViewEvent() {
+            @Override
+            public EventType getType() {
+                return EventType.SEARCH;
+            }
+
+            @Override
+            public String getText() {
+                return textOrUrl.getText();
+            }
+
+            @Override
+            public int getDepth() {
+                return (int) depth.getValue();
+            }
+        })));
+        randomButton.addActionListener(actionEvent -> this.listeners.forEach(l -> l.notifyEvent(new ViewEvent() {
+            @Override
+            public EventType getType() {
+                return EventType.RANDOM_SEARCH;
+            }
+
+            @Override
+            public int getDepth() {
+                return (int) depth.getValue();
+            }
+        })));
+        this.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                SwingView.this.listeners.forEach(l -> l.notifyEvent(() -> ViewEvent.EventType.EXIT));
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+
+            }
+        });
+
     }
 
-    @Override
-    public void addEventListener() {
 
     @Override
     public void addNode(final String id) {
@@ -84,42 +152,7 @@ public class SwingView extends JFrame implements View  {
 
     @Override
     public void addEventListener(ViewEventListener listener) {
-        this.searchButton.addActionListener(actionEvent -> listener.notifyEvent(new ViewEvent() {
-            @Override
-            public EventType getType() {
-                return EventType.SEARCH;
-            }
-
-            @Override
-            public String getText() {
-                return textOrUrl.getText();
-            }
-
-            @Override
-            public int getDepth() {
-                return (int) depth.getValue();
-            }
-        }));
-
-        this.randomButton.addActionListener(actionEvent -> listener.notifyEvent(new ViewEvent() {
-            @Override
-            public EventType getType() {
-                return EventType.RANDOM_SEARCH;
-            }
-
-            @Override
-            public int getDepth() {
-                return (int) depth.getValue();
-            }
-        }));
-
-        this.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                listener.notifyEvent( () -> ViewEvent.EventType.EXIT);
-            }
-        });
-
+        this.listeners.add(listener);
     }
 
     @Override
@@ -177,12 +210,18 @@ public class SwingView extends JFrame implements View  {
         @Override
         public void mouseDragged(MouseEvent mouseEvent) { }
 
+        private Node lastHovered = null;
+
         @Override
         public void mouseMoved(final MouseEvent mouseEvent) {
             Node nodeHovered = getNode(mouseEvent);
-            if (nodeHovered != null){
-                System.out.println("hovered:" + nodeHovered);
+            if (nodeHovered != lastHovered && lastHovered != null) {
+                lastHovered.removeAttribute("ui.label");
             }
+            if (nodeHovered != null){
+                nodeHovered.addAttribute("ui.label", nodeHovered.getId());
+            }
+            lastHovered = nodeHovered;
         }
     }
 
