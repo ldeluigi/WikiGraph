@@ -43,7 +43,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
             } else {//search
                 result = this.nodeFactory.from(this.node);
             }
-            view.addNode(result.term());
+            view.addNode(result.term(),this.depth);
         } else {
             result = nodeFactory.from(this.node);
         }
@@ -52,7 +52,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
         if (depth > 0 && result != null) {
             if (this.nodeMap.put(result.term(), result) == null) {
                 for (String child : result.childrenTerms()) {
-                    view.addNode(child);
+                    view.addNode(child,this.depth);
                     view.addEdge(result.term(), child);
                     addToPendingCount(1);
                     new ComputeChildrenTask(this, child, this.depth - 1, this.nodeFactory, this.nodeMap, this.view, false).fork();
