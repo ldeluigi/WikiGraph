@@ -34,6 +34,7 @@ public class ExecutorController implements Controller {
         nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
         this.nodeMap = new ConcurrentHashMap<>();
         pool = ForkJoinPool.commonPool();
+        view.start();
     }
 
     private void compute(String node, int depth){
@@ -59,7 +60,7 @@ public class ExecutorController implements Controller {
     @Override
     public void notifyEvent(ViewEvent event) {
         if(event.getType().equals(ViewEvent.EventType.EXIT)){
-            exit();
+            this.exit();
         }else if (event.getType().equals(ViewEvent.EventType.SEARCH)){
             computeSearch(event.getText(),event.getDepth());//get the term
         }else if (event.getType().equals(ViewEvent.EventType.RANDOM_SEARCH)){
