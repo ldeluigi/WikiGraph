@@ -3,7 +3,7 @@ package view;
 import controller.ViewEventListener;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
-import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.geom.Point3;
 import org.graphstream.ui.graphicGraph.GraphicElement;
 import org.graphstream.ui.swingViewer.ViewPanel;
@@ -21,9 +21,9 @@ public class SwingView extends JFrame implements View {
     private static final float DIMENSION_ADAPTER = 0.5f;
     private static final int MAX_DEPTH = 8;
     private static final int MAX_DELAY = 300;
-    private static final int HOVER_SIZE = 20;
-    private static final int ROOT_SIZE = 15;
-    private static final int SIZE_STEP = 2;
+    private static final int HOVER_SIZE = 30;
+    private static final int ROOT_SIZE = 20;
+    private static final int SIZE_STEP = 4;
     private final ViewPanel view;
     private final JTextField textOrUrl = new JTextField(20);
     private final JSpinner depth = new JSpinner(new SpinnerNumberModel(1, 1, MAX_DEPTH, 1));
@@ -34,6 +34,7 @@ public class SwingView extends JFrame implements View {
 
     public SwingView() {
         super("WikiGraph");
+        System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.setSize(Math.round(screenSize.width * DIMENSION_ADAPTER), Math.round(screenSize.height * DIMENSION_ADAPTER));
@@ -55,14 +56,20 @@ public class SwingView extends JFrame implements View {
         JSpinner refreshRate = new JSpinner(new SpinnerNumberModel(100, 0, MAX_DELAY, 5));
         topPanel.add(refreshRate);
 
-        this.graph = new SingleGraph("WikiGraph");
+        this.graph = new MultiGraph("WikiGraph");
         this.graph.addAttribute("ui.quality");
         this.graph.addAttribute("ui.antialias");
-        String depthCSS = "";
+        StringBuilder depthCSS = new StringBuilder();
         for (int i = 0; i < MAX_DEPTH; i++) {
-            depthCSS += "node.d" + i +" { size: "+Math.max(1, ROOT_SIZE - i * SIZE_STEP)+"px; } ";
+            depthCSS.append("node.d").append(i).append(" { size: ").append(Math.max(1, ROOT_SIZE - i * SIZE_STEP)).append("px; } ");
         }
-        this.graph.addAttribute("ui.stylesheet", depthCSS + "node.hover { size: " + HOVER_SIZE +"px; text-size: 20; text-offset: 6; }");
+        this.graph.addAttribute("ui.stylesheet",
+                "node {" +
+                        " text-visibility: 0.1; text-visibility-mode: under-zoom;" +
+                        " text-background-mode: rounded-box; text-background-color: white; text-padding: 1px;" +
+                        " text-alignment: at-right;" +
+                        " } "
+                + depthCSS + "node.hover { size: " + HOVER_SIZE +"px; text-size: 20; text-offset: 6; text-visibility-mode: normal; }");
 
         Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
         viewer.enableAutoLayout();
@@ -162,7 +169,10 @@ public class SwingView extends JFrame implements View {
     public void addNode(final String id, final int depth) {
         if (this.graph.getNode(id) == null) {
             this.graph.addNode(id);
-            this.graph.getNode(id).addAttribute("ui.class", "d"+depth);
+            final Node n = this.graph.getNode(id);
+            System.out.println("Added " + id + " d" +depth);
+            n.addAttribute("ui.class", "d"+depth);
+            n.addAttribute("label", id);
         }
     }
 
@@ -170,7 +180,7 @@ public class SwingView extends JFrame implements View {
     public void addEdge(final String idFrom, final String idTo) {
         final Node from = this.graph.getNode(idFrom);
         final Node to = this.graph.getNode(idTo);
-        this.graph.addEdge(idFrom + "secret" + idTo, from, to);
+        this.graph.addEdge(idFrom + "@@@" + idTo, from, to);
     }
 
     @Override
@@ -279,13 +289,12 @@ public class SwingView extends JFrame implements View {
             Node nodeHovered = getNode(mouseEvent);
             if (nodeHovered != lastHovered) {
                 if (lastHovered != null){
+                    System.out.println(oldClasses);
                     lastHovered.addAttribute("ui.class", oldClasses);
-                    lastHovered.removeAttribute("ui.label");
                 }
                 if (nodeHovered != null) {
                     oldClasses = nodeHovered.getAttribute("ui.class");
                     nodeHovered.addAttribute("ui.class", "hover");
-                    nodeHovered.addAttribute("ui.label", nodeHovered.getId());
                 }
             }
             lastHovered = nodeHovered;

@@ -12,24 +12,20 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
 
 
     private final String node;
-    private final int depth;
+    private final int myDepth;
     private final HttpWikiGraph nodeFactory;
     private final ConcurrentHashMap<String, WikiGraphNode> nodeMap;
     private final View view;
-    private final Boolean first;
+    private final int maxDepth;
 
-    public static void computeChildren(String startNode, int maxDepth, HttpWikiGraph nodeFactory, ConcurrentHashMap<String, WikiGraphNode> nodeMap, View view) {
-        new ComputeChildrenTask(null, startNode, maxDepth, nodeFactory, nodeMap, view, true).invoke();
-    }
-
-    public ComputeChildrenTask(CountedCompleter<?> t, String node, int depth, HttpWikiGraph nodeFactory, ConcurrentHashMap<String, WikiGraphNode> nodeMap, View view, boolean first) {
+    public ComputeChildrenTask(CountedCompleter<?> t, String node, int depth, HttpWikiGraph nodeFactory, ConcurrentHashMap<String, WikiGraphNode> nodeMap, View view, int maxdepth) {
         super(t);
         this.nodeFactory = nodeFactory;
         this.node = node;
-        this.depth = depth;
+        this.myDepth = depth;
         this.nodeMap = nodeMap;
         this.view = view;
-        this.first = first;
+        this.maxDepth = maxdepth;
     }
 
 
@@ -37,30 +33,29 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
     public void compute() {
         final WikiGraphNode result;
 
-        if (this.first) {
-            if (this.node == null) {//random
+        if (this.myDepth == 0) {
+            if (this.node == null) { //random
                 result = nodeFactory.random();
-            } else {//search
+            } else { //search
                 result = this.nodeFactory.from(this.node);
             }
-            view.addNode(result.term(),this.depth);
+            view.addNode(result.term(), this.myDepth);
         } else {
             result = nodeFactory.from(this.node);
         }
 
 
-        if (depth > 0 && result != null) {
+        if (myDepth < maxDepth && result != null) {
             if (this.nodeMap.put(result.term(), result) == null) {
                 for (String child : result.childrenTerms()) {
-                    view.addNode(child,this.depth);
+                    view.addNode(child, myDepth + 1);
                     view.addEdge(result.term(), child);
                     addToPendingCount(1);
-                    new ComputeChildrenTask(this, child, this.depth - 1, this.nodeFactory, this.nodeMap, this.view, false).fork();
+                    new ComputeChildrenTask(this, child, this.myDepth + 1, this.nodeFactory, this.nodeMap, this.view, maxDepth).fork();
                 }
             } else {
                 for (String child : result.childrenTerms()) {
-                    view.addEdge(result.term(), child); //aggiungere arco
-                }
+                    view.addEdge(result.term(), child);}
             }
         }
         propagateCompletion();

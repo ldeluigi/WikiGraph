@@ -70,7 +70,6 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
     }
 
     private WikiGraphNode from(final String term, final String lang) {
-        System.out.println("Called from " + term);
         final String URLTerm = term.replace(" ", "_");
         final HttpGET req = new HttpGET().setBaseURL(apiEndpoint(lang))
                 .addParameter("format", "json")
@@ -83,9 +82,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
                 .addParameter("disabletoc", "1");
         final String rawJSON = req.send();
         final JSONObject result = new JSONObject(rawJSON);
-        System.out.println("Parsed " + rawJSON);
         if (result.has("parse")) {
-            System.out.println("Parsed part 2");
             final JSONObject json = result.getJSONObject("parse");
             final JSONArray redirects = json.getJSONArray("redirects");
             final JSONArray links = json.getJSONArray("links");
@@ -103,7 +100,6 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
                     terms.add(linkTerm);
                 }
             }
-            System.out.println("Return from " + termResult);
             return new WikiGraphNodeImpl(termResult, sameTerm, terms);
         } else {
             return null;
