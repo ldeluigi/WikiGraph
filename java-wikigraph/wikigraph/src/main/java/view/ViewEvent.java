@@ -8,4 +8,7 @@ public interface ViewEvent {
     default String getText() {
         return "";
     }
+    default int getDepth() {
+        return 0;
+    }
 }
