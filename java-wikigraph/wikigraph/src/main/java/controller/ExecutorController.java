@@ -17,32 +17,39 @@ import java.util.concurrent.ForkJoinPool;
 public class ExecutorController implements Controller {
 
     private static ForkJoinPool pool;
-    private final HttpWikiGraph nodeFactory;
-    private final ConcurrentHashMap<String, WikiGraphNode> nodeMap;
+    private  HttpWikiGraph nodeFactory;
+    private  ConcurrentHashMap<String, WikiGraphNode> nodeMap;
     private final SwingView view;
 
-    public ExecutorController(HttpWikiGraph nodeFactory, ConcurrentHashMap<String, WikiGraphNode> nodeMap, SwingView view){
+    public ExecutorController(SwingView view){
         this.view = view;
-        this.nodeFactory = nodeFactory;
-        this.nodeMap = nodeMap;
+        this.view.addEventListener(this);
+    }
 
+    @Override
+    public void start(){
+        this.nodeFactory = new HttpWikiGraph();
+        nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
+        this.nodeMap = new ConcurrentHashMap<>();
+        pool = ForkJoinPool.commonPool();
     }
 
     private void compute(String node, int depth){
-        pool = ForkJoinPool.commonPool();
         this.pool.invoke(
                 new ComputeChildrenTask(null, node,depth,this.nodeFactory,this.nodeMap,this.view,true));
     }
 
-    public void exit(){
-        this.pool.shutdown();
+    private void exit(){
+        if(this.pool!= null){
+            this.pool.shutdown();
+        }
     }
-    public void computeRandom(int depth){
+    private void computeRandom(int depth){
         WikiGraphNode random = nodeFactory.random();
         compute(random.term(),depth);
     }
 
-    public void computeSearch(String node, int depth){
+    private void computeSearch(String node, int depth){
         List<Pair<String, String>> res =  this.nodeFactory.search(node);
         compute(res.get(0).getKey(),depth);
     }
