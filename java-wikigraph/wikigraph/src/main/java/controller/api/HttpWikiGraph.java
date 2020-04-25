@@ -106,7 +106,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
             System.out.println("Return from " + termResult);
             return new WikiGraphNodeImpl(termResult, sameTerm, terms);
         } else {
-            throw new IllegalStateException("Does not contain key 'parse': " + rawJSON);
+            return null;
         }
     }
 
