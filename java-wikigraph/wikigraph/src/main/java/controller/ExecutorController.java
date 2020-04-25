@@ -2,22 +2,14 @@ package controller;
 
 
 import controller.api.HttpWikiGraph;
-import model.Pair;
-
 import model.WikiGraphNode;
-
-
 import view.View;
 import view.ViewEvent;
 
-
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountedCompleter;
 import java.util.concurrent.ForkJoinPool;
-
-import static java.lang.Runtime.*;
 
 public class ExecutorController implements Controller {
 
@@ -42,9 +34,8 @@ public class ExecutorController implements Controller {
 
     private void compute(String node, int depth) {
 
-        CountedCompleter task = new ComputeChildrenTask(null, node, depth, this.nodeFactory, this.nodeMap, this.view, true);
-        this.pool.execute(
-                task);
+        CountedCompleter task = new ComputeChildrenTask(null, node, 0, this.nodeFactory, this.nodeMap, this.view, depth);
+        this.pool.execute(task);
 
 
     }
