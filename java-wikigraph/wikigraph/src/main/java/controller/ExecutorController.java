@@ -6,8 +6,9 @@ import model.Pair;
 
 import model.WikiGraphNode;
 
-import view.SwingView;
+import view.View;
 import view.ViewEvent;
+
 
 import java.util.List;
 import java.util.Locale;
@@ -19,9 +20,9 @@ public class ExecutorController implements Controller {
     private static ForkJoinPool pool;
     private  HttpWikiGraph nodeFactory;
     private  ConcurrentHashMap<String, WikiGraphNode> nodeMap;
-    private final SwingView view;
+    private final View view;
 
-    public ExecutorController(SwingView view){
+    public ExecutorController(View view){
         this.view = view;
         this.view.addEventListener(this);
     }
