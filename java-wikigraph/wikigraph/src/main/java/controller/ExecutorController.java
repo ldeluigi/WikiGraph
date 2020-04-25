@@ -38,7 +38,7 @@ public class ExecutorController implements Controller {
     }
 
     private void compute(String node, int depth){
-        this.pool.invoke(
+        this.pool.execute(
                 new ComputeChildrenTask(null, node,depth,this.nodeFactory,this.nodeMap, this.view,true));
     }
 
@@ -49,12 +49,16 @@ public class ExecutorController implements Controller {
     }
     private void computeRandom(int depth){
         WikiGraphNode random = nodeFactory.random();
-        compute(random.term(),depth);
+        if (random!=null){
+            compute(random.term(),depth);
+        }
     }
 
     private void computeSearch(String node, int depth){
         List<Pair<String, String>> res =  this.nodeFactory.search(node);
-        compute(res.get(0).getKey(),depth);
+        if (res!=null){
+            compute(res.get(0).getKey(),depth);
+        }
     }
 
     @Override
