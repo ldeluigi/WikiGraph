@@ -51,7 +51,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
             }
             return finalResults;
         }
-        return null;
+        throw new IllegalStateException("Wrong JSON: " + rawJSON);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
         if (matcher.find() && langMatch.find()) {
             return this.from(matcher.group(1), langMatch.group(1));
         }
-        return null;
+        throw new IllegalArgumentException("url didn't match patterns");
     }
 
     @Override
@@ -72,6 +72,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
     }
 
     private WikiGraphNode from(final String term, final String lang) {
+        System.out.println("Called from " + term);
         final String URLTerm = URLEncoder.encode(term.replace(" ", "_"),
                 StandardCharsets.UTF_8);
         final HttpGET req = new HttpGET().setBaseURL(apiEndpoint(lang))
@@ -85,7 +86,9 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
                 .addParameter("disabletoc", "1");
         final String rawJSON = req.send();
         final JSONObject result = new JSONObject(rawJSON);
+        System.out.println("Parsed");
         if (result.has("parse")) {
+            System.out.println("Parsed part 2");
             final JSONObject json = result.getJSONObject("parse");
             final JSONArray redirects = json.getJSONArray("redirects");
             final JSONArray links = json.getJSONArray("links");
@@ -103,9 +106,10 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
                     terms.add(linkTerm);
                 }
             }
+            System.out.println("Return from " + termResult);
             return new WikiGraphNodeImpl(termResult, sameTerm, terms);
         } else {
-            return null;
+            throw new IllegalStateException("Does not contain key 'parse': " + rawJSON);
         }
     }
 
@@ -148,6 +152,6 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
                 }
             }
         }
-        return null;
+        throw new IllegalStateException("Wrong JSON: " + out);
     }
 }
