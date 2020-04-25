@@ -21,6 +21,9 @@ public class SwingView extends JFrame implements View {
     private static final float DIMENSION_ADAPTER = 0.5f;
     private static final int MAX_DEPTH = 8;
     private static final int MAX_DELAY = 300;
+    private static final int HOVER_SIZE = 20;
+    private static final int ROOT_SIZE = 15;
+    private static final int SIZE_STEP = 2;
     private final ViewPanel view;
     private final JTextField textOrUrl = new JTextField(20);
     private final JSpinner depth = new JSpinner(new SpinnerNumberModel(1, 1, MAX_DEPTH, 1));
@@ -55,7 +58,11 @@ public class SwingView extends JFrame implements View {
         this.graph = new SingleGraph("WikiGraph");
         this.graph.addAttribute("ui.quality");
         this.graph.addAttribute("ui.antialias");
-        this.graph.addAttribute("ui.stylesheet", "node { size: 10px;} node.hover { size: 20px; text-size: 20;}");
+        String depthCSS = "";
+        for (int i = 0; i < MAX_DEPTH; i++) {
+            depthCSS += "node.d" + i +" { size: "+Math.max(1, ROOT_SIZE - i * SIZE_STEP)+"px; } ";
+        }
+        this.graph.addAttribute("ui.stylesheet", depthCSS + "node.hover { size: " + HOVER_SIZE +"px; text-size: 20; text-offset: 6; }");
 
         Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
         viewer.enableAutoLayout();
@@ -152,9 +159,10 @@ public class SwingView extends JFrame implements View {
 
 
     @Override
-    public void addNode(final String id) {
-        if (this.graph.getNode(id) != null) {
+    public void addNode(final String id, final int depth) {
+        if (this.graph.getNode(id) == null) {
             this.graph.addNode(id);
+            this.graph.getNode(id).addAttribute("ui.class", "d"+depth);
         }
     }
 
@@ -162,9 +170,7 @@ public class SwingView extends JFrame implements View {
     public void addEdge(final String idFrom, final String idTo) {
         final Node from = this.graph.getNode(idFrom);
         final Node to = this.graph.getNode(idTo);
-        final int fromSize = from.getAttribute("ui.size");
-        throw new IllegalArgumentException();
-        //this.graph.addEdge(idFrom + "secret" + idTo, from, to);
+        this.graph.addEdge(idFrom + "secret" + idTo, from, to);
     }
 
     @Override
@@ -266,17 +272,21 @@ public class SwingView extends JFrame implements View {
         }
 
         private Node lastHovered = null;
+        private String oldClasses = "";
 
         @Override
         public void mouseMoved(final MouseEvent mouseEvent) {
             Node nodeHovered = getNode(mouseEvent);
-            if (nodeHovered != lastHovered && lastHovered != null) {
-                lastHovered.removeAttribute("ui.class");
-                lastHovered.removeAttribute("ui.label");
-            }
-            if (nodeHovered != null) {
-                nodeHovered.addAttribute("ui.class", "hover");
-                nodeHovered.addAttribute("ui.label", nodeHovered.getId());
+            if (nodeHovered != lastHovered) {
+                if (lastHovered != null){
+                    lastHovered.addAttribute("ui.class", oldClasses);
+                    lastHovered.removeAttribute("ui.label");
+                }
+                if (nodeHovered != null) {
+                    oldClasses = nodeHovered.getAttribute("ui.class");
+                    nodeHovered.addAttribute("ui.class", "hover");
+                    nodeHovered.addAttribute("ui.label", nodeHovered.getId());
+                }
             }
             lastHovered = nodeHovered;
         }
