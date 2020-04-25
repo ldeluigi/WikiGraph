@@ -47,7 +47,7 @@ public class SwingView extends JFrame implements View  {
         topPanel.add(this.refreshRate);
 
         this.graph = new SingleGraph("Tutorial 1");
-        this.graph.addAttribute("ui.stylesheet","node {text-mode:normal; text-background-mode: rounded-box;}");
+        this.graph.addAttribute("ui.stylesheet","node {text-mode:normal; text-background-mode: plain;}");
         this.graph.addNode("A");
         this.graph.addNode("B");
         this.graph.addEdge("AB","A","B", true);
@@ -65,8 +65,6 @@ public class SwingView extends JFrame implements View  {
 
     @Override
     public void addEventListener() {
-
-    }
 
     @Override
     public void addNode(final String id) {
@@ -106,6 +104,7 @@ public class SwingView extends JFrame implements View  {
                 return (int) depth.getValue();
             }
         }));
+
         this.randomButton.addActionListener(actionEvent -> listener.notifyEvent(new ViewEvent() {
             @Override
             public EventType getType() {
@@ -117,6 +116,13 @@ public class SwingView extends JFrame implements View  {
                 return (int) depth.getValue();
             }
         }));
+
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                listener.notifyEvent( () -> {return ViewEvent.EventType.EXIT;});
+            }
+        });
 
     }
 
