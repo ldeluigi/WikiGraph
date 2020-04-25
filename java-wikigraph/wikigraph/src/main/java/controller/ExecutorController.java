@@ -6,6 +6,7 @@ import model.Pair;
 
 import model.WikiGraphNode;
 
+
 import view.View;
 import view.ViewEvent;
 
@@ -37,7 +38,7 @@ public class ExecutorController implements Controller {
 
     private void compute(String node, int depth){
         this.pool.invoke(
-                new ComputeChildrenTask(null, node,depth,this.nodeFactory,this.nodeMap,this.view,true));
+                new ComputeChildrenTask(null, node,depth,this.nodeFactory,this.nodeMap, this.view,true));
     }
 
     private void exit(){
