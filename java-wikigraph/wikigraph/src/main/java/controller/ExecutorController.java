@@ -47,34 +47,16 @@ public class ExecutorController implements Controller {
             this.pool.shutdown();
         }
     }
-    private void computeRandom(int depth){
-        WikiGraphNode random = nodeFactory.random();
-        if (random!=null){
-            System.out.println("random result:" +random.term());
-            compute(random.term(),depth);
-        }else{
-            System.out.println("no result");
-        }
-    }
 
-    private void computeSearch(String node, int depth){
-        List<Pair<String, String>> res =  this.nodeFactory.search(node);
-        if (res!=null){
-            System.out.println("search result:" +res.get(0).getKey());
-            compute(res.get(0).getKey(),depth);
-        }else{
-            System.out.println("search failed");
-        }
-    }
 
     @Override
     public void notifyEvent(ViewEvent event) {
         if(event.getType().equals(ViewEvent.EventType.EXIT)){
             this.exit();
         }else if (event.getType().equals(ViewEvent.EventType.SEARCH)){
-            computeSearch(event.getText(),event.getDepth());//get the term
+            compute(event.getText(),event.getDepth());//get the term
         }else if (event.getType().equals(ViewEvent.EventType.RANDOM_SEARCH)){
-            computeRandom(event.getDepth());
+            compute(null,event.getDepth());
         }else if (event.getType().equals(ViewEvent.EventType.OTHER)){
             //compute("term");//get the term
         }
