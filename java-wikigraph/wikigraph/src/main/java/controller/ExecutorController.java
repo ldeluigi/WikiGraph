@@ -30,20 +30,12 @@ public class ExecutorController implements Controller {
         this.view.addEventListener(this);
     }
 
-    class Handler implements Thread.UncaughtExceptionHandler {
-
-
-        public void uncaughtException(Thread t, Throwable e){
-            throw new IllegalStateException(e);
-        }
-    }
     @Override
     public void start(){
         this.nodeFactory = new HttpWikiGraph();
         nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
         this.nodeMap = new ConcurrentHashMap<>();
-        pool = new ForkJoinPool(getRuntime().availableProcessors(),ForkJoinPool.defaultForkJoinWorkerThreadFactory, new Handler(),true);
-        //commonpool
+        pool = ForkJoinPool.commonPool();
         view.start();
     }
 
