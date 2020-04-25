@@ -1,5 +1,5 @@
 package view;
 
-public interface View extends EventEmitter, GraphDisplay {
+public interface View extends ViewEventEmitter, GraphDisplay {
     void start();
 }

@@ -3,6 +3,6 @@ package view;
 import controller.ViewEventListener;
 
 
-interface EventEmitter {
+interface ViewEventEmitter {
     void addEventListener(ViewEventListener listener);
 }
