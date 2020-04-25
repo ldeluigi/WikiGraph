@@ -53,9 +53,6 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
                     addToPendingCount(1);
                     new ComputeChildrenTask(this, child, this.myDepth + 1, this.nodeFactory, this.nodeMap, this.view, maxDepth).fork();
                 }
-            } else {
-                for (String child : result.childrenTerms()) {
-                    view.addEdge(result.term(), child);}
             }
         }
         propagateCompletion();
