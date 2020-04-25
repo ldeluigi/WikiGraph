@@ -4,8 +4,8 @@ import controller.ViewEventListener;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.ui.geom.Point3;
 import org.graphstream.ui.graphicGraph.GraphicElement;
-import org.graphstream.ui.layout.springbox.implementations.SpringBox;
 import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
 
@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public class SwingView extends JFrame implements View {
 
@@ -52,14 +53,18 @@ public class SwingView extends JFrame implements View {
         topPanel.add(refreshRate);
 
         this.graph = new SingleGraph("WikiGraph");
+        this.graph.addAttribute("ui.quality");
+        this.graph.addAttribute("ui.antialias");
+        this.graph.addAttribute("ui.stylesheet", "node { size: 10px;} node.hover { size: 20px; text-size: 20;}");
 
         Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
-        viewer.enableAutoLayout(new SpringBox(true));
+        viewer.enableAutoLayout();
         this.view = viewer.addDefaultView(false);
         final WikiGraphMouseListener listener = new WikiGraphMouseListener();
         this.view.addMouseListener(listener);
         this.view.addMouseMotionListener(listener);
         this.view.setMinimumSize(new Dimension(Math.round(screenSize.width * DIMENSION_ADAPTER), Math.round(screenSize.height * DIMENSION_ADAPTER)));
+        this.view.addMouseWheelListener(listener);
         pane.add(topPanel, BorderLayout.PAGE_END);
         pane.add(this.view, BorderLayout.CENTER);
 
@@ -126,7 +131,23 @@ public class SwingView extends JFrame implements View {
 
             }
         });
+        this.view.addKeyListener(new KeyListener() {
 
+            @Override
+            public void keyTyped(final KeyEvent e) {
+            }
+
+            @Override
+            public void keyReleased(final KeyEvent e) {
+            }
+
+            @Override
+            public void keyPressed(final KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    SwingView.this.view.getCamera().resetView();
+                }
+            }
+        });
     }
 
 
@@ -160,11 +181,13 @@ public class SwingView extends JFrame implements View {
         this.setVisible(true);
     }
 
-    class WikiGraphMouseListener implements MouseListener, MouseMotionListener {
+    class WikiGraphMouseListener implements MouseListener, MouseMotionListener, MouseWheelListener {
 
         private Node lastClick = null;
+        private Optional<Integer> currentX = Optional.empty();
+        private Optional<Integer> currentY = Optional.empty();
 
-        public WikiGraphMouseListener(){
+        public WikiGraphMouseListener() {
             super();
         }
 
@@ -195,10 +218,18 @@ public class SwingView extends JFrame implements View {
         }
 
         @Override
-        public void mousePressed(MouseEvent mouseEvent) {}
+        public void mousePressed(MouseEvent mouseEvent) {
+            if (this.getNode(mouseEvent) == null) {
+                this.currentX = Optional.of(mouseEvent.getX());
+                this.currentY = Optional.of(mouseEvent.getY());
+            }
+        }
 
         @Override
-        public void mouseReleased(MouseEvent mouseEvent) {}
+        public void mouseReleased(MouseEvent mouseEvent) {
+            this.currentX = Optional.empty();
+            this.currentY = Optional.empty();
+        }
 
         @Override
         public void mouseEntered(MouseEvent mouseEvent) {
@@ -208,7 +239,25 @@ public class SwingView extends JFrame implements View {
         public void mouseExited(MouseEvent mouseEvent) {}
 
         @Override
-        public void mouseDragged(MouseEvent mouseEvent) { }
+        public void mouseDragged(MouseEvent mouseEvent) {
+            if (this.currentX.isPresent() && this.currentY.isPresent()) {
+                int newX = mouseEvent.getX();
+                int newY = mouseEvent.getY();
+
+                // see DefaultShortcutManager
+                Point3 p1 = SwingView.this.view.getCamera().getViewCenter();
+                Point3 p2 = SwingView.this.view.getCamera().transformGuToPx(p1.x, p1.y, 0);
+                int xdelta = newX - this.currentX.get();// determine direction
+                int ydelta = newY - this.currentY.get();// determine direction
+                // sysout("xdelta "+xdelta+" ydelta "+ydelta);
+                p2.x -= xdelta;
+                p2.y -= ydelta;
+                Point3 p3 = SwingView.this.view.getCamera().transformPxToGu(p2.x, p2.y);
+                SwingView.this.view.getCamera().setViewCenter(p3.x, p3.y, 0);
+                this.currentX = Optional.of(newX);
+                this.currentY = Optional.of(newY);
+            }
+        }
 
         private Node lastHovered = null;
 
@@ -216,12 +265,33 @@ public class SwingView extends JFrame implements View {
         public void mouseMoved(final MouseEvent mouseEvent) {
             Node nodeHovered = getNode(mouseEvent);
             if (nodeHovered != lastHovered && lastHovered != null) {
+                lastHovered.removeAttribute("ui.class");
                 lastHovered.removeAttribute("ui.label");
             }
-            if (nodeHovered != null){
+            if (nodeHovered != null) {
+                nodeHovered.addAttribute("ui.class", "hover");
                 nodeHovered.addAttribute("ui.label", nodeHovered.getId());
             }
             lastHovered = nodeHovered;
+        }
+
+        @Override
+        public void mouseWheelMoved(MouseWheelEvent e) {
+            int mod = e.getScrollAmount();
+            int notches = e.getWheelRotation();
+            if (notches < 0) {
+                mod = -mod;
+            }
+            if (e.isControlDown()) {
+                SwingView.this.view.getCamera().setViewRotation(SwingView.this.view.getCamera().getViewRotation() + 10 * notches);
+            } else {
+                double percentMod = (mod / 50.0);
+                double currentPercent = SwingView.this.view.getCamera().getViewPercent();
+                double percent = currentPercent + percentMod;
+                if (percent > 0 && percent < 1) {
+                    SwingView.this.view.getCamera().setViewPercent(percent);
+                }
+            }
         }
     }
 
