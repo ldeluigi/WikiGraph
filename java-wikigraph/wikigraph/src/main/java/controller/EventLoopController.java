@@ -8,4 +8,9 @@ public class EventLoopController implements Controller {
     public void notifyEvent(ViewEvent event) {
 
     }
+
+    @Override
+    public void start() {
+        
+    }
 }

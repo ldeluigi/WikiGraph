@@ -16,32 +16,38 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
     private final HttpWikiGraph nodeFactory;
     private final ConcurrentHashMap<String, WikiGraphNode> nodeMap;
     private final SwingView view;
+    private final Boolean first;
 
     public static void computeChildren(String startNode, int maxDepth, HttpWikiGraph nodeFactory, ConcurrentHashMap<String, WikiGraphNode> nodeMap,SwingView view) {
-        new ComputeChildrenTask(null, startNode, maxDepth, nodeFactory, nodeMap,view).invoke();
+        new ComputeChildrenTask(null, startNode, maxDepth, nodeFactory, nodeMap,view,true).invoke();
     }
 
-    public ComputeChildrenTask(CountedCompleter<?> t, String node, int depth, HttpWikiGraph nodeFactory, ConcurrentHashMap<String, WikiGraphNode> nodeMap,SwingView view) {
+    public ComputeChildrenTask(CountedCompleter<?> t, String node, int depth, HttpWikiGraph nodeFactory, ConcurrentHashMap<String, WikiGraphNode> nodeMap,SwingView view, boolean first) {
         super(t);
         this.nodeFactory = nodeFactory;
         this.node = node;
         this.depth = depth;
         this.nodeMap = nodeMap;
         this.view =view;
+        this.first = first;
     }
 
 
     @Override
     public void compute() {
-        view.addNode(this.node);
+        if (this.first){
+            view.addNode(this.node);
+        }
         if (depth > 0) {
             WikiGraphNode result = nodeFactory.from(this.node);
             if (result != null) {
                 if (this.nodeMap.put(result.term(), result) == null) {
                     for (String child : result.childrenTerms()) {
+                        view.addNode(child);
+
                        //System.out.println(child);
                         addToPendingCount(1);
-                        new ComputeChildrenTask(this, child, this.depth - 1, this.nodeFactory, this.nodeMap,this.view).fork();
+                        new ComputeChildrenTask(this, child, this.depth - 1, this.nodeFactory, this.nodeMap,this.view,false).fork();
                     }
                 } else {
                     for (String child : result.childrenTerms()){
