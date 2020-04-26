@@ -3,6 +3,7 @@ package view;
 import controller.ViewEventListener;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.Graphs;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.geom.Point3;
 import org.graphstream.ui.graphicGraph.GraphicElement;
@@ -61,15 +62,20 @@ public class SwingView extends JFrame implements View {
         this.graph.addAttribute("ui.antialias");
         StringBuilder depthCSS = new StringBuilder();
         for (int i = 0; i < MAX_DEPTH; i++) {
-            depthCSS.append("node.d").append(i).append(" { size: ").append(Math.max(1, ROOT_SIZE - i * SIZE_STEP)).append("px; } ");
+            final Color c = new HSLColor(360.0f * i / MAX_DEPTH, 80, 55).getRGB();
+            depthCSS.append("node.d").append(i).append(" { size: ").append(Math.max(1, ROOT_SIZE - i * SIZE_STEP)).append("px; fill-color: rgb(").append(c.getRed()).append(", ").append(c.getGreen()).append(", ").append(c.getBlue()).append("); } ");
         }
         this.graph.addAttribute("ui.stylesheet",
-                "node {" +
-                        " text-visibility: 0.1; text-visibility-mode: under-zoom;" +
+                "edge { shape: angle; size: 5px; } " +
+                        "node {" +
+                        " text-visibility: 0.3; text-visibility-mode: under-zoom;" +
                         " text-background-mode: rounded-box; text-background-color: white; text-padding: 1px;" +
-                        " text-alignment: at-right;" +
+                        " text-alignment: at-right; text-size: 15;" +
                         " } "
-                + depthCSS + "node.hover { size: " + HOVER_SIZE +"px; text-size: 20; text-offset: 6; text-visibility-mode: normal; }");
+                        + depthCSS +
+                        "node.hover { size: " + HOVER_SIZE +
+                        "px; text-size: 20; text-offset: 6; text-visibility-mode: normal; " +
+                        "z-index: 4; fill-color: gray; }");
 
         Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
         viewer.enableAutoLayout();
@@ -82,22 +88,7 @@ public class SwingView extends JFrame implements View {
         pane.add(topPanel, BorderLayout.PAGE_END);
         pane.add(this.view, BorderLayout.CENTER);
 
-        searchButton.addActionListener(actionEvent -> this.listeners.forEach(l -> l.notifyEvent(new ViewEvent() {
-            @Override
-            public EventType getType() {
-                return EventType.SEARCH;
-            }
-
-            @Override
-            public String getText() {
-                return textOrUrl.getText();
-            }
-
-            @Override
-            public int getDepth() {
-                return (int) depth.getValue();
-            }
-        })));
+        searchButton.addActionListener(actionEvent -> doSearch());
         randomButton.addActionListener(actionEvent -> this.listeners.forEach(l -> l.notifyEvent(new ViewEvent() {
             @Override
             public EventType getType() {
@@ -164,23 +155,51 @@ public class SwingView extends JFrame implements View {
         });
     }
 
+    private void doSearch() {
+        this.listeners.forEach(l -> l.notifyEvent(new ViewEvent() {
+            @Override
+            public EventType getType() {
+                return EventType.SEARCH;
+            }
+
+            @Override
+            public String getText() {
+                return textOrUrl.getText();
+            }
+
+            @Override
+            public int getDepth() {
+                return (int) depth.getValue();
+            }
+        }));
+    }
+
 
     @Override
     public void addNode(final String id, final int depth) {
         if (this.graph.getNode(id) == null) {
             this.graph.addNode(id);
             final Node n = this.graph.getNode(id);
-            System.out.println("Added " + id + " d" +depth);
-            n.addAttribute("ui.class", "d"+depth);
+            n.addAttribute("ui.class", "d" + depth);
             n.addAttribute("label", id);
+        } else {
+            System.err.println("WARNING: DUPLICATE NODE IGNORED - " + id);
         }
     }
 
     @Override
     public void addEdge(final String idFrom, final String idTo) {
         final Node from = this.graph.getNode(idFrom);
+        if (from == null) {
+            System.err.println("ERROR: node " + idFrom + " not found. Aborting edge " + idFrom + "@@@" + idTo);
+            return;
+        }
         final Node to = this.graph.getNode(idTo);
-        this.graph.addEdge(idFrom + "@@@" + idTo, from, to);
+        if (to == null) {
+            System.err.println("ERROR: node " + idTo + " not found. Aborting edge " + idFrom + "@@@" + idTo);
+            return;
+        }
+        this.graph.addEdge(idFrom + "@@@" + idTo, from, to, true);
     }
 
     @Override
@@ -231,7 +250,8 @@ public class SwingView extends JFrame implements View {
         }
 
         private void ctrlClickEvent(final Node nodeClicked) {
-            System.out.println("ctrl:"+nodeClicked);
+            SwingView.this.textOrUrl.setText(nodeClicked.getId());
+            doSearch();
         }
 
         private Node getNode(final MouseEvent event){
