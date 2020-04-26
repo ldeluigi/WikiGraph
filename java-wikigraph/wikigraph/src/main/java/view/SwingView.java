@@ -76,10 +76,9 @@ public class SwingView extends JFrame implements View {
                         "node.hover { size: " + HOVER_SIZE +
                         "px; text-size: 20; text-offset: 6; text-visibility-mode: normal; " +
                         "z-index: 4; fill-color: gray; }");
-
-        Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
-        viewer.enableAutoLayout();
+        Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         this.view = viewer.addDefaultView(false);
+        viewer.enableAutoLayout();
         final WikiGraphMouseListener listener = new WikiGraphMouseListener();
         this.view.addMouseListener(listener);
         this.view.addMouseMotionListener(listener);
@@ -177,39 +176,46 @@ public class SwingView extends JFrame implements View {
 
     @Override
     public void addNode(final String id, final int depth) {
-        if (this.graph.getNode(id) == null) {
-            this.graph.addNode(id);
-            final Node n = this.graph.getNode(id);
-            n.addAttribute("ui.class", "d" + depth);
-            n.addAttribute("label", id);
-        } else {
-            System.err.println("WARNING: DUPLICATE NODE IGNORED - " + id);
-        }
+        SwingUtilities.invokeLater(() -> {
+            if (this.graph.getNode(id) == null) {
+                this.graph.addNode(id);
+                final Node n = this.graph.getNode(id);
+                n.addAttribute("ui.class", "d" + depth);
+                n.addAttribute("label", id);
+            } else {
+                System.err.println("WARNING: DUPLICATE NODE IGNORED - " + id);
+            }
+        });
     }
 
     @Override
     public void addEdge(final String idFrom, final String idTo) {
-        final Node from = this.graph.getNode(idFrom);
-        if (from == null) {
-            System.err.println("ERROR: node " + idFrom + " not found. Aborting edge " + idFrom + "@@@" + idTo);
-            return;
-        }
-        final Node to = this.graph.getNode(idTo);
-        if (to == null) {
-            System.err.println("ERROR: node " + idTo + " not found. Aborting edge " + idFrom + "@@@" + idTo);
-            return;
-        }
-        this.graph.addEdge(idFrom + "@@@" + idTo, from, to, true);
+        SwingUtilities.invokeLater(() -> {
+            final Node from = this.graph.getNode(idFrom);
+            if (from == null) {
+                System.err.println("ERROR: node " + idFrom + " not found. Aborting edge " + idFrom + "@@@" + idTo);
+                return;
+            }
+            final Node to = this.graph.getNode(idTo);
+            if (to == null) {
+                System.err.println("ERROR: node " + idTo + " not found. Aborting edge " + idFrom + "@@@" + idTo);
+                return;
+            }
+            final String name = idFrom + "@@@" + idTo;
+            if (this.graph.getEdge(name) == null) {
+                this.graph.addEdge(idFrom + "@@@" + idTo, from, to, true);
+            }
+        });
     }
 
     @Override
     public void removeNode(final String id) {
-        this.graph.removeNode(id);
+        SwingUtilities.invokeLater(() -> this.graph.removeNode(id));
     }
 
     @Override
     public void removeEdge(final String idFrom, final String idTo) {
-        this.graph.removeEdge(idFrom, idTo);
+        SwingUtilities.invokeLater(() -> this.graph.removeEdge(idFrom, idTo));
     }
 
     @Override
