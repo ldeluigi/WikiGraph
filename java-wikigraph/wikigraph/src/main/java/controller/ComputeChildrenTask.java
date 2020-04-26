@@ -11,49 +11,55 @@ import java.util.concurrent.CountedCompleter;
 public class ComputeChildrenTask extends CountedCompleter<Void> {
 
 
-    private final String node;
+    private final String myTerm;
     private final int myDepth;
     private final HttpWikiGraph nodeFactory;
     private final ConcurrentHashMap<String, WikiGraphNode> nodeMap;
     private final View view;
     private final int maxDepth;
+    private final String fatherId;
+    private String id;
 
-    public ComputeChildrenTask(CountedCompleter<?> t, String node, int depth, HttpWikiGraph nodeFactory, ConcurrentHashMap<String, WikiGraphNode> nodeMap, View view, int maxdepth) {
-        super(t);
+    public ComputeChildrenTask(ComputeChildrenTask father, String term, int depth, HttpWikiGraph nodeFactory, ConcurrentHashMap<String, WikiGraphNode> nodeMap, View view, int maxdepth) {
+        super(father);
         this.nodeFactory = nodeFactory;
-        this.node = node;
+        this.myTerm = term;
         this.myDepth = depth;
         this.nodeMap = nodeMap;
         this.view = view;
         this.maxDepth = maxdepth;
+        this.fatherId = father == null ? "" : father.getNodeId();
     }
 
 
     @Override
     public void compute() {
         final WikiGraphNode result;
-
         if (this.myDepth == 0) {
-            if (this.node == null) { //random
+            if (this.myTerm == null) { //random
                 result = nodeFactory.random();
             } else { //search
-                result = this.nodeFactory.from(this.node);
+                result = this.nodeFactory.from(this.myTerm);
             }
-            view.addNode(result.term(), this.myDepth);
         } else {
-            result = nodeFactory.from(this.node);
+            result = nodeFactory.from(this.myTerm);
         }
+        if (myDepth <= maxDepth && result != null) {
+            this.id = result.term();
 
-
-        if (myDepth < maxDepth && result != null) {
-            if (this.nodeMap.put(result.term(), result) == null) {
+            if (this.nodeMap.putIfAbsent(this.id, result) == null) {
+                view.addNode(this.id, this.myDepth);
+                if (this.myDepth > 0) {
+                    view.addEdge(this.fatherId, this.id);
+                }
                 for (String child : result.childrenTerms()) {
-                    view.addNode(child, myDepth + 1);
-                    view.addEdge(result.term(), child);
                     addToPendingCount(1);
                     new ComputeChildrenTask(this, child, this.myDepth + 1, this.nodeFactory, this.nodeMap, this.view, maxDepth).fork();
                 }
+            } else if (this.myDepth > 0) {
+                view.addEdge(this.fatherId, this.id);
             }
+
         }
         propagateCompletion();
         //tryComplete();
@@ -73,4 +79,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
         }
     }
 
+    public String getNodeId() {
+        return this.id;
+    }
 }
