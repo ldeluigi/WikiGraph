@@ -3,6 +3,7 @@ package controller;
 
 import controller.api.HttpWikiGraph;
 import controller.api.RESTWikiGraph;
+import model.WikiGraphNode;
 import view.View;
 import view.ViewEvent;
 
