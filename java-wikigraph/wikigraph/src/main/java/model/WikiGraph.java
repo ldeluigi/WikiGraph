@@ -30,4 +30,6 @@ public interface WikiGraph {
      * @return a set of edges
      */
     Set<Pair<String, String>> termEdges();
+
+    boolean contains(final String term);
 }
