@@ -44,17 +44,18 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
         } else {
             result = nodeFactory.from(this.myTerm);
         }
-        if (myDepth <= maxDepth && result != null) {
+        if (result != null) {
             this.id = result.term();
-
             if (this.nodeMap.putIfAbsent(this.id, result) == null) {
                 view.addNode(this.id, this.myDepth);
                 if (this.myDepth > 0) {
                     view.addEdge(this.fatherId, this.id);
                 }
-                for (String child : result.childrenTerms()) {
-                    addToPendingCount(1);
-                    new ComputeChildrenTask(this, child, this.myDepth + 1, this.nodeFactory, this.nodeMap, this.view, maxDepth).fork();
+                if (this.myDepth < this.maxDepth) {
+                    for (String child : result.childrenTerms()) {
+                        addToPendingCount(1);
+                        new ComputeChildrenTask(this, child, this.myDepth + 1, this.nodeFactory, this.nodeMap, this.view, maxDepth).fork();
+                    }
                 }
             } else if (this.myDepth > 0) {
                 view.addEdge(this.fatherId, this.id);
