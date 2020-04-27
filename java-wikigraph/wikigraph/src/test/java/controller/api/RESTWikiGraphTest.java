@@ -61,4 +61,13 @@ public class RESTWikiGraphTest {
         final WikiGraphNodeFactory g = new RESTWikiGraph();
         assertNotNull(g.random());
     }
+
+    @Test
+    void testHttpVsREST() throws MalformedURLException {
+        final WikiGraphNodeFactory g = new RESTWikiGraph();
+        final WikiGraphNodeFactory h = new HttpWikiGraph();
+        assertEquals(g.from("UK"), h.from("United Kingdom"));
+        assertEquals(g.from("Albert Einstein"), h.from("Albert Einstein"));
+        assertEquals(h.from(new URL("https://en.wikipedia.org/wiki/UK#42")).term(), g.from(new URL("https://en.wikipedia.org/wiki/UK#42")).term());
+    }
 }
