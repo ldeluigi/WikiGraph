@@ -24,7 +24,7 @@ public class SwingView extends JFrame implements View {
     private static final int MAX_DELAY = 300;
     private static final int HOVER_SIZE = 30;
     private static final int ROOT_SIZE = 20;
-    private static final int SIZE_STEP = 4;
+    private static final int SIZE_STEP = 2;
     private final ViewPanel view;
     private final JTextField textOrUrl = new JTextField(20);
     private final JSpinner depth = new JSpinner(new SpinnerNumberModel(1, 1, MAX_DEPTH, 1));
@@ -58,24 +58,7 @@ public class SwingView extends JFrame implements View {
         topPanel.add(refreshRate);
 
         this.graph = new MultiGraph("WikiGraph");
-        this.graph.addAttribute("ui.quality");
-        this.graph.addAttribute("ui.antialias");
-        StringBuilder depthCSS = new StringBuilder();
-        for (int i = 0; i < MAX_DEPTH; i++) {
-            final Color c = new HSLColor(360.0f * i / MAX_DEPTH, 80, 55).getRGB();
-            depthCSS.append("node.d").append(i).append(" { size: ").append(Math.max(1, ROOT_SIZE - i * SIZE_STEP)).append("px; fill-color: rgb(").append(c.getRed()).append(", ").append(c.getGreen()).append(", ").append(c.getBlue()).append("); } ");
-        }
-        this.graph.addAttribute("ui.stylesheet",
-                "edge { shape: angle; size: 5px; } " +
-                        "node {" +
-                        " text-visibility: 0.3; text-visibility-mode: under-zoom;" +
-                        " text-background-mode: rounded-box; text-background-color: white; text-padding: 1px;" +
-                        " text-alignment: at-right; text-size: 15;" +
-                        " } "
-                        + depthCSS +
-                        "node.hover { size: " + HOVER_SIZE +
-                        "px; text-size: 20; text-offset: 6; text-visibility-mode: normal; " +
-                        "z-index: 4; fill-color: gray; }");
+        resetGraph();
         Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         this.view = viewer.addDefaultView(false);
         viewer.enableAutoLayout();
@@ -163,6 +146,7 @@ public class SwingView extends JFrame implements View {
 
             @Override
             public String getText() {
+                System.out.println(textOrUrl.getText());
                 return textOrUrl.getText();
             }
 
@@ -228,6 +212,28 @@ public class SwingView extends JFrame implements View {
         this.setVisible(true);
     }
 
+    private void resetGraph() {
+        SwingView.this.graph.clear();
+        this.graph.addAttribute("ui.quality");
+        this.graph.addAttribute("ui.antialias");
+        StringBuilder depthCSS = new StringBuilder();
+        for (int i = 0; i < MAX_DEPTH; i++) {
+            final Color c = new HSLColor(360.0f * i / MAX_DEPTH, 80, 55).getRGB();
+            depthCSS.append("node.d").append(i).append(" { size: ").append(Math.max(1, ROOT_SIZE - i * SIZE_STEP)).append("px; fill-color: rgb(").append(c.getRed()).append(", ").append(c.getGreen()).append(", ").append(c.getBlue()).append("); } ");
+        }
+        this.graph.addAttribute("ui.stylesheet",
+                "edge { shape: angle; size: 5px; } " +
+                        "node {" +
+                        " text-visibility: 0.2; text-visibility-mode: under-zoom;" +
+                        " text-background-mode: rounded-box; text-background-color: white; text-padding: 1px;" +
+                        " text-alignment: at-right; text-size: 15;" +
+                        " } "
+                        + depthCSS +
+                        "node.hover { size: " + HOVER_SIZE +
+                        "px; text-size: 20; text-offset: 6; text-visibility-mode: normal; " +
+                        "z-index: 4; fill-color: gray; }");
+    }
+
     class WikiGraphMouseListener implements MouseListener, MouseMotionListener, MouseWheelListener {
 
         private Node lastClick = null;
@@ -257,6 +263,7 @@ public class SwingView extends JFrame implements View {
 
         private void ctrlClickEvent(final Node nodeClicked) {
             SwingView.this.textOrUrl.setText(nodeClicked.getId());
+            resetGraph();
             doSearch();
         }
 
@@ -315,7 +322,6 @@ public class SwingView extends JFrame implements View {
             Node nodeHovered = getNode(mouseEvent);
             if (nodeHovered != lastHovered) {
                 if (lastHovered != null){
-                    System.out.println(oldClasses);
                     lastHovered.addAttribute("ui.class", oldClasses);
                 }
                 if (nodeHovered != null) {
