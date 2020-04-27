@@ -2,6 +2,7 @@ package controller;
 
 
 import controller.api.HttpWikiGraph;
+import controller.api.RESTWikiGraph;
 import model.WikiGraphNode;
 import view.View;
 import view.ViewEvent;
@@ -24,7 +25,7 @@ public class ExecutorController implements Controller {
 
     @Override
     public void start() {
-        this.nodeFactory = new HttpWikiGraph();
+        this.nodeFactory = new RESTWikiGraph();
         nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
         pool = ForkJoinPool.commonPool();
         view.start();
