@@ -263,7 +263,6 @@ public class SwingView extends JFrame implements View {
 
         private void ctrlClickEvent(final Node nodeClicked) {
             SwingView.this.textOrUrl.setText(nodeClicked.getId());
-            resetGraph();
             doSearch();
         }
 
