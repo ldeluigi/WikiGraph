@@ -8,12 +8,11 @@ import view.ViewEvent;
 
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountedCompleter;
 import java.util.concurrent.ForkJoinPool;
 
 public class ExecutorController implements Controller {
 
-    private static ForkJoinPool pool;
+    private ForkJoinPool pool;
     private HttpWikiGraph nodeFactory;
     private ConcurrentHashMap<String, WikiGraphNode> nodeMap;
     private final View view;
@@ -33,11 +32,7 @@ public class ExecutorController implements Controller {
     }
 
     private void compute(String node, int depth) {
-
-        CountedCompleter task = new ComputeChildrenTask(null, node, 0, this.nodeFactory, this.nodeMap, this.view, depth);
-        this.pool.execute(task);
-
-
+        this.pool.execute(new ComputeChildrenTask(null, node, 0, this.nodeFactory, this.nodeMap, this.view, depth));
     }
 
     private void exit() {
@@ -52,16 +47,13 @@ public class ExecutorController implements Controller {
         if (event.getType().equals(ViewEvent.EventType.EXIT)) {
             this.exit();
         } else if (event.getType().equals(ViewEvent.EventType.SEARCH)) {
-            if (this.pool.isQuiescent()) {
-                compute(event.getText(), event.getDepth());//get the term
-            }
+            compute(event.getText(), event.getDepth());//get the term
         } else if (event.getType().equals(ViewEvent.EventType.RANDOM_SEARCH)) {
-            if (this.pool.isQuiescent()) {
-                compute(null, event.getDepth());
-            }
-        } else if (event.getType().equals(ViewEvent.EventType.OTHER)) {
-            //compute("term");//get the term
+            compute(null, event.getDepth());
         }
+//        else if (event.getType().equals(ViewEvent.EventType.OTHER)) {
+//            //compute("term");//get the term
+//        }
     }
 
 
