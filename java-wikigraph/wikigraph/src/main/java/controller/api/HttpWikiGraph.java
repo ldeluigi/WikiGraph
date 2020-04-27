@@ -68,7 +68,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
         return this.from(term, this.locale);
     }
 
-    private WikiGraphNode from(final String term, final String lang) {
+    protected WikiGraphNode from(final String term, final String lang) {
         final String URLTerm = term.replace(" ", "_");
         final HttpGET req = new HttpGET().setBaseURL(apiEndpoint(lang))
                 .addParameter("format", "json")
@@ -145,9 +145,5 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
             }
         }
         throw new IllegalStateException("Wrong JSON: " + out);
-    }
-
-    protected final String getLanguageCode() {
-        return this.locale;
     }
 }
