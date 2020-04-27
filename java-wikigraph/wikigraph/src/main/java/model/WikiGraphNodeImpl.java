@@ -38,7 +38,7 @@ public class WikiGraphNodeImpl implements WikiGraphNode {
 
     @Override
     public String toString() {
-        return "HttpWikiGraphNode{" +
+        return "WikiGraphNode{" +
                 "name='" + name + '\'' +
                 ", synonyms=" + synonyms +
                 ", children=" + children +
