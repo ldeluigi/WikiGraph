@@ -57,7 +57,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
                 if (this.graph.contains(this.id)) {
                     this.view.addEdge(this.fatherId, this.id);
                 } else {
-                    this.view.addNode(this.id, this.myDepth);
+                    this.view.addNode(this.id, this.myDepth, this.nodeFactory.getLanguage());
                     this.graph.add(result);
                     if (this.myDepth > 0) {
                         view.addEdge(this.fatherId, this.id);

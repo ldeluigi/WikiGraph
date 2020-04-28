@@ -180,13 +180,14 @@ public class SwingView extends JFrame implements View {
 
 
     @Override
-    public void addNode(final String id, final int depth) {
+    public void addNode(final String id, final int depth, final String lang) {
         SwingUtilities.invokeLater(() -> {
             if (this.graph.getNode(id) == null) {
                 this.graph.addNode(id);
                 final Node n = this.graph.getNode(id);
                 n.addAttribute("ui.class", "d" + depth);
                 n.addAttribute("label", id);
+                n.addAttribute("lang", lang);
             } else {
                 System.err.println("WARNING: DUPLICATE NODE IGNORED - " + id);
             }
@@ -300,8 +301,9 @@ public class SwingView extends JFrame implements View {
         private void doubleClickEvent(final Node nodeClicked) {
             final String q = nodeClicked.getId().replace(' ', '_');
             try {
+                final String langAttr = nodeClicked.getAttribute("lang");
                 java.awt.Desktop.getDesktop()
-                        .browse(URI.create("https://" + "en" + ".wikipedia.org/wiki/" + q));
+                        .browse(URI.create("https://" + (langAttr == null ? "en" : langAttr) + ".wikipedia.org/wiki/" + q));
             } catch (IOException e1) {
             }
         }

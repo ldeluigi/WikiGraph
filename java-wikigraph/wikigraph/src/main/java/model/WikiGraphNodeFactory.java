@@ -58,4 +58,10 @@ public interface WikiGraphNodeFactory {
      * @return he node or null if something went wrong
      */
     WikiGraphNode random();
+
+    /**
+     * Returns the internal (default) language for this factory.
+     * @return the language code
+     */
+    String getLanguage();
 }
