@@ -48,8 +48,7 @@ public class SwingListener implements MouseListener, MouseMotionListener, MouseW
 
     private void ctrlClickEvent(final Node nodeClicked) {
         this.view.prepareSearch(nodeClicked.getId());
-        this.view.doClear(() -> this.view.doSearch(() -> {
-        }));
+        this.view.doClear(() -> this.view.doSearch(() -> {}));
     }
 
     private Node getNode(final MouseEvent event) {
@@ -104,7 +103,7 @@ public class SwingListener implements MouseListener, MouseMotionListener, MouseW
     public void mouseMoved(final MouseEvent mouseEvent) {
         Node nodeHovered = getNode(mouseEvent);
         if (nodeHovered != lastHovered) {
-            if (lastHovered != null) {
+            if (lastHovered != null && lastHovered.getGraph().getNodeCount() > 0) {
                 lastHovered.addAttribute("ui.class", oldClasses);
             }
             if (nodeHovered != null) {
