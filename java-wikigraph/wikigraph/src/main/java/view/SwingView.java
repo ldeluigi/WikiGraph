@@ -178,7 +178,7 @@ public class SwingView extends JFrame implements View {
                 n.addAttribute("label", id);
                 n.addAttribute("lang", lang);
             } else {
-                System.err.println("WARNING: DUPLICATE NODE IGNORED - " + id);
+                System.err.println("INFO: DUPLICATE NODE IGNORED - " + id);
             }
         });
     }

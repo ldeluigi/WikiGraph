@@ -55,10 +55,8 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
     public WikiGraphNode from(final URL url) {
         final Pattern pattern = Pattern.compile(".+wiki/([^/#]+).*");
         final Matcher matcher = pattern.matcher(url.getPath());
-        final Pattern langPattern = Pattern.compile(".*?(\\w+)\\.wikipedia\\..+");
-        final Matcher langMatch = langPattern.matcher(url.getHost());
-        if (matcher.find() && langMatch.find()) {
-            return this.from(matcher.group(1), langMatch.group(1));
+        if (matcher.find()) {
+            return this.from(matcher.group(1), this.getLanguage(url));
         }
         throw new IllegalArgumentException("url didn't match patterns");
     }
@@ -149,6 +147,16 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
 
     @Override
     public String getLanguage() {
+        return this.locale;
+    }
+
+    @Override
+    public String getLanguage(final URL url) {
+        final Pattern langPattern = Pattern.compile(".*?(\\w+)\\.wikipedia\\..+");
+        final Matcher langMatch = langPattern.matcher(url.getHost());
+        if (langMatch.find()) {
+            return langMatch.group(1);
+        }
         return this.locale;
     }
 }
