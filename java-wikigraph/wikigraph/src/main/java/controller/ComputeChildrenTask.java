@@ -36,7 +36,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
     @Override
     public void compute() {
         if (this.graph.isAborted()) {
-            propagateCompletion();
+            tryComplete();
             return;
         }
         final WikiGraphNode result;
@@ -73,22 +73,13 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
                 lock.unlock();
             }
         }
-        propagateCompletion();
-        //tryComplete();
+        tryComplete();
     }
 
     @Override
     public boolean onExceptionalCompletion(Throwable ex, CountedCompleter<?> caller) {
         ex.printStackTrace();
         return false;
-    }
-
-    @Override
-    public void onCompletion(CountedCompleter<?> caller) {
-        if (caller == this) {
-            System.out.printf("completed thread : %s ", Thread
-                    .currentThread().getName());
-        }
     }
 
     public String getNodeId() {

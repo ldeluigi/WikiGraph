@@ -2,20 +2,24 @@ package controller;
 
 
 import controller.api.HttpWikiGraph;
-import model.WikiGraphNode;
+import controller.api.RESTWikiGraph;
 import view.View;
 import view.ViewEvent;
 
 import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
+import java.util.concurrent.CountedCompleter;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ExecutorController implements Controller {
 
     private ForkJoinPool pool;
     private HttpWikiGraph nodeFactory;
     private final View view;
+    private final Lock scheduleLock = new ReentrantLock();
+    private Optional<ViewEvent> event = Optional.empty();
 
     public ExecutorController(View view) {
         this.view = view;
@@ -24,14 +28,30 @@ public class ExecutorController implements Controller {
 
     @Override
     public void start() {
-        this.nodeFactory = new HttpWikiGraph();
+        this.nodeFactory = new RESTWikiGraph();
         nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
         pool = ForkJoinPool.commonPool();
         view.start();
     }
 
-    private void compute(String node, int depth, final ConcurrentWikiGraph last) {
-        this.pool.execute(new ComputeChildrenTask(null, node, 0, this.nodeFactory, last, this.view, depth));
+    private void startComputing(String node, int depth, final ConcurrentWikiGraph last) {
+        this.pool.execute(new ComputeChildrenTask(null, node, 0, this.nodeFactory, last, this.view, depth) {
+            @Override
+            public void onCompletion(CountedCompleter<?> caller) {
+                super.onCompletion(caller);
+                scheduleLock.lock();
+                try {
+                    if (event.isPresent()) {
+                        final ViewEvent e = event.get();
+                        ExecutorController.this.last = SynchronizedWikiGraph.empty();
+                        startComputing(e.getType().equals(ViewEvent.EventType.RANDOM_SEARCH) ? null : e.getText(),
+                                e.getDepth(), ExecutorController.this.last);
+                    }
+                } finally {
+                    scheduleLock.unlock();
+                }
+            }
+        });
     }
 
     private void exit() {
@@ -50,26 +70,35 @@ public class ExecutorController implements Controller {
             if (this.last != null) {
                 this.last.setAborted();
                 this.last = null;
-                // await quiescence to avoid errors
-                // but it's blocking! F
             }
-            if (this.pool.awaitQuiescence(100, TimeUnit.MILLISECONDS)) {
-                this.last = SynchronizedWikiGraph.empty();
-                compute(event.getText(), event.getDepth(), this.last);
+            this.scheduleLock.lock();
+            try {
+                if (this.pool.isQuiescent()) {
+                    this.last = SynchronizedWikiGraph.empty();
+                    startComputing(event.getText(), event.getDepth(), this.last);
+                } else {
+                    this.event = Optional.of(event);
+                }
+            } finally {
+                this.scheduleLock.unlock();
             }
         } else if (event.getType().equals(ViewEvent.EventType.RANDOM_SEARCH)) {
             if (this.last != null) {
                 this.last.setAborted();
                 this.last = null;
-                // await quiescence to avoid errors
-                // but it's blocking! F
             }
-            if (this.pool.awaitQuiescence(100, TimeUnit.MILLISECONDS)) {
-                this.last = SynchronizedWikiGraph.empty();
-                compute(null, event.getDepth(), this.last);
+            this.scheduleLock.lock();
+            try {
+                if (this.pool.isQuiescent()) {
+                    this.last = SynchronizedWikiGraph.empty();
+                    startComputing(null, event.getDepth(), this.last);
+                } else {
+                    this.event = Optional.of(event);
+                }
+            } finally {
+                this.scheduleLock.unlock();
             }
         }
     }
-
 
 }
