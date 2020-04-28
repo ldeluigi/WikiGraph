@@ -66,8 +66,8 @@ public class RESTWikiGraphTest {
     void testHttpVsREST() throws MalformedURLException {
         final WikiGraphNodeFactory g = new RESTWikiGraph();
         final WikiGraphNodeFactory h = new HttpWikiGraph();
-        assertEquals(g.from("UK"), h.from("United Kingdom"));
-        assertEquals(g.from("Albert Einstein"), h.from("Albert Einstein"));
+        assertEquals(g.from("UK").term(), h.from("United Kingdom").term());
+        assertTrue(h.from("Albert Einstein").childrenTerms().containsAll(g.from("Albert Einstein").childrenTerms()));
         assertEquals(h.from(new URL("https://en.wikipedia.org/wiki/UK#42")).term(), g.from(new URL("https://en.wikipedia.org/wiki/UK#42")).term());
     }
 }

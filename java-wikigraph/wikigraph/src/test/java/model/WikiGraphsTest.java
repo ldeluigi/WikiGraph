@@ -9,5 +9,12 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 class WikiGraphsTest {
-    
+    @Test
+    void testFrom() {
+
+    }
+    @Test
+    void testDifference() {
+
+    }
 }
