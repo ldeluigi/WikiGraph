@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.*;
 
 public class RESTWikiGraph extends HttpWikiGraph {
 
@@ -46,10 +47,11 @@ public class RESTWikiGraph extends HttpWikiGraph {
                 return new WikiGraphNodeImpl(termResult, sameTerm, terms);
             }
         } catch (IOException e) {
-            System.err.println("from "+ term);
-            e.printStackTrace();
+            Logger logger = Logger.getLogger(RESTWikiGraph.class.getName());
+            logger.warning("from "+ term +" ritorna null");
+            return null;
         }
-        System.err.println("RESTWikiGraph ritorna null");
+        System.err.println("RESTWikiGraph ritorna null senza eccezione");
         return null;
 
     }
