@@ -14,4 +14,8 @@ public interface ViewEvent {
     enum EventType {
         EXIT, SEARCH, RANDOM_SEARCH, CLEAR
     }
+
+    default Runnable onComplete() {
+        return () -> {};
+    }
 }

@@ -64,4 +64,11 @@ public interface WikiGraphNodeFactory {
      * @return the language code
      */
     String getLanguage();
+
+    /**
+     * Returns the language to which the url refers.
+     * @param url a wikipedia url
+     * @return the language code
+     */
+    String getLanguage(URL url);
 }
