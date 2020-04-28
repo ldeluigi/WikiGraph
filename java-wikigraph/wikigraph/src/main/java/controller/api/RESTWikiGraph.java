@@ -39,11 +39,10 @@ public class RESTWikiGraph extends HttpWikiGraph {
                 Elements links = doc.select("section:first-child p a:not([href*=#])");
                 final Set<String> terms = new HashSet<>();
                 links.forEach((Element link) -> {
-                    if (link.attr("rel").equals("mw:WikiLink") && !link.attr("href").contains(":")) {
+                    if (link.attr("rel").equals("mw:WikiLink") && !link.attr("href").matches("([A-Z])\\w+:([A-Z])\\w+")) {
                         terms.add(link.attr("title"));
                     }
                 });
-                System.out.println(terms);
                 return new WikiGraphNodeImpl(termResult, sameTerm, terms);
             }
         } catch (IOException e) {
