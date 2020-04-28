@@ -43,23 +43,27 @@ public class ExecutorController implements Controller {
             @Override
             public void onCompletion(CountedCompleter<?> caller) {
                 super.onCompletion(caller);
-                scheduleLock.lock();
-                try {
-                    if (event.isPresent()) {
-                        final ViewEvent e = event.get();
-                        if (e.getType().equals(ViewEvent.EventType.CLEAR)) {
-                            view.clearGraph();
-                        } else {
-                            ExecutorController.this.last = SynchronizedWikiGraph.empty();
-                            startComputing(e.getType().equals(ViewEvent.EventType.RANDOM_SEARCH) ? null : e.getText(),
-                                    e.getDepth(), ExecutorController.this.last);
-                        }
-                    }
-                } finally {
-                    scheduleLock.unlock();
-                }
+                endComputing();
             }
         });
+    }
+
+    private void endComputing() {
+        this.scheduleLock.lock();
+        try {
+            if (this.event.isPresent()) {
+                final ViewEvent e = this.event.get();
+                if (e.getType().equals(ViewEvent.EventType.CLEAR)) {
+                    this.view.clearGraph();
+                } else {
+                    this.last = SynchronizedWikiGraph.empty();
+                    startComputing(e.getType().equals(ViewEvent.EventType.RANDOM_SEARCH) ? null : e.getText(),
+                            e.getDepth(), this.last);
+                }
+            }
+        } finally {
+            scheduleLock.unlock();
+        }
     }
 
     private void exit() {
