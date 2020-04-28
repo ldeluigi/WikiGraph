@@ -30,13 +30,6 @@ public class WikiGraphNodeImpl implements WikiGraphNode {
     }
 
     @Override
-    public boolean equals(WikiGraphNode other) {
-        if (other == null) return false;
-        if (other.term().equals(this.term())) return true;
-        return this.synonyms.contains(other.term());
-    }
-
-    @Override
     public String toString() {
         return "WikiGraphNode{" +
                 "name='" + name + '\'' +
@@ -49,12 +42,13 @@ public class WikiGraphNodeImpl implements WikiGraphNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof WikiGraphNode)) return false;
-        WikiGraphNode that = (WikiGraphNode) o;
-        return this.equals(that);
+        final WikiGraphNode that = (WikiGraphNode) o;
+        return Objects.equals(name, that.term()) &&
+                Objects.equals(children, that.childrenTerms());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, synonyms, children);
+        return Objects.hash(name, children);
     }
 }
