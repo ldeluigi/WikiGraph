@@ -11,11 +11,10 @@ public interface ViewEvent {
         return 0;
     }
 
-    enum EventType {
-        EXIT, SEARCH, RANDOM_SEARCH, CLEAR
+    default void onComplete() {
     }
 
-    default Runnable onComplete() {
-        return () -> {};
+    enum EventType {
+        EXIT, SEARCH, RANDOM_SEARCH, CLEAR
     }
 }
