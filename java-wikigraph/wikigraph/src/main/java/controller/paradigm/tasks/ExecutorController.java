@@ -48,9 +48,13 @@ public class ExecutorController implements Controller {
                 try {
                     if (event.isPresent()) {
                         final ViewEvent e = event.get();
-                        ExecutorController.this.last = SynchronizedWikiGraph.empty();
-                        startComputing(e.getType().equals(ViewEvent.EventType.RANDOM_SEARCH) ? null : e.getText(),
-                                e.getDepth(), ExecutorController.this.last);
+                        if (e.getType().equals(ViewEvent.EventType.CLEAR)) {
+                            view.clearGraph();
+                        } else {
+                            ExecutorController.this.last = SynchronizedWikiGraph.empty();
+                            startComputing(e.getType().equals(ViewEvent.EventType.RANDOM_SEARCH) ? null : e.getText(),
+                                    e.getDepth(), ExecutorController.this.last);
+                        }
                     }
                 } finally {
                     scheduleLock.unlock();
@@ -95,6 +99,21 @@ public class ExecutorController implements Controller {
                 if (this.pool.isQuiescent()) {
                     this.last = SynchronizedWikiGraph.empty();
                     startComputing(null, event.getDepth(), this.last);
+                } else {
+                    this.event = Optional.of(event);
+                }
+            } finally {
+                this.scheduleLock.unlock();
+            }
+        } else if (event.getType().equals(ViewEvent.EventType.CLEAR)) {
+            if (this.last != null) {
+                this.last.setAborted();
+                this.last = null;
+            }
+            this.scheduleLock.lock();
+            try {
+                if (this.pool.isQuiescent()) {
+                    this.view.clearGraph();
                 } else {
                     this.event = Optional.of(event);
                 }

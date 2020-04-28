@@ -12,6 +12,8 @@ import org.graphstream.ui.view.Viewer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -43,10 +45,12 @@ public class SwingView extends JFrame implements View {
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new FlowLayout());
         topPanel.add(this.textOrUrl);
-        JButton searchButton = new JButton("search");
+        JButton searchButton = new JButton("Search");
         topPanel.add(searchButton);
-        JButton randomButton = new JButton("random");
+        JButton randomButton = new JButton("Random");
         topPanel.add(randomButton);
+        JButton clearButton = new JButton("Clear");
+        topPanel.add(clearButton);
         topPanel.add(new JLabel("Depth:"));
         topPanel.add(this.depth);
         topPanel.add(new JLabel("AutoUpdate"));
@@ -70,17 +74,21 @@ public class SwingView extends JFrame implements View {
         pane.add(this.view, BorderLayout.CENTER);
 
         searchButton.addActionListener(actionEvent -> doSearch());
-        randomButton.addActionListener(actionEvent -> this.listeners.forEach(l -> l.notifyEvent(new ViewEvent() {
-            @Override
-            public EventType getType() {
-                return EventType.RANDOM_SEARCH;
-            }
+        randomButton.addActionListener(actionEvent -> this.listeners.forEach(l -> {
+            l.notifyEvent(new ViewEvent() {
+                @Override
+                public EventType getType() {
+                    return EventType.RANDOM_SEARCH;
+                }
 
-            @Override
-            public int getDepth() {
-                return (int) depth.getValue();
-            }
-        })));
+                @Override
+                public int getDepth() {
+                    return (int) depth.getValue();
+                }
+            });
+            waitCursor();
+        }));
+        clearButton.addActionListener(e -> askClear());
         this.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {
@@ -136,6 +144,19 @@ public class SwingView extends JFrame implements View {
         });
     }
 
+    private void askClear() {
+        this.listeners.forEach(l -> l.notifyEvent(() -> ViewEvent.EventType.CLEAR));
+        waitCursor();
+    }
+
+    private void waitCursor() {
+        this.view.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    }
+
+    private void resetCursor() {
+        this.view.setCursor(Cursor.getDefaultCursor());
+    }
+
     private void doSearch() {
         this.listeners.forEach(l -> l.notifyEvent(new ViewEvent() {
             @Override
@@ -154,6 +175,7 @@ public class SwingView extends JFrame implements View {
                 return (int) depth.getValue();
             }
         }));
+        this.waitCursor();
     }
 
 
@@ -168,6 +190,7 @@ public class SwingView extends JFrame implements View {
             } else {
                 System.err.println("WARNING: DUPLICATE NODE IGNORED - " + id);
             }
+            resetCursor();
         });
     }
 
@@ -188,17 +211,33 @@ public class SwingView extends JFrame implements View {
             if (this.graph.getEdge(name) == null) {
                 this.graph.addEdge(idFrom + "@@@" + idTo, from, to, true);
             }
+            resetCursor();
         });
     }
 
     @Override
     public void removeNode(final String id) {
-        SwingUtilities.invokeLater(() -> this.graph.removeNode(id));
+        SwingUtilities.invokeLater(() -> {
+            this.graph.removeNode(id);
+            resetCursor();
+        });
+
     }
 
     @Override
     public void removeEdge(final String idFrom, final String idTo) {
-        SwingUtilities.invokeLater(() -> this.graph.removeEdge(idFrom, idTo));
+        SwingUtilities.invokeLater(() -> {
+            this.graph.removeEdge(idFrom, idTo);
+            resetCursor();
+        });
+    }
+
+    @Override
+    public void clearGraph() {
+        SwingUtilities.invokeLater(() -> {
+            this.resetGraph();
+            resetCursor();
+        });
     }
 
     @Override
@@ -259,12 +298,17 @@ public class SwingView extends JFrame implements View {
         }
 
         private void doubleClickEvent(final Node nodeClicked) {
-            System.out.println("double:" + nodeClicked);
+            final String q = nodeClicked.getId().replace(' ', '_');
+            try {
+                java.awt.Desktop.getDesktop()
+                        .browse(URI.create("https://" + "en" + ".wikipedia.org/wiki/" + q));
+            } catch (IOException e1) {
+            }
         }
 
         private void ctrlClickEvent(final Node nodeClicked) {
             SwingView.this.textOrUrl.setText(nodeClicked.getId());
-            doSearch();
+            askClear();
         }
 
         private Node getNode(final MouseEvent event) {
