@@ -31,5 +31,10 @@ public interface WikiGraph {
      */
     Set<Pair<String, String>> termEdges();
 
+    /**
+     * Checks if term is present in the graph as a node id.
+     * @param term the term to check
+     * @return true if term is a node id for a node
+     */
     boolean contains(final String term);
 }

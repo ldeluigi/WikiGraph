@@ -1,6 +1,6 @@
 package start;
 
-import controller.ExecutorController;
+import controller.paradigm.tasks.ExecutorController;
 import view.SwingView;
 import view.View;
 

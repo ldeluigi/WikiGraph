@@ -1,6 +1,9 @@
-package controller;
+package controller.paradigm.tasks;
 
 
+import controller.ConcurrentWikiGraph;
+import controller.Controller;
+import controller.SynchronizedWikiGraph;
 import controller.api.HttpWikiGraph;
 import controller.api.RESTWikiGraph;
 import model.WikiGraphNode;
