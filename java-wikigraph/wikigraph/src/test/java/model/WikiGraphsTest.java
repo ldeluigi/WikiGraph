@@ -8,6 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-class WikiGraphFactoryTest {
-
+class WikiGraphsTest {
+    
 }
