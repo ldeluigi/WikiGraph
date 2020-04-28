@@ -6,6 +6,12 @@ import java.util.stream.Stream;
 
 public class WikiGraphs {
 
+    /**
+     * Creates a view of a {@link Map}<{@link String}, {@link WikiGraphNode}> that implements
+     * the {@link WikiGraph} interface.
+     * @param nodes the map of term -> node of that term
+     * @return a view of the map as a {@link WikiGraph}
+     */
     public static WikiGraph from(Map<String, WikiGraphNode> nodes) {
         return new WikiGraph() {
             @Override
@@ -36,14 +42,12 @@ public class WikiGraphs {
         };
     }
 
-    public interface NodeDifference {
-        boolean isAdd();
-        boolean isRemove();
-        boolean isReplace();
-        WikiGraphNode oldNode();
-        WikiGraphNode newNode();
-    }
-
+    /**
+     * Returns a list of operation that would make the older graph equal the newer.
+     * @param older the older graph
+     * @param newer the newer graph
+     * @return a list of {@link NodeDifference}
+     */
     public static List<NodeDifference> difference(final WikiGraph older, final WikiGraph newer) {
         final Set<WikiGraphNode> olderNodes = new HashSet<>(older.nodes());
         final Set<WikiGraphNode> newerNodes = new HashSet<>(newer.nodes());
