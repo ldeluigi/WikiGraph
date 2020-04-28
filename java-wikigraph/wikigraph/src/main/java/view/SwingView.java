@@ -74,21 +74,20 @@ public class SwingView extends JFrame implements View {
         pane.add(this.view, BorderLayout.CENTER);
 
         searchButton.addActionListener(actionEvent -> doSearch());
-        randomButton.addActionListener(actionEvent -> this.listeners.forEach(l -> {
-            l.notifyEvent(new ViewEvent() {
-                @Override
-                public EventType getType() {
-                    return EventType.RANDOM_SEARCH;
-                }
+        randomButton.addActionListener(actionEvent -> this.listeners.forEach(l ->
+                l.notifyEvent(new ViewEvent() {
+                    @Override
+                    public EventType getType() {
+                        return EventType.RANDOM_SEARCH;
+                    }
 
-                @Override
-                public int getDepth() {
-                    return (int) depth.getValue();
-                }
-            });
-            waitCursor();
-        }));
-        clearButton.addActionListener(e -> askClear());
+                    @Override
+                    public int getDepth() {
+                        return (int) depth.getValue();
+                    }
+                })
+        ));
+        clearButton.addActionListener(e -> doClear());
         this.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {
@@ -144,17 +143,8 @@ public class SwingView extends JFrame implements View {
         });
     }
 
-    private void askClear() {
+    private void doClear() {
         this.listeners.forEach(l -> l.notifyEvent(() -> ViewEvent.EventType.CLEAR));
-        waitCursor();
-    }
-
-    private void waitCursor() {
-        this.view.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    }
-
-    private void resetCursor() {
-        this.view.setCursor(Cursor.getDefaultCursor());
     }
 
     private void doSearch() {
@@ -175,7 +165,6 @@ public class SwingView extends JFrame implements View {
                 return (int) depth.getValue();
             }
         }));
-        this.waitCursor();
     }
 
 
@@ -191,7 +180,6 @@ public class SwingView extends JFrame implements View {
             } else {
                 System.err.println("WARNING: DUPLICATE NODE IGNORED - " + id);
             }
-            resetCursor();
         });
     }
 
@@ -212,33 +200,23 @@ public class SwingView extends JFrame implements View {
             if (this.graph.getEdge(name) == null) {
                 this.graph.addEdge(idFrom + "@@@" + idTo, from, to, true);
             }
-            resetCursor();
         });
     }
 
     @Override
     public void removeNode(final String id) {
-        SwingUtilities.invokeLater(() -> {
-            this.graph.removeNode(id);
-            resetCursor();
-        });
+        SwingUtilities.invokeLater(() -> this.graph.removeNode(id));
 
     }
 
     @Override
     public void removeEdge(final String idFrom, final String idTo) {
-        SwingUtilities.invokeLater(() -> {
-            this.graph.removeEdge(idFrom, idTo);
-            resetCursor();
-        });
+        SwingUtilities.invokeLater(() -> this.graph.removeEdge(idFrom, idTo));
     }
 
     @Override
     public void clearGraph() {
-        SwingUtilities.invokeLater(() -> {
-            this.resetGraph();
-            resetCursor();
-        });
+        SwingUtilities.invokeLater(this::resetGraph);
     }
 
     @Override
@@ -303,14 +281,16 @@ public class SwingView extends JFrame implements View {
             try {
                 final String langAttr = nodeClicked.getAttribute("lang");
                 java.awt.Desktop.getDesktop()
-                        .browse(URI.create("https://" + (langAttr == null ? "en" : langAttr) + ".wikipedia.org/wiki/" + q));
-            } catch (IOException e1) {
+                        .browse(URI.create("https://" + (langAttr == null ? "en" : langAttr)
+                                + ".wikipedia.org/wiki/" + q));
+            } catch (IOException ignored) {
             }
         }
 
         private void ctrlClickEvent(final Node nodeClicked) {
             SwingView.this.textOrUrl.setText(nodeClicked.getId());
-            askClear();
+            doClear();
+            doSearch();
         }
 
         private Node getNode(final MouseEvent event) {
