@@ -19,12 +19,4 @@ public interface WikiGraphNode {
      * @return the term as a string
      */
     String term();
-
-    /**
-     * Should return true only if o is a {@link WikiGraphNode} of the same term.
-     *
-     * @param other the other node
-     * @return true if it's the same node
-     */
-    boolean equals(WikiGraphNode other);
 }
