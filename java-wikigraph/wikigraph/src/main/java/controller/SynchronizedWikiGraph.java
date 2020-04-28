@@ -12,6 +12,13 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Implements: <br/>
+ * - A monitor for a {@link MutableWikiGraph} <br/>
+ * - A container for the state "aborted" (yes/no) to abrupt computation <br/>
+ * - A manager for {@link Lock}s that are separate for each term, to grant mutual exclusion between
+ *   tasks relative to the same term.
+ */
 public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
     private final Map<String, Lock> locks = new HashMap<>();
     private final MutableWikiGraph graph;
