@@ -13,13 +13,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
-    private volatile boolean aborted = false;
     private final Map<String, Lock> locks = new HashMap<>();
     private final MutableWikiGraph graph;
-
-    public static SynchronizedWikiGraph empty() {
-        return new SynchronizedWikiGraph();
-    }
+    private volatile boolean aborted = false;
 
     private SynchronizedWikiGraph(final MutableWikiGraph graph) {
         this.graph = graph;
@@ -27,6 +23,10 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
 
     private SynchronizedWikiGraph() {
         this(new MutableGraphImpl());
+    }
+
+    public static SynchronizedWikiGraph empty() {
+        return new SynchronizedWikiGraph();
     }
 
     @Override
