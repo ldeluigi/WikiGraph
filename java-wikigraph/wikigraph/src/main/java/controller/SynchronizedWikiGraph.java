@@ -25,6 +25,10 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
         this(new MutableGraphImpl());
     }
 
+    /**
+     * Returns an empty fresh new {@link SynchronizedWikiGraph}.
+     * @return a new empty synchronized graph
+     */
     public static SynchronizedWikiGraph empty() {
         return new SynchronizedWikiGraph();
     }
