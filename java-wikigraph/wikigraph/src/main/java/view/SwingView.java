@@ -211,8 +211,8 @@ public class SwingView extends JFrame implements GraphStreamView {
         this.graph.addAttribute("ui.quality");
         this.graph.addAttribute("ui.antialias");
         StringBuilder depthCSS = new StringBuilder();
-        for (int i = 0; i < MAX_DEPTH; i++) {
-            final Color c = new HSLColor(360.0f * i / MAX_DEPTH, 80, 55).getRGB();
+        for (int i = 0; i <= MAX_DEPTH; i++) {
+            final Color c = new HSLColor(360.0f * i / (MAX_DEPTH + 1), 80, 55).getRGB();
             depthCSS.append("node.d").append(i).append(" { size: ").append(Math.max(1, ROOT_SIZE - i * SIZE_STEP))
                     .append("px; fill-color: rgb(").append(c.getRed()).append(", ").append(c.getGreen()).append(", ")
                     .append(c.getBlue()).append("); } ");
