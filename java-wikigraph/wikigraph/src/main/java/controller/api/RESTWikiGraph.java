@@ -37,22 +37,26 @@ public class RESTWikiGraph extends HttpWikiGraph {
             Document doc = Jsoup.connect(apiEndpoint(lang) + URLTerm).get();
             if (doc != null) {
                 String termResult = doc.select("html head title").html();
+                Elements firstLanesLinks = doc.select("section:first-child>div:first-child>a:not([href*=#])");
                 Elements links = doc.select("section:first-child p a:not([href*=#])");
                 final Set<String> terms = new HashSet<>();
-                links.forEach((Element link) -> {
-                    if (link.attr("rel").equals("mw:WikiLink") && !link.attr("href").matches("\\w+:\\w")) {
-                        terms.add(link.attr("title"));
-                    }
-                });
+                this.addToSet(terms, firstLanesLinks);
+                this.addToSet(terms, links);
                 return new WikiGraphNodeImpl(termResult, sameTerm, terms);
             }
         } catch (IOException e) {
-            Logger logger = Logger.getLogger(RESTWikiGraph.class.getName());
-            logger.warning("from "+ term +" ritorna null");
+            System.err.println("WARNING: "+term +" is returning null");
             return null;
         }
-        System.err.println("RESTWikiGraph ritorna null senza eccezione");
+        System.err.println("ERROR: RESTWikiGraph is returning null without exception");
         return null;
+    }
 
+    private void addToSet(Set<String> terms, Elements links){
+        links.forEach((Element link) -> {
+            if (link.attr("rel").equals("mw:WikiLink") && !link.attr("title").matches("\\w+:\\w.*")) {
+                terms.add(link.attr("title"));
+            }
+        });
     }
 }
