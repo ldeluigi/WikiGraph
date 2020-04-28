@@ -1,7 +1,5 @@
 package model;
 
-import org.graphstream.graph.implementations.Graphs;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +8,7 @@ import java.util.Set;
 public class MutableGraphImpl implements MutableWikiGraph {
     private final Map<String, WikiGraphNode> nodeMap = new HashMap<>();
     private final WikiGraph view = WikiGraphs.from(this.nodeMap);
+
     @Override
     public boolean add(final WikiGraphNode node) {
         if (this.nodeMap.containsKey(node.term())) {

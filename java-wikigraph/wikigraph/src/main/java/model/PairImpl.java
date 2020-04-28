@@ -14,7 +14,8 @@ public class PairImpl<K, V> implements Pair<K, V> {
 
     /**
      * Basic constructor that takes two parameters.
-     * @param key left element
+     *
+     * @param key   left element
      * @param value right element
      */
     public PairImpl(K key, V value) {

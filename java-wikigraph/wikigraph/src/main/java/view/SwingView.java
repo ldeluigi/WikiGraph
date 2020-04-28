@@ -3,7 +3,6 @@ package view;
 import controller.ViewEventListener;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
-import org.graphstream.graph.implementations.Graphs;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.geom.Point3;
 import org.graphstream.ui.graphicGraph.GraphicElement;
@@ -239,6 +238,8 @@ public class SwingView extends JFrame implements View {
         private Node lastClick = null;
         private Optional<Integer> currentX = Optional.empty();
         private Optional<Integer> currentY = Optional.empty();
+        private Node lastHovered = null;
+        private String oldClasses = "";
 
         public WikiGraphMouseListener() {
             super();
@@ -258,7 +259,7 @@ public class SwingView extends JFrame implements View {
         }
 
         private void doubleClickEvent(final Node nodeClicked) {
-            System.out.println("double:"+nodeClicked);
+            System.out.println("double:" + nodeClicked);
         }
 
         private void ctrlClickEvent(final Node nodeClicked) {
@@ -266,7 +267,7 @@ public class SwingView extends JFrame implements View {
             doSearch();
         }
 
-        private Node getNode(final MouseEvent event){
+        private Node getNode(final MouseEvent event) {
             GraphicElement elem = view.findNodeOrSpriteAt(event.getX(), event.getY());
             return elem != null ? graph.getNode(elem.getId()) : null;
         }
@@ -290,7 +291,8 @@ public class SwingView extends JFrame implements View {
         }
 
         @Override
-        public void mouseExited(MouseEvent mouseEvent) {}
+        public void mouseExited(MouseEvent mouseEvent) {
+        }
 
         @Override
         public void mouseDragged(MouseEvent mouseEvent) {
@@ -313,14 +315,11 @@ public class SwingView extends JFrame implements View {
             }
         }
 
-        private Node lastHovered = null;
-        private String oldClasses = "";
-
         @Override
         public void mouseMoved(final MouseEvent mouseEvent) {
             Node nodeHovered = getNode(mouseEvent);
             if (nodeHovered != lastHovered) {
-                if (lastHovered != null){
+                if (lastHovered != null) {
                     lastHovered.addAttribute("ui.class", oldClasses);
                 }
                 if (nodeHovered != null) {

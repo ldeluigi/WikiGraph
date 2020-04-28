@@ -16,11 +16,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ExecutorController implements Controller {
 
-    private ForkJoinPool pool;
-    private HttpWikiGraph nodeFactory;
     private final View view;
     private final Lock scheduleLock = new ReentrantLock();
+    private ForkJoinPool pool;
+    private HttpWikiGraph nodeFactory;
     private Optional<ViewEvent> event = Optional.empty();
+    private ConcurrentWikiGraph last = null;
 
     public ExecutorController(View view) {
         this.view = view;
@@ -60,8 +61,6 @@ public class ExecutorController implements Controller {
             this.pool.shutdown();
         }
     }
-
-    private ConcurrentWikiGraph last = null;
 
     @Override
     public void notifyEvent(ViewEvent event) {

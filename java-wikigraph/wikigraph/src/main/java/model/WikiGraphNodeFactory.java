@@ -54,6 +54,7 @@ public interface WikiGraphNodeFactory {
     /**
      * Creates a structural {@link WikiGraphNode} from a random wikipedia page.
      * Blocking behaviour.
+     *
      * @return he node or null if something went wrong
      */
     WikiGraphNode random();
