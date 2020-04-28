@@ -8,4 +8,6 @@ interface GraphDisplay {
     void removeNode(String id);
 
     void removeEdge(String idFrom, String idTo);
+
+    void clearGraph();
 }

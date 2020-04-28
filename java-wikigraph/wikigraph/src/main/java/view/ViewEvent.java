@@ -12,6 +12,6 @@ public interface ViewEvent {
     }
 
     enum EventType {
-        EXIT, SEARCH, RANDOM_SEARCH, OTHER
+        EXIT, SEARCH, RANDOM_SEARCH, CLEAR
     }
 }
