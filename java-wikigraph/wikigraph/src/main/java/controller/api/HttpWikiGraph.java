@@ -146,4 +146,9 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
         }
         throw new IllegalStateException("Wrong JSON: " + out);
     }
+
+    @Override
+    public String getLanguage() {
+        return this.locale;
+    }
 }

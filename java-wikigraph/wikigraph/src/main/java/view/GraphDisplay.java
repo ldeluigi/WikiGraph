@@ -1,7 +1,7 @@
 package view;
 
 interface GraphDisplay {
-    void addNode(String id, final int depth);
+    void addNode(String id, final int depth, final String lang);
 
     void addEdge(String idFrom, String idTo);
 
