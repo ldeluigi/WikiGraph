@@ -1,14 +1,11 @@
 package controller.paradigm.tasks;
 
 import controller.ConcurrentWikiGraph;
-import controller.api.HttpWikiGraph;
 import controller.paradigm.NodeRecursion;
-import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
 import view.View;
 
 import java.util.concurrent.CountedCompleter;
-import java.util.concurrent.locks.Lock;
 
 
 public class ComputeChildrenTask extends CountedCompleter<Void> {
