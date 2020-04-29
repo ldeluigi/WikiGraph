@@ -2,39 +2,37 @@ package controller.paradigm.tasks;
 
 import controller.ConcurrentWikiGraph;
 import controller.api.HttpWikiGraph;
-import model.WikiGraphNode;
 import view.View;
-
-import java.util.concurrent.CountedCompleter;
-import java.util.concurrent.locks.Lock;
 
 
 public class ComputeChildrenTaskBuilder {
 
 
-    private String myTerm;
-    private int myDepth;
+    private String term;
+    private int actualDepth;
     private HttpWikiGraph nodeFactory;
     private ConcurrentWikiGraph graph;
     private View view;
     private int maxDepth;
-    private String fatherId;
-    private String id;
+    private ComputeChildrenTask father;
 
     public ComputeChildrenTaskBuilder() { }
 
-    public ComputeChildrenTaskBuilder setFather(ComputeChildrenTaskBuilder father){
-        this.fatherId = father == null ? "" : father.getNodeId();
+    public ComputeChildrenTaskBuilder setFather(ComputeChildrenTask father){
+        this.father = father;
         return this;
     }
 
     public ComputeChildrenTaskBuilder setTerm(String term){
-        this.myTerm = term;
+        this.term = term;
         return this;
     }
 
     public ComputeChildrenTaskBuilder setDepth(int depth){
-        this.myDepth = depth;
+        if (depth<0) {
+            throw new IllegalArgumentException();
+        }
+        this.actualDepth = depth;
         return this;
     }
 
@@ -43,22 +41,34 @@ public class ComputeChildrenTaskBuilder {
         return this;
     }
 
-    public ComputeChildrenTaskBuilder setNodeFactory(ConcurrentWikiGraph graph){
+    public ComputeChildrenTaskBuilder setGraph(ConcurrentWikiGraph graph){
         this.graph = graph;
         return this;
     }
 
-    public ComputeChildrenTaskBuilder setNodeFactory(View view){
+    public ComputeChildrenTaskBuilder setView(View view){
         this.view = view;
         return this;
     }
 
     public ComputeChildrenTaskBuilder setMaxDepth(int maxDepth){
+        if (maxDepth<0) {
+            throw new IllegalArgumentException();
+        }
         this.maxDepth = maxDepth;
         return this;
     }
 
-    public String getNodeId() {
-        return this.id;
+    public ComputeChildrenTask build(){
+        if (this.nodeFactory == null ||
+             this.graph == null ||
+             this.view == null ||
+             this.father == null ||
+             this.term == null ||
+             this.maxDepth == -1 ||
+             this.actualDepth == -1)
+            throw new IllegalStateException();
+        return new ComputeChildrenTask(father, term, actualDepth, nodeFactory, graph, view, maxDepth);
     }
+
 }
