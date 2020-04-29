@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 
 public abstract class NodeRecursion {
-    
+
     private final WikiGraphNodeFactory factory;
     private final ConcurrentWikiGraph graph;
     private final View view;
@@ -33,10 +33,10 @@ public abstract class NodeRecursion {
     }
 
     protected NodeRecursion(final WikiGraphNodeFactory factory,
-                         final ConcurrentWikiGraph graph,
-                         final View view,
-                         final int maxDepth,
-                         final String term) {
+                            final ConcurrentWikiGraph graph,
+                            final View view,
+                            final int maxDepth,
+                            final String term) {
         this.factory = factory;
         this.graph = graph;
         this.view = view;
@@ -108,7 +108,7 @@ public abstract class NodeRecursion {
     public WikiGraphNodeFactory getNodeFactory() {
         return this.factory;
     }
-    
+
     public ConcurrentWikiGraph getGraph() {
         return this.graph;
     }
