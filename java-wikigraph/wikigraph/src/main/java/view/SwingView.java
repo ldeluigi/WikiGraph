@@ -27,6 +27,7 @@ public class SwingView extends JFrame implements GraphStreamView {
     private final JSpinner depth = new JSpinner(new SpinnerNumberModel(1, 1, MAX_DEPTH, 1));
     private final List<ViewEventListener> listeners = new LinkedList<>();
     private final Graph graph;
+    private final JLabel stats;
 
     public SwingView() {
         super("WikiGraph");
@@ -36,23 +37,26 @@ public class SwingView extends JFrame implements GraphStreamView {
         this.setSize(Math.round(screenSize.width * DIMENSION_ADAPTER), Math.round(screenSize.height * DIMENSION_ADAPTER));
         Container pane = this.getContentPane();
         pane.setLayout(new BorderLayout());
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new FlowLayout());
-        topPanel.add(this.textOrUrl);
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new FlowLayout());
+        bottomPanel.add(this.textOrUrl);
         JButton searchButton = new JButton("Search");
-        topPanel.add(searchButton);
+        bottomPanel.add(searchButton);
         JButton randomButton = new JButton("Random");
-        topPanel.add(randomButton);
+        bottomPanel.add(randomButton);
         JButton clearButton = new JButton("Clear");
-        topPanel.add(clearButton);
-        topPanel.add(new JLabel("Depth:"));
-        topPanel.add(this.depth);
-        topPanel.add(new JLabel("AutoUpdate"));
+        bottomPanel.add(clearButton);
+        bottomPanel.add(new JLabel("Depth:"));
+        bottomPanel.add(this.depth);
+        bottomPanel.add(new JLabel("AutoUpdate"));
         JCheckBox autoUpdate = new JCheckBox();
-        topPanel.add(autoUpdate);
-        topPanel.add(new JLabel("Refresh Rate"));
+        bottomPanel.add(autoUpdate);
+        bottomPanel.add(new JLabel("Refresh Rate"));
         JSpinner refreshRate = new JSpinner(new SpinnerNumberModel(100, 0, MAX_DELAY, 5));
-        topPanel.add(refreshRate);
+        bottomPanel.add(refreshRate);
+        this.stats = new JLabel();
+        this.stats.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 16));
+        bottomPanel.add(this.stats);
 
         this.graph = new MultiGraph("WikiGraph");
         resetGraph();
@@ -64,7 +68,7 @@ public class SwingView extends JFrame implements GraphStreamView {
         this.view.addMouseMotionListener(listener);
         this.view.setMinimumSize(new Dimension(Math.round(screenSize.width * DIMENSION_ADAPTER), Math.round(screenSize.height * DIMENSION_ADAPTER)));
         this.view.addMouseWheelListener(listener);
-        pane.add(topPanel, BorderLayout.PAGE_END);
+        pane.add(bottomPanel, BorderLayout.PAGE_END);
         pane.add(this.view, BorderLayout.CENTER);
 
         searchButton.addActionListener(actionEvent -> doSearch(() -> {
@@ -102,6 +106,7 @@ public class SwingView extends JFrame implements GraphStreamView {
                 n.addAttribute("ui.class", "d" + depth);
                 n.addAttribute("label", id);
                 n.addAttribute("lang", lang);
+                updateStats();
             } else {
                 System.err.println("INFO: DUPLICATE NODE IGNORED - " + id);
             }
@@ -124,19 +129,26 @@ public class SwingView extends JFrame implements GraphStreamView {
             final String name = idFrom + "@@@" + idTo;
             if (this.graph.getEdge(name) == null) {
                 this.graph.addEdge(idFrom + "@@@" + idTo, from, to, true);
+                updateStats();
             }
         });
     }
 
     @Override
     public void removeNode(final String id) {
-        SwingUtilities.invokeLater(() -> this.graph.removeNode(id));
+        SwingUtilities.invokeLater(() -> {
+            this.graph.removeNode(id);
+            updateStats();
+        });
 
     }
 
     @Override
     public void removeEdge(final String idFrom, final String idTo) {
-        SwingUtilities.invokeLater(() -> this.graph.removeEdge(idFrom, idTo));
+        SwingUtilities.invokeLater(() -> {
+            this.graph.removeEdge(idFrom, idTo);
+            updateStats();
+        });
     }
 
     @Override
@@ -206,8 +218,15 @@ public class SwingView extends JFrame implements GraphStreamView {
         });
     }
 
+    private void updateStats() {
+        final int nodes = this.graph.getNodeCount();
+        final int edges = this.graph.getEdgeCount();
+        this.stats.setText("Nodes: " + nodes + " Edges: " + edges);
+    }
+
     private void resetGraph() {
         SwingView.this.graph.clear();
+        this.updateStats();
         this.graph.addAttribute("ui.quality");
         this.graph.addAttribute("ui.antialias");
         StringBuilder depthCSS = new StringBuilder();
