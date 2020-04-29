@@ -16,8 +16,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
+import com.google.common.util.concurrent.RateLimiter;
 
 public class RESTWikiGraph extends HttpWikiGraph {
+
+    private RateLimiter rateLimiter = RateLimiter.create(200);
 
     private String apiEndpoint(final String lang) {
         return "https://" + lang + ".wikipedia.org/api/rest_v1/page/html/";
@@ -34,6 +37,7 @@ public class RESTWikiGraph extends HttpWikiGraph {
             e.printStackTrace();
         }
         try {
+            rateLimiter.acquire();
             Document doc = Jsoup.connect(apiEndpoint(lang) + URLTerm).get();
             if (doc != null) {
                 String termResult = doc.select("html head title").html();
