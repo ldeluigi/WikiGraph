@@ -37,14 +37,16 @@ public class ExecutorController implements Controller {
 
     private void startComputing(final String root, final int depth) {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
-        nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
-        this.last = SynchronizedWikiGraph.empty();
-        this.pool.execute(new ComputeChildrenTask(nodeFactory, this.last, this.view, depth, root) {
-            @Override
-            public void onCompletion(CountedCompleter<?> caller) {
-                super.onCompletion(caller);
-                endComputing();
-            }
+        this.pool.execute(() -> {
+            nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
+            this.last = SynchronizedWikiGraph.empty();
+            this.pool.execute(new ComputeChildrenTask(nodeFactory, this.last, this.view, depth, root) {
+                @Override
+                public void onCompletion(CountedCompleter<?> caller) {
+                    super.onCompletion(caller);
+                    endComputing();
+                }
+            });
         });
     }
 
@@ -59,6 +61,7 @@ public class ExecutorController implements Controller {
                     startComputing(e.getType().equals(ViewEvent.EventType.RANDOM_SEARCH) ? null : e.getText(),
                             e.getDepth());
                 }
+                e.onComplete();
             }
         } finally {
             scheduleLock.unlock();
@@ -75,12 +78,16 @@ public class ExecutorController implements Controller {
     public void notifyEvent(final ViewEvent event) {
         if (event.getType().equals(ViewEvent.EventType.EXIT)) {
             this.exit();
+            event.onComplete();
         } else if (event.getType().equals(ViewEvent.EventType.SEARCH)) {
-            this.resolve(()-> startComputing(event.getText(), event.getDepth()), ()-> this.event = Optional.of(event));
+            this.resolve(()-> {startComputing(event.getText(), event.getDepth()); event.onComplete();},
+                    ()-> this.event = Optional.of(event));
         } else if (event.getType().equals(ViewEvent.EventType.RANDOM_SEARCH)) {
-            this.resolve(()-> startComputing(null, event.getDepth()), ()-> this.event = Optional.of(event));
+            this.resolve(()-> {startComputing(null, event.getDepth()); event.onComplete();},
+                    ()-> this.event = Optional.of(event));
         } else if (event.getType().equals(ViewEvent.EventType.CLEAR)) {
-            this.resolve(()-> this.view.clearGraph(), ()-> this.event = Optional.of(event));
+            this.resolve(()-> {this.view.clearGraph(); event.onComplete();},
+                    ()-> this.event = Optional.of(event));
         }
     }
 
