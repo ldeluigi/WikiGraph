@@ -53,7 +53,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
         }
 
         @Override
-        protected void scheduleChild(final String term) {
+        protected void childBirth(String term) {
             addToPendingCount(1);
             new ComputeChildrenTask(ComputeChildrenTask.this,
                     new TaskNodeRecursion(this, term)).fork();
