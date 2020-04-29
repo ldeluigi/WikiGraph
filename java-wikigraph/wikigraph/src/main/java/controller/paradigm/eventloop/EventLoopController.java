@@ -39,6 +39,10 @@ public class EventLoopController implements Controller {
                     case SEARCH:
                         startComputing( event.getText(),event.getDepth());
                         break;
+                    case RANDOM_SEARCH:
+                        startComputing(null,event.getDepth());
+                        break;
+
                 }
             });
         }
@@ -47,7 +51,10 @@ public class EventLoopController implements Controller {
     private void startComputing(String term,int depth) {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
         final MutableWikiGraph graph = new MutableGraphImpl();
-        new NodeRecursionBrutto(nodeFactory, graph,this.view,depth,term, this.vertx).compute();
+
+
+            new NodeRecursionBrutto(nodeFactory, graph,this.view,depth,term, this.vertx).compute();
+
     }
 
     @Override
