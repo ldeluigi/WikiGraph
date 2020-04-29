@@ -1,22 +1,19 @@
 package controller.api;
 
+import com.google.common.util.concurrent.RateLimiter;
 import model.WikiGraphNode;
 import model.WikiGraphNodeImpl;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
-import org.jsoup.*;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.*;
-import com.google.common.util.concurrent.RateLimiter;
 
 public class RESTWikiGraph extends HttpWikiGraph {
 

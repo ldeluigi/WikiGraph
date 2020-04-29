@@ -72,7 +72,7 @@ public abstract class NodeRecursion {
                     }
                     if (this.depth < this.maxDepth) {
                         for (String child : result.childrenTerms()) {
-                            scheduleChild(child);
+                            childBirth(child);
                         }
                     }
                 }
@@ -85,7 +85,7 @@ public abstract class NodeRecursion {
 
     protected abstract void complete();
 
-    protected abstract void scheduleChild(final String term);
+    protected abstract void childBirth(final String term);
 
     protected WikiGraphNode initRoot() {
         if (this.term == null) { //random
