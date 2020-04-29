@@ -76,50 +76,28 @@ public class ExecutorController implements Controller {
         if (event.getType().equals(ViewEvent.EventType.EXIT)) {
             this.exit();
         } else if (event.getType().equals(ViewEvent.EventType.SEARCH)) {
-            if (this.last != null) {
-                this.last.setAborted();
-                this.last = null;
-            }
-            this.scheduleLock.lock();
-            try {
-                if (this.pool.isQuiescent()) {
-                    startComputing(event.getText(), event.getDepth());
-                } else {
-                    this.event = Optional.of(event);
-                }
-            } finally {
-                this.scheduleLock.unlock();
-            }
+            this.resolve(()-> startComputing(event.getText(), event.getDepth()), ()-> this.event = Optional.of(event));
         } else if (event.getType().equals(ViewEvent.EventType.RANDOM_SEARCH)) {
-            if (this.last != null) {
-                this.last.setAborted();
-                this.last = null;
-            }
-            this.scheduleLock.lock();
-            try {
-                if (this.pool.isQuiescent()) {
-                    startComputing(null, event.getDepth());
-                } else {
-                    this.event = Optional.of(event);
-                }
-            } finally {
-                this.scheduleLock.unlock();
-            }
+            this.resolve(()-> startComputing(null, event.getDepth()), ()-> this.event = Optional.of(event));
         } else if (event.getType().equals(ViewEvent.EventType.CLEAR)) {
-            if (this.last != null) {
-                this.last.setAborted();
-                this.last = null;
+            this.resolve(()-> this.view.clearGraph(), ()-> this.event = Optional.of(event));
+        }
+    }
+
+    private void resolve(Runnable quiescentBranch, Runnable nonQuiescentBranch){
+        if (this.last != null) {
+            this.last.setAborted();
+            this.last = null;
+        }
+        this.scheduleLock.lock();
+        try {
+            if (this.pool.isQuiescent()) {
+                quiescentBranch.run();
+            } else {
+                nonQuiescentBranch.run();
             }
-            this.scheduleLock.lock();
-            try {
-                if (this.pool.isQuiescent()) {
-                    this.view.clearGraph();
-                } else {
-                    this.event = Optional.of(event);
-                }
-            } finally {
-                this.scheduleLock.unlock();
-            }
+        } finally {
+            this.scheduleLock.unlock();
         }
     }
 
