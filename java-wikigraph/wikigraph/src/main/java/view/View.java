@@ -3,11 +3,11 @@ package view;
 public interface View extends ViewEventEmitter, GraphDisplay {
     void start();
 
-    void doSearch(Runnable then);
+    void doSearch(final Runnable then);
 
-    void doClear(Runnable then);
+    void doClear(final Runnable then);
 
     void doExit();
 
-    void prepareSearch(String query);
+    void prepareSearch(final String query);
 }

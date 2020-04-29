@@ -24,7 +24,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
     }
 
     @Override
-    public List<Pair<String, String>> search(String term) {
+    public List<Pair<String, String>> search(final String term) {
         final String URLTerm = term.replace(" ", "_");
         final HttpGET req = new HttpGET().setBaseURL(apiEndpoint())
                 .addParameter("format", "json")

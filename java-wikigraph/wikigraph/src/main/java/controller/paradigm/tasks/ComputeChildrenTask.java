@@ -20,8 +20,8 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
         this.nr = rec;
     }
 
-    public ComputeChildrenTask(WikiGraphNodeFactory factory, ConcurrentWikiGraph graph,
-                               View view, int maxDepth, String term) {
+    public ComputeChildrenTask(final WikiGraphNodeFactory factory, final ConcurrentWikiGraph graph,
+                               final View view, final int maxDepth, final String term) {
         this.nr = new TaskNodeRecursion(factory, graph, view, maxDepth, term);
     }
 
@@ -31,19 +31,19 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
     }
 
     @Override
-    public boolean onExceptionalCompletion(Throwable ex, CountedCompleter<?> caller) {
+    public boolean onExceptionalCompletion(final Throwable ex, final CountedCompleter<?> caller) {
         ex.printStackTrace();
         return false;
     }
 
     private class TaskNodeRecursion extends NodeRecursion {
 
-        private TaskNodeRecursion(NodeRecursion father, String term) {
+        private TaskNodeRecursion(final NodeRecursion father, final String term) {
             super(father, term);
         }
 
-        public TaskNodeRecursion(WikiGraphNodeFactory factory, ConcurrentWikiGraph graph,
-                                 View view, int maxDepth, String term) {
+        public TaskNodeRecursion(final WikiGraphNodeFactory factory, final ConcurrentWikiGraph graph,
+                                 final View view, final int maxDepth, final String term) {
             super(factory, graph, view, maxDepth, term);
         }
 
@@ -53,7 +53,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
         }
 
         @Override
-        protected void scheduleChild(String term) {
+        protected void scheduleChild(final String term) {
             addToPendingCount(1);
             new ComputeChildrenTask(ComputeChildrenTask.this,
                     new TaskNodeRecursion(this, term)).fork();

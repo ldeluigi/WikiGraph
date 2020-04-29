@@ -9,11 +9,11 @@ public class WikiGraphNodeImpl implements WikiGraphNode {
     private final Set<String> synonyms;
     private final Set<String> children;
 
-    public WikiGraphNodeImpl(final String term, Set<String> children) {
+    public WikiGraphNodeImpl(final String term, final Set<String> children) {
         this(term, Collections.emptySet(), children);
     }
 
-    public WikiGraphNodeImpl(final String term, Set<String> synonyms, Set<String> children) {
+    public WikiGraphNodeImpl(final String term, final Set<String> synonyms, final Set<String> children) {
         this.name = term;
         this.synonyms = synonyms;
         this.children = children;
@@ -39,7 +39,7 @@ public class WikiGraphNodeImpl implements WikiGraphNode {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (!(o instanceof WikiGraphNode)) return false;
         final WikiGraphNode that = (WikiGraphNode) o;

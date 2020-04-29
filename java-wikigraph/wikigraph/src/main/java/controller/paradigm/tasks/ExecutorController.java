@@ -24,7 +24,7 @@ public class ExecutorController implements Controller {
     private Optional<ViewEvent> event = Optional.empty();
     private ConcurrentWikiGraph last = null;
 
-    public ExecutorController(View view) {
+    public ExecutorController(final View view) {
         this.view = view;
         this.view.addEventListener(this);
     }
@@ -35,7 +35,7 @@ public class ExecutorController implements Controller {
         view.start();
     }
 
-    private void startComputing(String root, int depth) {
+    private void startComputing(final String root, final int depth) {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
         nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
         this.last = SynchronizedWikiGraph.empty();
@@ -72,7 +72,7 @@ public class ExecutorController implements Controller {
     }
 
     @Override
-    public void notifyEvent(ViewEvent event) {
+    public void notifyEvent(final ViewEvent event) {
         if (event.getType().equals(ViewEvent.EventType.EXIT)) {
             this.exit();
         } else if (event.getType().equals(ViewEvent.EventType.SEARCH)) {
@@ -84,7 +84,7 @@ public class ExecutorController implements Controller {
         }
     }
 
-    private void resolve(Runnable quiescentBranch, Runnable nonQuiescentBranch){
+    private void resolve(final Runnable quiescentBranch, final Runnable nonQuiescentBranch){
         if (this.last != null) {
             this.last.setAborted();
             this.last = null;

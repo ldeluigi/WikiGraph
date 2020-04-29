@@ -18,7 +18,7 @@ public class PairImpl<K, V> implements Pair<K, V> {
      * @param key   left element
      * @param value right element
      */
-    public PairImpl(K key, V value) {
+    public PairImpl(final K key, final V value) {
         this.key = key;
         this.value = value;
     }
@@ -32,7 +32,7 @@ public class PairImpl<K, V> implements Pair<K, V> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (!(o instanceof Pair)) return false;
         Pair<?, ?> pair = (Pair<?, ?>) o;
