@@ -1,12 +1,18 @@
 package controller.paradigm.eventloop;
 
 import controller.Controller;
+import controller.api.RESTWikiGraph;
 import controller.paradigm.NodeRecursion;
+import controller.paradigm.NodeRecursionBrutto;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import model.*;
 import view.View;
 import view.ViewEvent;
 import view.ViewEvent.EventType;
+
+import java.util.Collection;
+import java.util.Set;
 
 public class EventLoopController implements Controller {
 
@@ -31,18 +37,17 @@ public class EventLoopController implements Controller {
                         event.onComplete();
                         break;
                     case SEARCH:
-                        final String term = event.getText();
-                        final int depth = event.getDepth();
-                        vertx.executeBlocking(this::computeTree);
+                        startComputing( event.getText(),event.getDepth());
                         break;
                 }
             });
         }
     }
 
-    private void computeTree(Promise<Object> promise) {
-        //new NodeRecursion(promise, vertx)
-        //nr.compute();
+    private void startComputing(String term,int depth) {
+        final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
+        final MutableWikiGraph graph = new MutableGraphImpl();
+        new NodeRecursionBrutto(nodeFactory, graph,this.view,depth,term, this.vertx).compute();
     }
 
     @Override
