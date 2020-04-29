@@ -4,9 +4,8 @@ package controller.paradigm.tasks;
 import controller.ConcurrentWikiGraph;
 import controller.Controller;
 import controller.SynchronizedWikiGraph;
-import controller.api.HttpWikiGraph;
 import controller.api.RESTWikiGraph;
-import model.WikiGraphNode;
+import model.WikiGraphNodeFactory;
 import view.View;
 import view.ViewEvent;
 
@@ -22,7 +21,6 @@ public class ExecutorController implements Controller {
     private final View view;
     private final Lock scheduleLock = new ReentrantLock();
     private ForkJoinPool pool;
-    private HttpWikiGraph nodeFactory;
     private Optional<ViewEvent> event = Optional.empty();
     private ConcurrentWikiGraph last = null;
 
@@ -33,14 +31,15 @@ public class ExecutorController implements Controller {
 
     @Override
     public void start() {
-        this.nodeFactory = new RESTWikiGraph();
-        nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
         pool = ForkJoinPool.commonPool();
         view.start();
     }
 
-    private void startComputing(String node, int depth, final ConcurrentWikiGraph last) {
-        this.pool.execute(new ComputeChildrenTask(null, node, 0, this.nodeFactory, last, this.view, depth) {
+    private void startComputing(String root, int depth) {
+        final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
+        nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
+        this.last = SynchronizedWikiGraph.empty();
+        this.pool.execute(new ComputeChildrenTask(nodeFactory, this.last, this.view, depth, root) {
             @Override
             public void onCompletion(CountedCompleter<?> caller) {
                 super.onCompletion(caller);
@@ -57,9 +56,8 @@ public class ExecutorController implements Controller {
                 if (e.getType().equals(ViewEvent.EventType.CLEAR)) {
                     this.view.clearGraph();
                 } else {
-                    this.last = SynchronizedWikiGraph.empty();
                     startComputing(e.getType().equals(ViewEvent.EventType.RANDOM_SEARCH) ? null : e.getText(),
-                            e.getDepth(), this.last);
+                            e.getDepth());
                 }
             }
         } finally {
@@ -85,8 +83,7 @@ public class ExecutorController implements Controller {
             this.scheduleLock.lock();
             try {
                 if (this.pool.isQuiescent()) {
-                    this.last = SynchronizedWikiGraph.empty();
-                    startComputing(event.getText(), event.getDepth(), this.last);
+                    startComputing(event.getText(), event.getDepth());
                 } else {
                     this.event = Optional.of(event);
                 }
@@ -101,8 +98,7 @@ public class ExecutorController implements Controller {
             this.scheduleLock.lock();
             try {
                 if (this.pool.isQuiescent()) {
-                    this.last = SynchronizedWikiGraph.empty();
-                    startComputing(null, event.getDepth(), this.last);
+                    startComputing(null, event.getDepth());
                 } else {
                     this.event = Optional.of(event);
                 }
