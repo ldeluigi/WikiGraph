@@ -93,7 +93,7 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
     }
 
     @Override
-    public synchronized boolean contains(String term) {
+    public synchronized boolean contains(final String term) {
         return this.graph.contains(term);
     }
 }

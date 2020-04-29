@@ -30,7 +30,7 @@ public class HSLColor {
      *
      * @param rgb the RGB Color object
      */
-    public HSLColor(Color rgb) {
+    public HSLColor(final Color rgb) {
         this.rgb = rgb;
         hsl = fromRGB(rgb);
         alpha = rgb.getAlpha() / 255.0f;
@@ -44,7 +44,7 @@ public class HSLColor {
      * @param s is the Saturation percentage between 0 - 100
      * @param l is the Lumanance percentage between 0 - 100
      */
-    public HSLColor(float h, float s, float l) {
+    public HSLColor(final float h, final float s, final float l) {
         this(h, s, l, 1.0f);
     }
 
@@ -56,7 +56,7 @@ public class HSLColor {
      * @param l     the Lumanance percentage between 0 - 100
      * @param alpha the alpha value between 0 - 1
      */
-    public HSLColor(float h, float s, float l, float alpha) {
+    public HSLColor(final float h, final float s, final float l, final float alpha) {
         hsl = new float[]{h, s, l};
         this.alpha = alpha;
         rgb = toRGB(hsl, alpha);
@@ -68,7 +68,7 @@ public class HSLColor {
      *
      * @param hsl array containing HSL values
      */
-    public HSLColor(float[] hsl) {
+    public HSLColor(final float[] hsl) {
         this(hsl, 1.0f);
     }
 
@@ -79,7 +79,7 @@ public class HSLColor {
      * @param hsl   array containing HSL values
      * @param alpha the alpha value between 0 - 1
      */
-    public HSLColor(float[] hsl, float alpha) {
+    public HSLColor(final float[] hsl, final float alpha) {
         this.hsl = hsl;
         this.alpha = alpha;
         rgb = toRGB(hsl, alpha);
@@ -90,7 +90,7 @@ public class HSLColor {
      *
      * @return an array containing the 3 HSL values.
      */
-    public static float[] fromRGB(Color color) {
+    public static float[] fromRGB(final Color color) {
         //  Get RGB values in the range 0 - 1
 
         float[] rgb = color.getRGBColorComponents(null);
@@ -143,7 +143,7 @@ public class HSLColor {
      * @param hsl an array containing the 3 HSL values
      * @returns the RGB Color object
      */
-    public static Color toRGB(float[] hsl) {
+    public static Color toRGB(final float[] hsl) {
         return toRGB(hsl, 1.0f);
     }
 
@@ -157,7 +157,7 @@ public class HSLColor {
      * @param alpha the alpha value between 0 - 1
      * @returns the RGB Color object
      */
-    public static Color toRGB(float[] hsl, float alpha) {
+    public static Color toRGB(final float[] hsl, final float alpha) {
         return toRGB(hsl[0], hsl[1], hsl[2], alpha);
     }
 
@@ -169,7 +169,7 @@ public class HSLColor {
      * @param l Lumanance is specified as a percentage in the range 1 - 100.
      * @returns the RGB Color object
      */
-    public static Color toRGB(float h, float s, float l) {
+    public static Color toRGB(final float h, final float s, final float l) {
         return toRGB(h, s, l, 1.0f);
     }
 
@@ -182,7 +182,7 @@ public class HSLColor {
      * @param alpha the alpha value between 0 - 1
      * @returns the RGB Color object
      */
-    public static Color toRGB(float h, float s, float l, float alpha) {
+    public static Color toRGB(float h, float s, float l, final float alpha) {
         if (s < 0.0f || s > 100.0f) {
             String message = "Color parameter outside of expected range - Saturation";
             throw new IllegalArgumentException(message);
@@ -225,7 +225,7 @@ public class HSLColor {
         return new Color(r, g, b, alpha);
     }
 
-    private static float HueToRGB(float p, float q, float h) {
+    private static float HueToRGB(final float p, final float q, float h) {
         if (h < 0) h += 1;
 
         if (h > 1) h -= 1;
@@ -252,7 +252,7 @@ public class HSLColor {
      * @param degrees - the Hue value between 0 - 360
      * @return the RGB Color object
      */
-    public Color adjustHue(float degrees) {
+    public Color adjustHue(final float degrees) {
         return toRGB(degrees, hsl[1], hsl[2], alpha);
     }
 
@@ -263,7 +263,7 @@ public class HSLColor {
      * @param percent - the Luminance value between 0 - 100
      * @return the RGB Color object
      */
-    public Color adjustLuminance(float percent) {
+    public Color adjustLuminance(final float percent) {
         return toRGB(hsl[0], hsl[1], percent, alpha);
     }
 
@@ -274,7 +274,7 @@ public class HSLColor {
      * @param percent - the Saturation value between 0 - 100
      * @return the RGB Color object
      */
-    public Color adjustSaturation(float percent) {
+    public Color adjustSaturation(final float percent) {
         return toRGB(hsl[0], percent, hsl[2], alpha);
     }
 
@@ -286,7 +286,7 @@ public class HSLColor {
      * @param percent - the value between 0 - 100
      * @return the RGB Color object
      */
-    public Color adjustShade(float percent) {
+    public Color adjustShade(final float percent) {
         float multiplier = (100.0f - percent) / 100.0f;
         float l = Math.max(0.0f, hsl[2] * multiplier);
 
@@ -301,7 +301,7 @@ public class HSLColor {
      * @param percent - the value between 0 - 100
      * @return the RGB Color object
      */
-    public Color adjustTone(float percent) {
+    public Color adjustTone(final float percent) {
         float multiplier = (100.0f + percent) / 100.0f;
         float l = Math.min(100.0f, hsl[2] * multiplier);
 

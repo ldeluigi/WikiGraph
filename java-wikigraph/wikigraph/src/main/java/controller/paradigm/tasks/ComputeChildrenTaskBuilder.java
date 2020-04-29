@@ -17,27 +17,27 @@ public class ComputeChildrenTaskBuilder {
 
     public ComputeChildrenTaskBuilder() { }
 
-    public ComputeChildrenTaskBuilder setTerm(String term){
+    public ComputeChildrenTaskBuilder setTerm(final String term){
         this.term = term;
         return this;
     }
 
-    public ComputeChildrenTaskBuilder setNodeFactory(HttpWikiGraph nodeFactory){
+    public ComputeChildrenTaskBuilder setNodeFactory(final HttpWikiGraph nodeFactory){
         this.nodeFactory = nodeFactory;
         return this;
     }
 
-    public ComputeChildrenTaskBuilder setGraph(ConcurrentWikiGraph graph){
+    public ComputeChildrenTaskBuilder setGraph(final ConcurrentWikiGraph graph){
         this.graph = graph;
         return this;
     }
 
-    public ComputeChildrenTaskBuilder setView(View view){
+    public ComputeChildrenTaskBuilder setView(final View view){
         this.view = view;
         return this;
     }
 
-    public ComputeChildrenTaskBuilder setMaxDepth(int maxDepth){
+    public ComputeChildrenTaskBuilder setMaxDepth(final int maxDepth){
         if (maxDepth<0) {
             throw new IllegalArgumentException();
         }

@@ -178,11 +178,11 @@ public class SwingView extends JFrame implements GraphStreamView {
         this.textOrUrl.setText(query);
     }
 
-    private void fireEvent(ViewEvent e) {
+    private void fireEvent(final ViewEvent e) {
         this.listeners.forEach(l -> l.notifyEvent(e));
     }
 
-    private void fireEvent(EventType type, Supplier<String> text, int depth, Runnable callback) {
+    private void fireEvent(final EventType type, final Supplier<String> text, int depth, final Runnable callback) {
         this.fireEvent(new ViewEvent() {
             @Override
             public EventType getType() {

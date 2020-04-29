@@ -5,5 +5,5 @@ import view.ViewEvent;
 import java.util.EventListener;
 
 public interface ViewEventListener extends EventListener {
-    void notifyEvent(ViewEvent event);
+    void notifyEvent(final ViewEvent event);
 }

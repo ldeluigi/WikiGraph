@@ -56,7 +56,7 @@ public class RESTWikiGraph extends HttpWikiGraph {
         return null;
     }
 
-    private void addToSet(Set<String> terms, Elements links){
+    private void addToSet(final Set<String> terms, final Elements links){
         links.forEach((Element link) -> {
             if (link.attr("rel").equals("mw:WikiLink") && !link.attr("title").matches("\\w+:\\w.*")) {
                 terms.add(link.attr("title"));
