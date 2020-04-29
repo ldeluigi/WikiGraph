@@ -4,5 +4,5 @@ import controller.ViewEventListener;
 
 
 interface ViewEventEmitter {
-    void addEventListener(ViewEventListener listener);
+    void addEventListener(final ViewEventListener listener);
 }

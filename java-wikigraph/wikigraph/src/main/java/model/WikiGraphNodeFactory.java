@@ -28,7 +28,7 @@ public interface WikiGraphNodeFactory {
      * @param url the wikipedia page URL
      * @return the node or null if something went wrong (term not found or connection problems)
      */
-    WikiGraphNode from(URL url);
+    WikiGraphNode from(final URL url);
 
     /**
      * Creates a structural {@link WikiGraphNode} from a wikipedia page title like
@@ -39,7 +39,7 @@ public interface WikiGraphNodeFactory {
      * @param term the wikipedia page name
      * @return the node or null if something went wrong (term not found or connection problems)
      */
-    WikiGraphNode from(String term);
+    WikiGraphNode from(final String term);
 
     /**
      * Sets the internal language (the default) for this factory.
@@ -49,7 +49,7 @@ public interface WikiGraphNodeFactory {
      * @param langCode like "en", "it", "nap"
      * @return true if language is available and was set correctly
      */
-    boolean setLanguage(String langCode);
+    boolean setLanguage(final String langCode);
 
     /**
      * Creates a structural {@link WikiGraphNode} from a random wikipedia page.
@@ -70,5 +70,5 @@ public interface WikiGraphNodeFactory {
      * @param url a wikipedia url
      * @return the language code
      */
-    String getLanguage(URL url);
+    String getLanguage(final URL url);
 }

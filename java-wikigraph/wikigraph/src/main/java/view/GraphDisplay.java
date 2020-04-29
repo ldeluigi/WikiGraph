@@ -1,13 +1,13 @@
 package view;
 
 interface GraphDisplay {
-    void addNode(String id, final int depth, final String lang);
+    void addNode(final String id, final int depth, final String lang);
 
-    void addEdge(String idFrom, String idTo);
+    void addEdge(final String idFrom, final String idTo);
 
-    void removeNode(String id);
+    void removeNode(final String id);
 
-    void removeEdge(String idFrom, String idTo);
+    void removeEdge(final String idFrom, final String idTo);
 
     void clearGraph();
 }

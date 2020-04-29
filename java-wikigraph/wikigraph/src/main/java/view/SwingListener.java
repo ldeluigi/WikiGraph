@@ -57,7 +57,7 @@ public class SwingListener implements MouseListener, MouseMotionListener, MouseW
     }
 
     @Override
-    public void mousePressed(MouseEvent mouseEvent) {
+    public void mousePressed(final MouseEvent mouseEvent) {
         if (this.getNode(mouseEvent) == null) {
             this.currentX = Optional.of(mouseEvent.getX());
             this.currentY = Optional.of(mouseEvent.getY());
@@ -65,21 +65,21 @@ public class SwingListener implements MouseListener, MouseMotionListener, MouseW
     }
 
     @Override
-    public void mouseReleased(MouseEvent mouseEvent) {
+    public void mouseReleased(final MouseEvent mouseEvent) {
         this.currentX = Optional.empty();
         this.currentY = Optional.empty();
     }
 
     @Override
-    public void mouseEntered(MouseEvent mouseEvent) {
+    public void mouseEntered(final MouseEvent mouseEvent) {
     }
 
     @Override
-    public void mouseExited(MouseEvent mouseEvent) {
+    public void mouseExited(final MouseEvent mouseEvent) {
     }
 
     @Override
-    public void mouseDragged(MouseEvent mouseEvent) {
+    public void mouseDragged(final MouseEvent mouseEvent) {
         if (this.currentX.isPresent() && this.currentY.isPresent()) {
             int newX = mouseEvent.getX();
             int newY = mouseEvent.getY();
@@ -115,7 +115,7 @@ public class SwingListener implements MouseListener, MouseMotionListener, MouseW
     }
 
     @Override
-    public void mouseWheelMoved(MouseWheelEvent e) {
+    public void mouseWheelMoved(final MouseWheelEvent e) {
         int mod = e.getScrollAmount();
         int notches = e.getWheelRotation();
         if (notches < 0) {

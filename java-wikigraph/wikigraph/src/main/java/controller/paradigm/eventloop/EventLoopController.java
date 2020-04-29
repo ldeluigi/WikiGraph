@@ -4,6 +4,8 @@ import controller.Controller;
 import view.View;
 import view.ViewEvent;
 
+import java.util.concurrent.BlockingQueue;
+
 public class EventLoopController implements Controller {
 
     private final View view;
@@ -15,7 +17,7 @@ public class EventLoopController implements Controller {
     }
 
     @Override
-    public void notifyEvent(ViewEvent event) {
+    public void notifyEvent(final ViewEvent event) {
 
     }
 

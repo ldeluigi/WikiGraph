@@ -19,7 +19,7 @@ public class MutableGraphImpl implements MutableWikiGraph {
     }
 
     @Override
-    public boolean remove(String nodeTerm) {
+    public boolean remove(final String nodeTerm) {
         if (this.nodeMap.containsKey(nodeTerm)) {
             this.nodeMap.remove(nodeTerm);
             return true;
@@ -28,7 +28,7 @@ public class MutableGraphImpl implements MutableWikiGraph {
     }
 
     @Override
-    public boolean set(WikiGraphNode node) {
+    public boolean set(final WikiGraphNode node) {
         if (this.nodeMap.containsKey(node.term())) {
             this.nodeMap.put(node.term(), node);
             return true;

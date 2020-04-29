@@ -24,7 +24,7 @@ public class ExecutorController implements Controller {
     private Optional<ViewEvent> event = Optional.empty();
     private ConcurrentWikiGraph last = null;
 
-    public ExecutorController(View view) {
+    public ExecutorController(final View view) {
         this.view = view;
         this.view.addEventListener(this);
     }
@@ -35,16 +35,18 @@ public class ExecutorController implements Controller {
         view.start();
     }
 
-    private void startComputing(String root, int depth) {
+    private void startComputing(final String root, final int depth) {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
-        nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
-        this.last = SynchronizedWikiGraph.empty();
-        this.pool.execute(new ComputeChildrenTask(nodeFactory, this.last, this.view, depth, root) {
-            @Override
-            public void onCompletion(CountedCompleter<?> caller) {
-                super.onCompletion(caller);
-                endComputing();
-            }
+        this.pool.execute(() -> {
+            nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
+            this.last = SynchronizedWikiGraph.empty();
+            this.pool.execute(new ComputeChildrenTask(nodeFactory, this.last, this.view, depth, root) {
+                @Override
+                public void onCompletion(CountedCompleter<?> caller) {
+                    super.onCompletion(caller);
+                    endComputing();
+                }
+            });
         });
     }
 
@@ -59,6 +61,7 @@ public class ExecutorController implements Controller {
                     startComputing(e.getType().equals(ViewEvent.EventType.RANDOM_SEARCH) ? null : e.getText(),
                             e.getDepth());
                 }
+                e.onComplete();
             }
         } finally {
             scheduleLock.unlock();
@@ -72,19 +75,23 @@ public class ExecutorController implements Controller {
     }
 
     @Override
-    public void notifyEvent(ViewEvent event) {
+    public void notifyEvent(final ViewEvent event) {
         if (event.getType().equals(ViewEvent.EventType.EXIT)) {
             this.exit();
+            event.onComplete();
         } else if (event.getType().equals(ViewEvent.EventType.SEARCH)) {
-            this.resolve(()-> startComputing(event.getText(), event.getDepth()), ()-> this.event = Optional.of(event));
+            this.resolve(()-> {startComputing(event.getText(), event.getDepth()); event.onComplete();},
+                    ()-> this.event = Optional.of(event));
         } else if (event.getType().equals(ViewEvent.EventType.RANDOM_SEARCH)) {
-            this.resolve(()-> startComputing(null, event.getDepth()), ()-> this.event = Optional.of(event));
+            this.resolve(()-> {startComputing(null, event.getDepth()); event.onComplete();},
+                    ()-> this.event = Optional.of(event));
         } else if (event.getType().equals(ViewEvent.EventType.CLEAR)) {
-            this.resolve(()-> this.view.clearGraph(), ()-> this.event = Optional.of(event));
+            this.resolve(()-> {this.view.clearGraph(); event.onComplete();},
+                    ()-> this.event = Optional.of(event));
         }
     }
 
-    private void resolve(Runnable quiescentBranch, Runnable nonQuiescentBranch){
+    private void resolve(final Runnable quiescentBranch, final Runnable nonQuiescentBranch){
         if (this.last != null) {
             this.last.setAborted();
             this.last = null;

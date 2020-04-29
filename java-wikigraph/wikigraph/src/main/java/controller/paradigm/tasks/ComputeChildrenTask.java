@@ -1,14 +1,11 @@
 package controller.paradigm.tasks;
 
 import controller.ConcurrentWikiGraph;
-import controller.api.HttpWikiGraph;
 import controller.paradigm.NodeRecursion;
-import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
 import view.View;
 
 import java.util.concurrent.CountedCompleter;
-import java.util.concurrent.locks.Lock;
 
 
 public class ComputeChildrenTask extends CountedCompleter<Void> {
@@ -38,12 +35,12 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
 
     private class TaskNodeRecursion extends NodeRecursion {
 
-        private TaskNodeRecursion(NodeRecursion father, String term) {
+        private TaskNodeRecursion(final NodeRecursion father, final String term) {
             super(father, term);
         }
 
-        public TaskNodeRecursion(WikiGraphNodeFactory factory, ConcurrentWikiGraph graph,
-                                 View view, int maxDepth, String term) {
+        public TaskNodeRecursion(final WikiGraphNodeFactory factory, final ConcurrentWikiGraph graph,
+                                 final View view, final int maxDepth, final String term) {
             super(factory, graph, view, maxDepth, term);
         }
 
@@ -53,7 +50,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
         }
 
         @Override
-        protected void childBirth(String term) {
+        protected void childBirth(final String term) {
             addToPendingCount(1);
             new ComputeChildrenTask(ComputeChildrenTask.this,
                     new TaskNodeRecursion(this, term)).fork();
