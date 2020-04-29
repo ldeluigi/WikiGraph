@@ -2,6 +2,7 @@ package controller.paradigm.tasks;
 
 import controller.ConcurrentWikiGraph;
 import controller.api.HttpWikiGraph;
+import model.WikiGraphNodeFactory;
 import view.View;
 
 
@@ -9,30 +10,15 @@ public class ComputeChildrenTaskBuilder {
 
 
     private String term;
-    private int actualDepth;
-    private HttpWikiGraph nodeFactory;
+    private WikiGraphNodeFactory nodeFactory;
     private ConcurrentWikiGraph graph;
     private View view;
-    private int maxDepth;
-    private ComputeChildrenTask father;
+    private int maxDepth = -1;
 
     public ComputeChildrenTaskBuilder() { }
 
-    public ComputeChildrenTaskBuilder setFather(ComputeChildrenTask father){
-        this.father = father;
-        return this;
-    }
-
     public ComputeChildrenTaskBuilder setTerm(String term){
         this.term = term;
-        return this;
-    }
-
-    public ComputeChildrenTaskBuilder setDepth(int depth){
-        if (depth<0) {
-            throw new IllegalArgumentException();
-        }
-        this.actualDepth = depth;
         return this;
     }
 
@@ -59,16 +45,15 @@ public class ComputeChildrenTaskBuilder {
         return this;
     }
 
+
     public ComputeChildrenTask build(){
         if (this.nodeFactory == null ||
-             this.graph == null ||
-             this.view == null ||
-             this.father == null ||
-             this.term == null ||
-             this.maxDepth == -1 ||
-             this.actualDepth == -1)
+                this.graph == null ||
+                this.view == null ||
+                this.maxDepth == -1 ||
+                this.term == null)
             throw new IllegalStateException();
-        return new ComputeChildrenTask(father, term, actualDepth, nodeFactory, graph, view, maxDepth);
+        return new ComputeChildrenTask(this.nodeFactory, this.graph, this.view, this.maxDepth, this.term);
     }
 
 }
