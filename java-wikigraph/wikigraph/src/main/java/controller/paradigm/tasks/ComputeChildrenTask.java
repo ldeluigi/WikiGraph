@@ -1,7 +1,7 @@
 package controller.paradigm.tasks;
 
-import controller.ConcurrentWikiGraph;
-import controller.paradigm.NodeRecursion;
+import controller.paradigm.concurrent.ConcurrentNodeRecursion;
+import controller.paradigm.concurrent.ConcurrentWikiGraph;
 import model.WikiGraphNodeFactory;
 import view.View;
 
@@ -10,9 +10,9 @@ import java.util.concurrent.CountedCompleter;
 
 public class ComputeChildrenTask extends CountedCompleter<Void> {
 
-    private final NodeRecursion nr;
+    private final ConcurrentNodeRecursion nr;
 
-    private ComputeChildrenTask(final ComputeChildrenTask father, final NodeRecursion rec) {
+    private ComputeChildrenTask(final ComputeChildrenTask father, final ConcurrentNodeRecursion rec) {
         super(father);
         this.nr = rec;
     }
@@ -33,9 +33,9 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
         return false;
     }
 
-    private class TaskNodeRecursion extends NodeRecursion {
+    private class TaskNodeRecursion extends ConcurrentNodeRecursion {
 
-        private TaskNodeRecursion(final NodeRecursion father, final String term) {
+        private TaskNodeRecursion(final ConcurrentNodeRecursion father, final String term) {
             super(father, term);
         }
 

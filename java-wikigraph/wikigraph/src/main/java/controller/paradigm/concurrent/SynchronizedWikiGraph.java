@@ -1,5 +1,7 @@
-package controller;
+package controller.paradigm.concurrent;
 
+import controller.PartialWikiGraph;
+import controller.PartialWikiGraphImpl;
 import model.MutableGraphImpl;
 import model.MutableWikiGraph;
 import model.Pair;
@@ -21,15 +23,15 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
     private final Map<String, Lock> locks = new HashMap<>();
-    private final MutableWikiGraph graph;
+    private final PartialWikiGraph graph;
     private volatile boolean aborted = false;
 
-    private SynchronizedWikiGraph(final MutableWikiGraph graph) {
+    private SynchronizedWikiGraph(final PartialWikiGraph graph) {
         this.graph = graph;
     }
 
     private SynchronizedWikiGraph() {
-        this(new MutableGraphImpl());
+        this(new PartialWikiGraphImpl());
     }
 
     /**
@@ -40,15 +42,6 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
         return new SynchronizedWikiGraph();
     }
 
-    @Override
-    public void setAborted() {
-        this.aborted = true;
-    }
-
-    @Override
-    public boolean isAborted() {
-        return this.aborted;
-    }
 
     @Override
     public Lock getLockOn(final String nodeTerm) {
@@ -95,5 +88,19 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
     @Override
     public synchronized boolean contains(final String term) {
         return this.graph.contains(term);
+    }
+
+    @Override
+    public void setAborted() {
+        synchronized (this.graph) {
+            this.graph.setAborted();
+        }
+    }
+
+    @Override
+    public boolean isAborted() {
+        synchronized (this.graph) {
+            return this.graph.isAborted();
+        }
     }
 }
