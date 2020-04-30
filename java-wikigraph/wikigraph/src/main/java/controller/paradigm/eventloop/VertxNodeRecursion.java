@@ -45,7 +45,7 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
             } else {
                 promise.fail(VertxNodeRecursion.this.getTerm() + " not found.");
             }
-        }, event -> {
+        }, false, event -> {
             if (event.succeeded()) {
                 final WikiGraphNode result = event.result();
                 setID(result.term());
