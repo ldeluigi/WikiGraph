@@ -173,11 +173,11 @@ public class SwingView extends JFrame implements GraphStreamView {
 
     @Override
     public void doSearch(final Runnable then) {
-        fireEvent(EventType.SEARCH, () -> {
-            System.out.println(textOrUrl.getText());
-            return textOrUrl.getText();
-        }, (int) depth.getValue(), () -> {
-        });
+        fireEvent(EventType.SEARCH,
+                () -> textOrUrl.getText(),
+                (int) depth.getValue(),
+                () -> {
+                });
     }
 
     @Override

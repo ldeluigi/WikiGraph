@@ -1,10 +1,10 @@
 package controller.paradigm.tasks;
 
 
-import controller.ConcurrentWikiGraph;
 import controller.Controller;
-import controller.SynchronizedWikiGraph;
+import controller.paradigm.concurrent.SynchronizedWikiGraph;
 import controller.api.RESTWikiGraph;
+import controller.paradigm.concurrent.ConcurrentWikiGraph;
 import model.WikiGraphNodeFactory;
 import view.View;
 import view.ViewEvent;
