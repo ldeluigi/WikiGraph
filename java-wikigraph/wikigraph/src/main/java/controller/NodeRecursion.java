@@ -1,17 +1,15 @@
-package controller.paradigm;
+package controller;
 
-import controller.ConcurrentWikiGraph;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
 import view.View;
 
 import java.util.Optional;
-import java.util.concurrent.locks.Lock;
 
 public abstract class NodeRecursion {
 
     private final WikiGraphNodeFactory factory;
-    private final ConcurrentWikiGraph graph;
+    private final PartialWikiGraph graph;
     private final View view;
     private final int maxDepth;
     private final String term;
@@ -33,7 +31,7 @@ public abstract class NodeRecursion {
     }
 
     protected NodeRecursion(final WikiGraphNodeFactory factory,
-                            final ConcurrentWikiGraph graph,
+                            final PartialWikiGraph graph,
                             final View view,
                             final int maxDepth,
                             final String term) {
@@ -52,32 +50,30 @@ public abstract class NodeRecursion {
             return;
         }
         final WikiGraphNode result;
-        if (this.depth == 0) {
-            result = initRoot();
+        if (this.getDepth() == 0) {
+            if (this.getTerm() == null) { //random
+                result = this.getNodeFactory().random();
+            } else { //search
+                result = this.getNodeFactory().from(this.getTerm());
+            }
         } else {
-            result = this.factory.from(this.term);
+            result = this.getNodeFactory().from(this.getTerm());
         }
         if (result != null) {
-            this.id = Optional.of(result.term());
-            final Lock lock = this.graph.getLockOn(this.id.get());
-            lock.lock();
-            try {
-                if (this.graph.contains(this.id.get())) {
-                    this.view.addEdge(this.fatherID, this.id.get());
-                } else {
-                    this.view.addNode(this.id.get(), this.depth, this.factory.getLanguage());
-                    this.graph.add(result);
-                    if (this.depth > 0) {
-                        view.addEdge(this.fatherID, this.id.get());
-                    }
-                    if (this.depth < this.maxDepth) {
-                        for (String child : result.childrenTerms()) {
-                            childBirth(child);
-                        }
+            this.setID(result.term());
+            if (this.getGraph().contains(result.term())) {
+                this.getView().addEdge(this.getFatherID(), result.term());
+            } else {
+                this.getView().addNode(result.term(), this.getDepth(), this.getNodeFactory().getLanguage());
+                this.getGraph().add(result);
+                if (this.getDepth() > 0) {
+                    this.getView().addEdge(this.getFatherID(), result.term());
+                }
+                if (this.getDepth() < this.getMaxDepth()) {
+                    for (String child : result.childrenTerms()) {
+                        childBirth(child);
                     }
                 }
-            } finally {
-                lock.unlock();
             }
         }
         complete();
@@ -86,14 +82,6 @@ public abstract class NodeRecursion {
     protected abstract void complete();
 
     protected abstract void childBirth(final String term);
-
-    protected WikiGraphNode initRoot() {
-        if (this.term == null) { //random
-            return this.factory.random();
-        } else { //search
-            return this.factory.from(this.term);
-        }
-    }
 
     public abstract void abort();
 
@@ -109,7 +97,7 @@ public abstract class NodeRecursion {
         return this.factory;
     }
 
-    public ConcurrentWikiGraph getGraph() {
+    public PartialWikiGraph getGraph() {
         return this.graph;
     }
 
@@ -123,5 +111,13 @@ public abstract class NodeRecursion {
 
     public Optional<String> getID() {
         return this.id;
+    }
+
+    protected final void setID(final String id) {
+        this.id = Optional.of(id);
+    }
+
+    protected final String getFatherID() {
+        return this.fatherID;
     }
 }

@@ -1,18 +1,15 @@
 package controller.paradigm.eventloop;
 
 import controller.Controller;
+import controller.PartialWikiGraph;
+import controller.PartialWikiGraphImpl;
 import controller.api.RESTWikiGraph;
-import controller.paradigm.NodeRecursion;
-import controller.paradigm.NodeRecursionBrutto;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import model.*;
+import io.vertx.core.VertxOptions;
+import model.WikiGraphNodeFactory;
 import view.View;
 import view.ViewEvent;
 import view.ViewEvent.EventType;
-
-import java.util.Collection;
-import java.util.Set;
 
 public class EventLoopController implements Controller {
 
@@ -33,28 +30,24 @@ public class EventLoopController implements Controller {
             this.vertx.runOnContext(Void -> {
                 switch (event.getType()) {
                     case CLEAR:
-                        this.view.clearGraph();
-                        event.onComplete();
+                        //this.view.clearGraph();
                         break;
                     case SEARCH:
-                        startComputing( event.getText(),event.getDepth());
+                        startComputing(event.getText(), event.getDepth());
                         break;
                     case RANDOM_SEARCH:
-                        startComputing(null,event.getDepth());
+                        startComputing(null, event.getDepth());
                         break;
-
                 }
+                event.onComplete();
             });
         }
     }
 
-    private void startComputing(String term,int depth) {
+    private void startComputing(String term, int depth) {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
-        final MutableWikiGraph graph = new MutableGraphImpl();
-
-
-            new NodeRecursionBrutto(nodeFactory, graph,this.view,depth,term, this.vertx).compute();
-
+        final PartialWikiGraph graph = new PartialWikiGraphImpl();
+        new VertxNodeRecursion(this.vertx, nodeFactory, graph, this.view, depth, term).compute();
     }
 
     @Override

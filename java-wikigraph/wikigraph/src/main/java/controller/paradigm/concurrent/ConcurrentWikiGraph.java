@@ -1,21 +1,11 @@
-package controller;
+package controller.paradigm.concurrent;
 
+import controller.PartialWikiGraph;
 import model.MutableWikiGraph;
 
 import java.util.concurrent.locks.Lock;
 
-public interface ConcurrentWikiGraph extends MutableWikiGraph {
-    /**
-     * Sets this graph computation as aborted.
-     * Every node computation should hang itself as soon as possible from now on.
-     */
-    void setAborted();
-
-    /**
-     * Checks whether this graph computation has been aborted or not.
-     * @return true if computation has been aborted
-     */
-    boolean isAborted();
+public interface ConcurrentWikiGraph extends PartialWikiGraph {
 
     /**
      * Returns a lock that grants mutual exclusion between threads that are computing the exact
