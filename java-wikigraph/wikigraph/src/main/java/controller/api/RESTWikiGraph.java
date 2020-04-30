@@ -38,10 +38,11 @@ public class RESTWikiGraph extends HttpWikiGraph {
             Document doc = Jsoup.connect(apiEndpoint(lang) + URLTerm).get();
             if (doc != null) {
                 String termResult = doc.select("html head title").html();
-                Elements firstLanesLinks = doc.select("section:first-child>div:first-child>a:not([href*=#])");
+                Elements firstLanesLinks = doc.select("section:first-child>div>a:not([href*=#])");
                 Elements links = doc.select("section:first-child p a:not([href*=#])");
                 final Set<String> terms = new HashSet<>();
                 this.addToSet(terms, firstLanesLinks);
+                System.out.println(terms);
                 this.addToSet(terms, links);
                 return new WikiGraphNodeImpl(termResult, sameTerm, terms);
             }
