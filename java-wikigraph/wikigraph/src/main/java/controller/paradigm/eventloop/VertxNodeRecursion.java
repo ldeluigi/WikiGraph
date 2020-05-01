@@ -12,15 +12,19 @@ import view.View;
 public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
 
     private final Vertx vertx;
+    private int childrenYetToComplete = 0;
+    private final Runnable atCompletion;
 
     protected VertxNodeRecursion(VertxNodeRecursion father, String term) {
         super(father, term);
         this.vertx = father.getVertx();
+        this.atCompletion = () -> father.childCompleted();
     }
 
-    public VertxNodeRecursion(Vertx vertx, WikiGraphNodeFactory factory, PartialWikiGraph graph, View view, int maxDepth, String term) {
+    public VertxNodeRecursion(Vertx vertx, WikiGraphNodeFactory factory, PartialWikiGraph graph, View view, int maxDepth, String term, Runnable atCompletion) {
         super(factory, graph, view, maxDepth, term);
         this.vertx = vertx;
+        this.atCompletion = atCompletion;
     }
 
     @Override
@@ -30,6 +34,10 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
             return;
         }
         this.vertx.executeBlocking((Handler<Promise<WikiGraphNode>>) promise -> {
+            if (this.getGraph().isAborted()) {
+                promise.fail("Graph aborted");
+                return;
+            }
             final WikiGraphNode result;
             if (VertxNodeRecursion.this.getDepth() == 0) {
                 if (VertxNodeRecursion.this.getTerm() == null) { //random
@@ -46,6 +54,10 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
                 promise.fail(VertxNodeRecursion.this.getTerm() + " not found.");
             }
         }, false, event -> {
+            if (this.getGraph().isAborted()) {
+                abort();
+                return;
+            }
             if (event.succeeded()) {
                 final WikiGraphNode result = event.result();
                 setID(result.term());
@@ -64,25 +76,37 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
                     }
                 }
             }
-            complete();
+            if (this.childrenYetToComplete == 0) {
+                complete();
+            }
         });
     }
 
     @Override
     protected void complete() {
+        this.atCompletion.run();
     }
 
     @Override
     protected void childBirth(String term) {
+        this.childrenYetToComplete++;
         this.vertx.runOnContext(new VertxNodeRecursion(this, term));
     }
 
     @Override
     public void abort() {
+        this.atCompletion.run();
     }
 
     private Vertx getVertx() {
         return this.vertx;
+    }
+
+    private void childCompleted() {
+        this.childrenYetToComplete--;
+        if (this.childrenYetToComplete == 0) {
+            complete();
+        }
     }
 
     @Override

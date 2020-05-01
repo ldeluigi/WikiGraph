@@ -28,6 +28,7 @@ public class SwingView extends JFrame implements GraphStreamView {
     private final List<ViewEventListener> listeners = new LinkedList<>();
     private final Graph graph;
     private final JLabel stats;
+    private final JTextField language;
 
     public SwingView() {
         super("WikiGraph");
@@ -39,6 +40,27 @@ public class SwingView extends JFrame implements GraphStreamView {
         pane.setLayout(new BorderLayout());
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new FlowLayout());
+        this.language = new JTextField("en", 3);
+        this.language.addActionListener(e -> fireEvent(new ViewEvent() {
+            private final String lan = language.getText();
+            @Override
+            public EventType getType() {
+                return EventType.LANGUAGE;
+            }
+
+            @Override
+            public String getText() {
+                return this.lan;
+            }
+
+            @Override
+            public void onComplete(final boolean success) {
+                SwingUtilities.invokeLater(() ->
+                        JOptionPane.showMessageDialog(language, success ? "Language set to " + this.lan : "Language does not exist"));
+            }
+        }));
+        bottomPanel.add(new JLabel("Language code: "));
+        bottomPanel.add(this.language);
         bottomPanel.add(this.textOrUrl);
         JButton searchButton = new JButton("Search");
         bottomPanel.add(searchButton);
@@ -212,7 +234,7 @@ public class SwingView extends JFrame implements GraphStreamView {
             }
 
             @Override
-            public void onComplete() {
+            public void onComplete(final boolean success) {
                 callback.run();
             }
         });

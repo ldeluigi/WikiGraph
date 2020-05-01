@@ -1,8 +1,6 @@
 package controller.paradigm.concurrent;
 
 import controller.PartialWikiGraph;
-import controller.PartialWikiGraphImpl;
-import model.MutableGraphImpl;
 import model.MutableWikiGraph;
 import model.Pair;
 import model.WikiGraphNode;
@@ -24,7 +22,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
     private final Map<String, Lock> locks = new HashMap<>();
     private final PartialWikiGraph graph;
-    private volatile boolean aborted = false;
 
     private SynchronizedWikiGraph(final PartialWikiGraph graph) {
         this.graph = graph;
