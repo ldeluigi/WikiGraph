@@ -42,11 +42,11 @@ public class RESTWikiGraph extends HttpWikiGraph {
                 Elements links = doc.select("section:first-child p a:not([href*=#])");
                 final Set<String> terms = new HashSet<>();
                 this.addToSet(terms, firstLanesLinks);
-                System.out.println(terms);
                 this.addToSet(terms, links);
                 return new WikiGraphNodeImpl(termResult, sameTerm, terms);
             }
         } catch (IOException e) {
+            e.printStackTrace();
             System.err.println("WARNING: "+term +" is returning null");
             return null;
         }
