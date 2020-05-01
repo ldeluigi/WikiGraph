@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CountedCompleter;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -23,6 +24,7 @@ public class ExecutorController implements Controller {
     private ForkJoinPool pool;
     private Optional<ViewEvent> event = Optional.empty();
     private ConcurrentWikiGraph last = null;
+    private final AtomicReference<String> language = new AtomicReference<>(Locale.ENGLISH.getLanguage());
 
     public ExecutorController(final View view) {
         this.view = view;
@@ -38,7 +40,7 @@ public class ExecutorController implements Controller {
     private void startComputing(final String root, final int depth) {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
         this.pool.execute(() -> {
-            nodeFactory.setLanguage(Locale.ENGLISH.getLanguage());
+            nodeFactory.setLanguage(language.get());
             this.last = SynchronizedWikiGraph.empty();
             this.pool.execute(new ComputeChildrenTask(nodeFactory, this.last, this.view, depth, root) {
                 @Override
@@ -61,7 +63,7 @@ public class ExecutorController implements Controller {
                     startComputing(e.getType().equals(ViewEvent.EventType.RANDOM_SEARCH) ? null : e.getText(),
                             e.getDepth());
                 }
-                e.onComplete();
+                e.onComplete(true);
             }
         } finally {
             scheduleLock.unlock();
@@ -78,16 +80,25 @@ public class ExecutorController implements Controller {
     public void notifyEvent(final ViewEvent event) {
         if (event.getType().equals(ViewEvent.EventType.EXIT)) {
             this.exit();
-            event.onComplete();
+            event.onComplete(true);
         } else if (event.getType().equals(ViewEvent.EventType.SEARCH)) {
-            this.resolve(()-> {startComputing(event.getText(), event.getDepth()); event.onComplete();},
+            this.resolve(()-> {startComputing(event.getText(), event.getDepth()); event.onComplete(true);},
                     ()-> this.event = Optional.of(event));
         } else if (event.getType().equals(ViewEvent.EventType.RANDOM_SEARCH)) {
-            this.resolve(()-> {startComputing(null, event.getDepth()); event.onComplete();},
+            this.resolve(()-> {startComputing(null, event.getDepth()); event.onComplete(true);},
                     ()-> this.event = Optional.of(event));
         } else if (event.getType().equals(ViewEvent.EventType.CLEAR)) {
-            this.resolve(()-> {this.view.clearGraph(); event.onComplete();},
+            this.resolve(()-> {this.view.clearGraph(); event.onComplete(true);},
                     ()-> this.event = Optional.of(event));
+        } else if (event.getType().equals(ViewEvent.EventType.LANGUAGE)) {
+            this.pool.execute(() -> {
+                if (new RESTWikiGraph().setLanguage(event.getText())) {
+                    this.language.set(event.getText());
+                    event.onComplete(true);
+                } else {
+                    event.onComplete(false);
+                }
+            });
         }
     }
 
