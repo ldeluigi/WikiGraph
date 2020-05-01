@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 
 public class SwingView extends JFrame implements GraphStreamView {
 
-    private static final float DIMENSION_ADAPTER = 0.5f;
+    private static final float DIMENSION_ADAPTER = 0.8f;
     private static final int MAX_DEPTH = 8;
     private static final int MAX_DELAY = 300;
     private static final int HOVER_SIZE = 30;
