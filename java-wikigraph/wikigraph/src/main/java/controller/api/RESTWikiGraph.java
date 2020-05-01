@@ -46,8 +46,7 @@ public class RESTWikiGraph extends HttpWikiGraph {
                 return new WikiGraphNodeImpl(termResult, sameTerm, terms);
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("WARNING: "+term +" is returning null");
+            System.err.println("WARNING: "+term +" is returning null caused by "+e.getMessage());
             return null;
         }
         System.err.println("ERROR: RESTWikiGraph is returning null without exception");
