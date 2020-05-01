@@ -2,9 +2,9 @@ package controller.paradigm.tasks;
 
 
 import controller.Controller;
-import controller.paradigm.concurrent.SynchronizedWikiGraph;
 import controller.api.RESTWikiGraph;
 import controller.paradigm.concurrent.ConcurrentWikiGraph;
+import controller.paradigm.concurrent.SynchronizedWikiGraph;
 import model.WikiGraphNodeFactory;
 import view.View;
 import view.ViewEvent;
@@ -82,14 +82,23 @@ public class ExecutorController implements Controller {
             this.exit();
             event.onComplete(true);
         } else if (event.getType().equals(ViewEvent.EventType.SEARCH)) {
-            this.resolve(()-> {startComputing(event.getText(), event.getDepth()); event.onComplete(true);},
-                    ()-> this.event = Optional.of(event));
+            this.resolve(() -> {
+                        startComputing(event.getText(), event.getDepth());
+                        event.onComplete(true);
+                    },
+                    () -> this.event = Optional.of(event));
         } else if (event.getType().equals(ViewEvent.EventType.RANDOM_SEARCH)) {
-            this.resolve(()-> {startComputing(null, event.getDepth()); event.onComplete(true);},
-                    ()-> this.event = Optional.of(event));
+            this.resolve(() -> {
+                        startComputing(null, event.getDepth());
+                        event.onComplete(true);
+                    },
+                    () -> this.event = Optional.of(event));
         } else if (event.getType().equals(ViewEvent.EventType.CLEAR)) {
-            this.resolve(()-> {this.view.clearGraph(); event.onComplete(true);},
-                    ()-> this.event = Optional.of(event));
+            this.resolve(() -> {
+                        this.view.clearGraph();
+                        event.onComplete(true);
+                    },
+                    () -> this.event = Optional.of(event));
         } else if (event.getType().equals(ViewEvent.EventType.LANGUAGE)) {
             this.pool.execute(() -> {
                 if (new RESTWikiGraph().setLanguage(event.getText())) {
@@ -102,7 +111,7 @@ public class ExecutorController implements Controller {
         }
     }
 
-    private void resolve(final Runnable quiescentBranch, final Runnable nonQuiescentBranch){
+    private void resolve(final Runnable quiescentBranch, final Runnable nonQuiescentBranch) {
         if (this.last != null) {
             this.last.setAborted();
             this.last = null;
