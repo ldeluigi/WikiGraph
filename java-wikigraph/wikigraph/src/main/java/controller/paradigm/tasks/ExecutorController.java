@@ -35,7 +35,7 @@ public class ExecutorController implements Controller {
 
     @Override
     public void start() {
-        this.pool = ForkJoinPool.commonPool();
+        this.pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() * 5);
         this.view.start();
     }
 
@@ -107,6 +107,7 @@ public class ExecutorController implements Controller {
                         event.onComplete(false);
                     }
                 });
+                this.isQuiescent = true;
                 break;
         }
     }
