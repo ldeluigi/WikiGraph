@@ -10,7 +10,6 @@ import io.vertx.core.Vertx;
 import model.WikiGraphNodeFactory;
 import view.View;
 import view.ViewEvent;
-import view.ViewEvent.EventType;
 
 import java.util.Locale;
 import java.util.concurrent.locks.Lock;
@@ -23,7 +22,7 @@ public class EventLoopController implements Controller {
     private String language = Locale.ENGLISH.getLanguage();
     private PartialWikiGraph last;
     private boolean toClear;
-    private Lock mutex = new ReentrantLock();
+    private final Lock mutex = new ReentrantLock();
 
     public EventLoopController(View view) {
         this.view = view;
@@ -51,10 +50,10 @@ public class EventLoopController implements Controller {
                 }
                 break;
             case SEARCH:
-                startComputing(event.getText(), event.getDepth());
+                startComputing(event.getText(), event.getInt());
                 break;
             case RANDOM_SEARCH:
-                startComputing(null, event.getDepth());
+                startComputing(null, event.getInt());
                 break;
             case LANGUAGE:
                 this.vertx.executeBlocking((Handler<Promise<String>>) p -> {
@@ -112,7 +111,7 @@ public class EventLoopController implements Controller {
                             }
                         }).compute();
                     } else {
-                        System.err.println(result.cause());
+                        System.err.println(result.cause().getMessage());
                     }
                 });
     }

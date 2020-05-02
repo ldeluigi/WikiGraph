@@ -7,7 +7,7 @@ public interface ViewEvent {
         return "";
     }
 
-    default int getDepth() {
+    default int getInt() {
         return 0;
     }
 
@@ -15,6 +15,6 @@ public interface ViewEvent {
     }
 
     enum EventType {
-        EXIT, SEARCH, RANDOM_SEARCH, CLEAR, LANGUAGE
+        EXIT, SEARCH, RANDOM_SEARCH, CLEAR, LANGUAGE, AUTO_UPDATE
     }
 }
