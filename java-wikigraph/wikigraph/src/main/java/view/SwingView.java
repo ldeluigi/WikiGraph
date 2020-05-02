@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class SwingView extends JFrame implements GraphStreamView {
@@ -41,24 +42,6 @@ public class SwingView extends JFrame implements GraphStreamView {
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new FlowLayout());
         this.language = new JTextField("en", 3);
-        this.language.addActionListener(e -> fireEvent(new ViewEvent() {
-            private final String lan = language.getText();
-            @Override
-            public EventType getType() {
-                return EventType.LANGUAGE;
-            }
-
-            @Override
-            public String getText() {
-                return this.lan;
-            }
-
-            @Override
-            public void onComplete(final boolean success) {
-                SwingUtilities.invokeLater(() ->
-                        JOptionPane.showMessageDialog(language, success ? "Language set to " + this.lan : "Language does not exist"));
-            }
-        }));
         bottomPanel.add(new JLabel("Language code: "));
         bottomPanel.add(this.language);
         bottomPanel.add(this.textOrUrl);
@@ -190,16 +173,29 @@ public class SwingView extends JFrame implements GraphStreamView {
 
     @Override
     public void doClear(final Runnable callback) {
-        fireEvent(EventType.CLEAR, () -> "", 0, callback);
+        fireEvent(EventType.CLEAR, () -> "", 0, b -> callback.run());
     }
 
     @Override
     public void doSearch(final Runnable then) {
-        fireEvent(EventType.SEARCH,
-                () -> textOrUrl.getText(),
-                (int) depth.getValue(),
-                () -> {
-                });
+        fireEvent(EventType.LANGUAGE,
+                this.language::getText,
+                0,
+                s -> {
+                    if (s) {
+                        fireEvent(EventType.SEARCH,
+                                textOrUrl::getText,
+                                (int) depth.getValue(),
+                                b -> {
+                                });
+                    } else {
+                        SwingUtilities.invokeLater(() ->
+                                JOptionPane.showMessageDialog(language,
+                                        "Language " + this.language.getText() +
+                                                " does not exist"));
+                    }
+                }
+        );
     }
 
     @Override
@@ -216,7 +212,7 @@ public class SwingView extends JFrame implements GraphStreamView {
         this.listeners.forEach(l -> l.notifyEvent(e));
     }
 
-    private void fireEvent(final EventType type, final Supplier<String> text, int depth, final Runnable callback) {
+    private void fireEvent(final EventType type, final Supplier<String> text, int depth, final Consumer<Boolean> callback) {
         this.fireEvent(new ViewEvent() {
             @Override
             public EventType getType() {
@@ -235,7 +231,7 @@ public class SwingView extends JFrame implements GraphStreamView {
 
             @Override
             public void onComplete(final boolean success) {
-                callback.run();
+                callback.accept(success);
             }
         });
     }
