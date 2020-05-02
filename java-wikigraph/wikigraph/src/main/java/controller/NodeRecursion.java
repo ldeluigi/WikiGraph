@@ -1,9 +1,11 @@
 package controller;
 
+import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
 import view.View;
 
+import java.util.List;
 import java.util.Optional;
 
 public abstract class NodeRecursion {
@@ -54,7 +56,14 @@ public abstract class NodeRecursion {
             if (this.getTerm() == null) { //random
                 result = this.getNodeFactory().random();
             } else { //search
-                result = this.getNodeFactory().from(this.getTerm());
+                WikiGraphNode temp = this.getNodeFactory().from(this.getTerm());
+                if (temp == null) {
+                    final List<Pair<String, String>> closest = this.getNodeFactory().search(this.getTerm());
+                    if (closest.size() > 0) {
+                        temp = this.getNodeFactory().from(closest.get(0).getKey());
+                    }
+                }
+                result = temp;
             }
         } else {
             result = this.getNodeFactory().from(this.getTerm());

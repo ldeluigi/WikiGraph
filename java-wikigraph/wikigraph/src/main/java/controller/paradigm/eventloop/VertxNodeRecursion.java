@@ -5,9 +5,12 @@ import controller.PartialWikiGraph;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
 import view.View;
+
+import java.util.List;
 
 public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
 
@@ -39,19 +42,26 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
                 return;
             }
             final WikiGraphNode result;
-            if (VertxNodeRecursion.this.getDepth() == 0) {
-                if (VertxNodeRecursion.this.getTerm() == null) { //random
-                    result = VertxNodeRecursion.this.getNodeFactory().random();
+            if (this.getDepth() == 0) {
+                if (this.getTerm() == null) { //random
+                    result = this.getNodeFactory().random();
                 } else { //search
-                    result = VertxNodeRecursion.this.getNodeFactory().from(VertxNodeRecursion.this.getTerm());
+                    WikiGraphNode temp = this.getNodeFactory().from(this.getTerm());
+                    if (temp == null) {
+                        final List<Pair<String, String>> closest = this.getNodeFactory().search(this.getTerm());
+                        if (closest.size() > 0) {
+                            temp = this.getNodeFactory().from(closest.get(0).getKey());
+                        }
+                    }
+                    result = temp;
                 }
             } else {
-                result = VertxNodeRecursion.this.getNodeFactory().from(VertxNodeRecursion.this.getTerm());
+                result = this.getNodeFactory().from(this.getTerm());
             }
             if (result != null) {
                 promise.complete(result);
             } else {
-                promise.fail(VertxNodeRecursion.this.getTerm() + " not found.");
+                promise.fail(this.getTerm() + " not found.");
             }
         }, false, event -> {
             if (this.getGraph().isAborted()) {
