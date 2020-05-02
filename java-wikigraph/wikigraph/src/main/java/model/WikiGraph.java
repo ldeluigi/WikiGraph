@@ -37,4 +37,10 @@ public interface WikiGraph {
      * @return true if term is a node id for a node
      */
     boolean contains(final String term);
+
+    /**
+     * Returns the root of the graph.
+     * @return the root as a string, or null if graph is empty
+     */
+    String getRoot();
 }

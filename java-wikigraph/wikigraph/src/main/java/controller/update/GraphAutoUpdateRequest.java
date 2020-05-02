@@ -23,10 +23,6 @@ public class GraphAutoUpdateRequest {
         return view;
     }
 
-    public String getRoot() {
-        return root;
-    }
-
     public int getDepth() {
         return depth;
     }

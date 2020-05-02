@@ -11,7 +11,7 @@ public class WikiGraphStart {
 
     public static void main(String[] args) {
         View view = new SwingView();
-        Controller controller = new ExecutorController(view);
+        Controller controller = new EventLoopController(view);
         controller.start();
     }
 

@@ -88,6 +88,11 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
     }
 
     @Override
+    public String getRoot() {
+        return this.graph.getRoot();
+    }
+
+    @Override
     public void setAborted() {
         synchronized (this.graph) {
             this.graph.setAborted();
