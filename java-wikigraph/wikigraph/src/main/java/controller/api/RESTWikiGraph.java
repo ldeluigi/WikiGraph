@@ -28,7 +28,7 @@ public class RESTWikiGraph extends HttpWikiGraph {
     }
 
     @Override
-    protected WikiGraphNode from(final String term, final String lang) {
+    protected WikiGraphNode from(final String term, final String lang, final int depth) {
         Set<String> sameTerm = new HashSet<>();
         sameTerm.add(term);
         String URLTerm = term.replace(" ", "_");
@@ -47,7 +47,7 @@ public class RESTWikiGraph extends HttpWikiGraph {
                 final Set<String> terms = new HashSet<>();
                 this.addToSet(terms, firstLanesLinks);
                 this.addToSet(terms, links);
-                return new WikiGraphNodeImpl(termResult, sameTerm, terms);
+                return new WikiGraphNodeImpl(termResult, depth, sameTerm, terms);
             }
             System.err.println("ERROR: RESTWikiGraph document is null");
         } catch (MalformedURLException e) {

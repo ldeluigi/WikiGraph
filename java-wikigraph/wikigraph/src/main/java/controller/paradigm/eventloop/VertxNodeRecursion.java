@@ -44,19 +44,19 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
             final WikiGraphNode result;
             if (this.getDepth() == 0) {
                 if (this.getTerm() == null) { //random
-                    result = this.getNodeFactory().random();
+                    result = this.getNodeFactory().random(0);
                 } else { //search
-                    WikiGraphNode temp = this.getNodeFactory().from(this.getTerm());
+                    WikiGraphNode temp = this.getNodeFactory().from(this.getTerm(), 0);
                     if (temp == null) {
                         final List<Pair<String, String>> closest = this.getNodeFactory().search(this.getTerm());
                         if (closest.size() > 0) {
-                            temp = this.getNodeFactory().from(closest.get(0).getKey());
+                            temp = this.getNodeFactory().from(closest.get(0).getKey(), 0);
                         }
                     }
                     result = temp;
                 }
             } else {
-                result = this.getNodeFactory().from(this.getTerm());
+                result = this.getNodeFactory().from(this.getTerm(), this.getDepth());
             }
             if (result != null) {
                 promise.complete(result);

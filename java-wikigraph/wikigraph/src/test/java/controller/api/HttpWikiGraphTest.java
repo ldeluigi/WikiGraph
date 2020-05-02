@@ -22,21 +22,21 @@ public class HttpWikiGraphTest {
     @Test
     void testFrom() {
         final WikiGraphNodeFactory g = new HttpWikiGraph();
-        assertNull(g.from(""));
-        assertNotNull(g.from("UK"));
-        assertNotNull(g.from("Albert Einstein"));
-        assertEquals("United Kingdom", g.from("UK").term());
-        assertTrue(g.from("Albert Einstein").childrenTerms().size() > 10);
+        assertNull(g.from("", 0));
+        assertNotNull(g.from("UK", 0));
+        assertNotNull(g.from("Albert Einstein", 0));
+        assertEquals("United Kingdom", g.from("UK", 0).term());
+        assertTrue(g.from("Albert Einstein", 0).childrenTerms().size() > 10);
     }
 
     @Test
     void testFromURL() {
         final WikiGraphNodeFactory g = new HttpWikiGraph();
         try {
-            assertNotNull(g.from(new URL("https://en.wikipedia.org/wiki/Introduction_to_quantum_mechanics#Wave%E2%80%93particle_duality")));
-            assertNull(g.from(new URL("https://en.wikipedia.org/wiki/Test_dummy#42")));
-            assertTrue(g.from(new URL("https://en.wikipedia.org/wiki/Introduction_to_quantum_mechanics#Wave%E2%80%93particle_duality")).childrenTerms().size() > 10);
-            assertEquals("United Kingdom", g.from(new URL("https://en.wikipedia.org/wiki/UK#42")).term());
+            assertNotNull(g.from(new URL("https://en.wikipedia.org/wiki/Introduction_to_quantum_mechanics#Wave%E2%80%93particle_duality"), 0));
+            assertNull(g.from(new URL("https://en.wikipedia.org/wiki/Test_dummy#42"), 0));
+            assertTrue(g.from(new URL("https://en.wikipedia.org/wiki/Introduction_to_quantum_mechanics#Wave%E2%80%93particle_duality"), 0).childrenTerms().size() > 10);
+            assertEquals("United Kingdom", g.from(new URL("https://en.wikipedia.org/wiki/UK#42"), 0).term());
         } catch (MalformedURLException e) {
             fail(e);
         }
@@ -53,12 +53,12 @@ public class HttpWikiGraphTest {
     @Test
     void testSynonyms() {
         final WikiGraphNodeFactory g = new HttpWikiGraph();
-        assertEquals(g.from("UK"), g.from("United Kingdom"));
+        assertEquals(g.from("UK", 0), g.from("United Kingdom", 0));
     }
 
     @Test
     void testRandom() {
         final WikiGraphNodeFactory g = new HttpWikiGraph();
-        assertNotNull(g.random());
+        assertNotNull(g.random(0));
     }
 }
