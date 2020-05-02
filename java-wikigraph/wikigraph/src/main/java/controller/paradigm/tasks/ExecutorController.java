@@ -8,6 +8,7 @@ import controller.paradigm.concurrent.SynchronizedWikiGraph;
 import model.WikiGraphNodeFactory;
 import view.View;
 import view.ViewEvent;
+import view.ViewEvent.EventType;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -25,6 +26,7 @@ public class ExecutorController implements Controller {
     private Optional<ViewEvent> event = Optional.empty();
     private ConcurrentWikiGraph last = null;
     private final AtomicReference<String> language = new AtomicReference<>(Locale.ENGLISH.getLanguage());
+    private boolean isQuiescent = true;
 
     public ExecutorController(final View view) {
         this.view = view;
@@ -33,41 +35,42 @@ public class ExecutorController implements Controller {
 
     @Override
     public void start() {
-        pool = ForkJoinPool.commonPool();
-        view.start();
+        this.pool = ForkJoinPool.commonPool();
+        this.view.start();
     }
 
     private void startComputing(final String root, final int depth) {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
         this.pool.execute(() -> {
             nodeFactory.setLanguage(language.get());
-            this.last = SynchronizedWikiGraph.empty();
-            this.pool.execute(new ComputeChildrenTask(nodeFactory, this.last, this.view, depth, root) {
+            ConcurrentWikiGraph graph = SynchronizedWikiGraph.empty();
+            scheduleLock.lock();
+            try {
+                this.last = graph;
+            } finally {
+                scheduleLock.unlock();
+            }
+            new ComputeChildrenTask(nodeFactory, graph, this.view, depth, root) {
                 @Override
                 public void onCompletion(CountedCompleter<?> caller) {
                     super.onCompletion(caller);
-                    endComputing();
+                    scheduleLock.lock();
+                    try {
+                        if (last == graph){
+                            if (event.isPresent()) {
+                                resolveEvent(event.get());
+                                event = Optional.empty();
+                            } else {
+                                isQuiescent = true;
+                            }
+                            last = null;
+                        }
+                    } finally {
+                        scheduleLock.unlock();
+                    }
                 }
-            });
+            }.compute();
         });
-    }
-
-    private void endComputing() {
-        this.scheduleLock.lock();
-        try {
-            if (this.event.isPresent()) {
-                final ViewEvent e = this.event.get();
-                if (e.getType().equals(ViewEvent.EventType.CLEAR)) {
-                    this.view.clearGraph();
-                } else {
-                    startComputing(e.getType().equals(ViewEvent.EventType.RANDOM_SEARCH) ? null : e.getText(),
-                            e.getDepth());
-                }
-                e.onComplete(true);
-            }
-        } finally {
-            scheduleLock.unlock();
-        }
     }
 
     private void exit() {
@@ -76,52 +79,50 @@ public class ExecutorController implements Controller {
         }
     }
 
-    @Override
-    public void notifyEvent(final ViewEvent event) {
-        if (event.getType().equals(ViewEvent.EventType.EXIT)) {
-            this.exit();
-            event.onComplete(true);
-        } else if (event.getType().equals(ViewEvent.EventType.SEARCH)) {
-            this.resolve(() -> {
-                        startComputing(event.getText(), event.getDepth());
+    private void resolveEvent(final ViewEvent event){
+        switch (event.getType()) {
+            case EXIT:
+                this.exit();
+                event.onComplete(true);
+                break;
+            case SEARCH:
+                startComputing(event.getText(), event.getDepth());
+                event.onComplete(true);
+                break;
+            case RANDOM_SEARCH:
+                startComputing(null, event.getDepth());
+                event.onComplete(true);
+                break;
+            case CLEAR:
+                this.view.clearGraph();
+                this.isQuiescent = true;
+                event.onComplete(true);
+                break;
+            case LANGUAGE:
+                this.pool.execute(() -> {
+                    if (new RESTWikiGraph().setLanguage(event.getText())) {
+                        this.language.set(event.getText());
                         event.onComplete(true);
-                    },
-                    () -> this.event = Optional.of(event));
-        } else if (event.getType().equals(ViewEvent.EventType.RANDOM_SEARCH)) {
-            this.resolve(() -> {
-                        startComputing(null, event.getDepth());
-                        event.onComplete(true);
-                    },
-                    () -> this.event = Optional.of(event));
-        } else if (event.getType().equals(ViewEvent.EventType.CLEAR)) {
-            this.resolve(() -> {
-                        this.view.clearGraph();
-                        event.onComplete(true);
-                    },
-                    () -> this.event = Optional.of(event));
-        } else if (event.getType().equals(ViewEvent.EventType.LANGUAGE)) {
-            this.pool.execute(() -> {
-                if (new RESTWikiGraph().setLanguage(event.getText())) {
-                    this.language.set(event.getText());
-                    event.onComplete(true);
-                } else {
-                    event.onComplete(false);
-                }
-            });
+                    } else {
+                        event.onComplete(false);
+                    }
+                });
+                break;
         }
     }
 
-    private void resolve(final Runnable quiescentBranch, final Runnable nonQuiescentBranch) {
-        if (this.last != null) {
-            this.last.setAborted();
-            this.last = null;
-        }
+    @Override
+    public void notifyEvent(final ViewEvent event) {
         this.scheduleLock.lock();
         try {
-            if (this.pool.isQuiescent()) {
-                quiescentBranch.run();
+            if (this.last != null) {
+                this.last.setAborted();
+            }
+            if (this.isQuiescent) {
+                this.isQuiescent = false;
+                this.resolveEvent(event);
             } else {
-                nonQuiescentBranch.run();
+                this.event = Optional.of(event);
             }
         } finally {
             this.scheduleLock.unlock();
