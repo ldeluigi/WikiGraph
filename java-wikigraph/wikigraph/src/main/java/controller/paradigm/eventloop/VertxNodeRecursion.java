@@ -8,6 +8,7 @@ import io.vertx.core.Vertx;
 import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
+import view.GraphDisplay;
 import view.View;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
         this.atCompletion = () -> father.childCompleted();
     }
 
-    public VertxNodeRecursion(Vertx vertx, WikiGraphNodeFactory factory, PartialWikiGraph graph, View view, int maxDepth, String term, Runnable atCompletion) {
+    public VertxNodeRecursion(Vertx vertx, WikiGraphNodeFactory factory, PartialWikiGraph graph, GraphDisplay view, int maxDepth, String term, Runnable atCompletion) {
         super(factory, graph, view, maxDepth, term);
         this.vertx = vertx;
         this.atCompletion = atCompletion;

@@ -7,7 +7,8 @@ import java.util.Set;
 
 public class MutableGraphImpl implements MutableWikiGraph {
     private final Map<String, WikiGraphNode> nodeMap = new HashMap<>();
-    private final WikiGraph view = WikiGraphs.from(this.nodeMap);
+    private String root = null;
+    private final WikiGraph view = WikiGraphs.from(this.nodeMap, null);
 
     @Override
     public boolean add(final WikiGraphNode node) {
@@ -15,6 +16,9 @@ public class MutableGraphImpl implements MutableWikiGraph {
             return false;
         }
         this.nodeMap.put(node.term(), node);
+        if (root == null) {
+            root = node.term();
+        }
         return true;
     }
 
@@ -22,6 +26,9 @@ public class MutableGraphImpl implements MutableWikiGraph {
     public boolean remove(final String nodeTerm) {
         if (this.nodeMap.containsKey(nodeTerm)) {
             this.nodeMap.remove(nodeTerm);
+            if (this.nodeMap.isEmpty()) {
+                this.root = null;
+            }
             return true;
         }
         return false;
@@ -54,5 +61,10 @@ public class MutableGraphImpl implements MutableWikiGraph {
     @Override
     public boolean contains(final String term) {
         return view.contains(term);
+    }
+
+    @Override
+    public String getRoot() {
+        return this.root;
     }
 }

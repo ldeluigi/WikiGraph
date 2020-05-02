@@ -1,6 +1,7 @@
 package model;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -12,7 +13,7 @@ public class WikiGraphs {
      * @param nodes the map of term -> node of that term
      * @return a view of the map as a {@link WikiGraph}
      */
-    public static WikiGraph from(Map<String, WikiGraphNode> nodes) {
+    public static WikiGraph from(final Map<String, WikiGraphNode> nodes, final String root) {
         return new WikiGraph() {
             @Override
             public Set<String> terms() {
@@ -38,6 +39,11 @@ public class WikiGraphs {
             @Override
             public boolean contains(final String term) {
                 return nodes.containsKey(term);
+            }
+
+            @Override
+            public String getRoot() {
+                return root;
             }
         };
     }
