@@ -1,19 +1,22 @@
 package controller.update;
 
+import model.WikiGraph;
 import model.WikiGraphNodeFactory;
 import view.GraphDisplay;
 
 public class GraphAutoUpdateRequest {
 
-    private WikiGraphNodeFactory nodeFactory;
-    private int depth;
-    private String root;
-    private GraphDisplay view = new NoOpView();
+    private final WikiGraphNodeFactory nodeFactory;
+    private final int depth;
+    private final String root;
+    private final GraphDisplay view = new NoOpView();
+    private final WikiGraph graph;
 
-    public GraphAutoUpdateRequest(WikiGraphNodeFactory nodeFactory, int depth, String root) {
+    public GraphAutoUpdateRequest(WikiGraph graph, WikiGraphNodeFactory nodeFactory, int depth, String root) {
         this.nodeFactory = nodeFactory;
         this.depth = depth;
         this.root = root;
+        this.graph = graph;
     }
 
     public GraphDisplay getView() {
@@ -30,6 +33,10 @@ public class GraphAutoUpdateRequest {
 
     public WikiGraphNodeFactory getNodeFactory() {
         return nodeFactory;
+    }
+    
+    public WikiGraph getOriginal() {
+        return this.graph;
     }
 }
 
