@@ -1,6 +1,6 @@
 package view;
 
-interface GraphDisplay {
+public interface GraphDisplay {
     void addNode(final String id, final int depth, final String lang);
 
     void addEdge(final String idFrom, final String idTo);
