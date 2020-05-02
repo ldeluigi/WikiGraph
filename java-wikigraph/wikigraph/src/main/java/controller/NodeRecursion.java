@@ -3,6 +3,7 @@ package controller;
 import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
+import view.GraphDisplay;
 import view.View;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public abstract class NodeRecursion {
 
     private final WikiGraphNodeFactory factory;
     private final PartialWikiGraph graph;
-    private final View view;
+    private final GraphDisplay view;
     private final int maxDepth;
     private final String term;
     private final String fatherID;
@@ -110,7 +111,7 @@ public abstract class NodeRecursion {
         return this.graph;
     }
 
-    public View getView() {
+    public GraphDisplay getView() {
         return this.view;
     }
 
