@@ -30,7 +30,7 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
     @Override
     public void compute() {
         if (this.getGraph().isAborted()) {
-            abort();
+            this.abort();
             return;
         }
         this.vertx.executeBlocking((Handler<Promise<WikiGraphNode>>) promise -> {
@@ -55,7 +55,7 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
             }
         }, false, event -> {
             if (this.getGraph().isAborted()) {
-                abort();
+                this.abort();
                 return;
             }
             if (event.succeeded()) {

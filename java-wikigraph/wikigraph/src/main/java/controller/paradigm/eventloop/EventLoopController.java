@@ -111,8 +111,7 @@ public class EventLoopController implements Controller {
                             } finally {
                                 mutex.unlock();
                             }
-                        })
-                                .compute();
+                        }).compute();
                     } else {
                         System.err.println(result.cause());
                     }
