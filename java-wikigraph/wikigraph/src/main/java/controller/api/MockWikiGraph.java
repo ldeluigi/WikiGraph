@@ -22,17 +22,17 @@ public class MockWikiGraph implements WikiGraphNodeFactory {
     }
 
     @Override
-    public WikiGraphNode from(URL url) {
-        return this.random();
+    public WikiGraphNode from(URL url, final int depth) {
+        return this.random(depth);
     }
 
     @Override
-    public WikiGraphNode from(String term) {
+    public WikiGraphNode from(String term, int depth) {
         Set<String> sameTerm = new HashSet<>();
         sameTerm.add(term);
         final Set<String> terms = new HashSet<>();
         IntStream.rangeClosed(0,this.rand.nextInt(2)).forEach(i -> terms.add(this.getRandomName()));
-        return new WikiGraphNodeImpl(term, sameTerm, terms);
+        return new WikiGraphNodeImpl(term, depth, sameTerm, terms);
     }
 
     private String getRandomName() {
@@ -40,8 +40,8 @@ public class MockWikiGraph implements WikiGraphNodeFactory {
     }
 
     @Override
-    public WikiGraphNode random() {
-        return from(this.getRandomName());
+    public WikiGraphNode random(final int depth) {
+        return from(this.getRandomName(), depth);
     }
 
     @Override

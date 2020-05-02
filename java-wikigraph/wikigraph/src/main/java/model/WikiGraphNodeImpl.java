@@ -8,15 +8,17 @@ public class WikiGraphNodeImpl implements WikiGraphNode {
     private final String name;
     private final Set<String> synonyms;
     private final Set<String> children;
+    private final int depth;
 
-    public WikiGraphNodeImpl(final String term, final Set<String> children) {
-        this(term, Collections.emptySet(), children);
+    public WikiGraphNodeImpl(final String term, final int depth, final Set<String> children) {
+        this(term, depth, Collections.emptySet(), children);
     }
 
-    public WikiGraphNodeImpl(final String term, final Set<String> synonyms, final Set<String> children) {
+    public WikiGraphNodeImpl(final String term, final int depth, final Set<String> synonyms, final Set<String> children) {
         this.name = term;
         this.synonyms = synonyms;
         this.children = children;
+        this.depth = depth;
     }
 
     @Override
@@ -27,6 +29,11 @@ public class WikiGraphNodeImpl implements WikiGraphNode {
     @Override
     public String term() {
         return this.name;
+    }
+
+    @Override
+    public int getDepth() {
+        return this.depth;
     }
 
     @Override

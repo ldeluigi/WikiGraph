@@ -19,4 +19,10 @@ public interface WikiGraphNode {
      * @return the term as a string
      */
     String term();
+
+    /**
+     * Returns the depth of the node.
+     * @return the node depth
+     */
+    int getDepth();
 }

@@ -52,21 +52,21 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
     }
 
     @Override
-    public WikiGraphNode from(final URL url) {
+    public WikiGraphNode from(final URL url, final int depth) {
         final Pattern pattern = Pattern.compile(".+wiki/([^/#]+).*");
         final Matcher matcher = pattern.matcher(url.getPath());
         if (matcher.find()) {
-            return this.from(matcher.group(1), this.getLanguage(url));
+            return this.from(matcher.group(1), this.getLanguage(url), depth);
         }
         throw new IllegalArgumentException("url didn't match patterns");
     }
 
     @Override
-    public WikiGraphNode from(final String term) {
-        return this.from(term, this.locale);
+    public WikiGraphNode from(final String term, final int depth) {
+        return this.from(term, this.locale, depth);
     }
 
-    protected WikiGraphNode from(final String term, final String lang) {
+    protected WikiGraphNode from(final String term, final String lang, final int depth) {
         final String URLTerm = term.replace(" ", "_");
         final HttpGET req = new HttpGET().setBaseURL(apiEndpoint(lang))
                 .addParameter("format", "json")
@@ -97,7 +97,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
                     terms.add(linkTerm);
                 }
             }
-            return new WikiGraphNodeImpl(termResult, sameTerm, terms);
+            return new WikiGraphNodeImpl(termResult, depth, sameTerm, terms);
         } else {
             return null;
         }
@@ -122,7 +122,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
     }
 
     @Override
-    public WikiGraphNode random() {
+    public WikiGraphNode random(final int depth) {
         final HttpGET req = new HttpGET().setBaseURL(apiEndpoint())
                 .addParameter("format", "json")
                 .addParameter("action", "query")
@@ -137,7 +137,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
                 if (results.length() > 0) {
                     final JSONObject result =  results.getJSONObject(0);
                     if (result.has("title")) {
-                        return from(result.getString("title"));
+                        return from(result.getString("title"), depth);
                     }
                 }
             }

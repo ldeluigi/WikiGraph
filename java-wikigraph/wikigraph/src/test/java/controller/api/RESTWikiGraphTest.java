@@ -22,21 +22,21 @@ public class RESTWikiGraphTest {
     @Test
     void testFrom() {
         final WikiGraphNodeFactory g = new RESTWikiGraph();
-        assertNotNull(g.from(""));
-        assertNotNull(g.from("UK"));
-        assertNotNull(g.from("Albert Einstein"));
-        assertEquals("United Kingdom", g.from("UK").term());
-        assertTrue(g.from("Albert Einstein").childrenTerms().size() > 10);
+        assertNotNull(g.from("", 0));
+        assertNotNull(g.from("UK", 0));
+        assertNotNull(g.from("Albert Einstein", 0));
+        assertEquals("United Kingdom", g.from("UK", 0).term());
+        assertTrue(g.from("Albert Einstein", 0).childrenTerms().size() > 10);
     }
 
     @Test
     void testFromURL() {
         final WikiGraphNodeFactory g = new RESTWikiGraph();
         try {
-            assertNotNull(g.from(new URL("https://en.wikipedia.org/wiki/Introduction_to_quantum_mechanics#Wave%E2%80%93particle_duality")));
-            assertNull(g.from(new URL("https://en.wikipedia.org/wiki/Test_dummy#42")));
-            assertTrue(g.from(new URL("https://en.wikipedia.org/wiki/Introduction_to_quantum_mechanics#Wave%E2%80%93particle_duality")).childrenTerms().size() > 10);
-            assertEquals("United Kingdom", g.from(new URL("https://en.wikipedia.org/wiki/UK#42")).term());
+            assertNotNull(g.from(new URL("https://en.wikipedia.org/wiki/Introduction_to_quantum_mechanics#Wave%E2%80%93particle_duality"), 0));
+            assertNull(g.from(new URL("https://en.wikipedia.org/wiki/Test_dummy#42"), 0));
+            assertTrue(g.from(new URL("https://en.wikipedia.org/wiki/Introduction_to_quantum_mechanics#Wave%E2%80%93particle_duality"), 0).childrenTerms().size() > 10);
+            assertEquals("United Kingdom", g.from(new URL("https://en.wikipedia.org/wiki/UK#42"), 0).term());
         } catch (MalformedURLException e) {
             fail(e);
         }
@@ -53,21 +53,21 @@ public class RESTWikiGraphTest {
     @Test
     void testSynonyms() {
         final WikiGraphNodeFactory g = new RESTWikiGraph();
-        assertEquals(g.from("UK"), g.from("United Kingdom"));
+        assertEquals(g.from("UK", 0), g.from("United Kingdom", 0));
     }
 
     @Test
     void testRandom() {
         final WikiGraphNodeFactory g = new RESTWikiGraph();
-        assertNotNull(g.random());
+        assertNotNull(g.random(0));
     }
 
     @Test
     void testHttpVsREST() throws MalformedURLException {
         final WikiGraphNodeFactory g = new RESTWikiGraph();
         final WikiGraphNodeFactory h = new HttpWikiGraph();
-        assertEquals(g.from("UK").term(), h.from("United Kingdom").term());
-        assertTrue(h.from("Albert Einstein").childrenTerms().containsAll(g.from("Albert Einstein").childrenTerms()));
-        assertEquals(h.from(new URL("https://en.wikipedia.org/wiki/UK#42")).term(), g.from(new URL("https://en.wikipedia.org/wiki/UK#42")).term());
+        assertEquals(g.from("UK", 0).term(), h.from("United Kingdom", 0).term());
+        assertTrue(h.from("Albert Einstein", 0).childrenTerms().containsAll(g.from("Albert Einstein", 0).childrenTerms()));
+        assertEquals(h.from(new URL("https://en.wikipedia.org/wiki/UK#42"), 0).term(), g.from(new URL("https://en.wikipedia.org/wiki/UK#42"), 0).term());
     }
 }

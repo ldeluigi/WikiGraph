@@ -26,9 +26,10 @@ public interface WikiGraphNodeFactory {
      * Blocking behaviour.
      *
      * @param url the wikipedia page URL
+     * @param depth the depth of the node
      * @return the node or null if something went wrong (term not found or connection problems)
      */
-    WikiGraphNode from(final URL url);
+    WikiGraphNode from(final URL url, final int depth);
 
     /**
      * Creates a structural {@link WikiGraphNode} from a wikipedia page title like
@@ -37,9 +38,10 @@ public interface WikiGraphNodeFactory {
      * Blocking behaviour.
      *
      * @param term the wikipedia page name
+     * @param depth the depth of the node
      * @return the node or null if something went wrong (term not found or connection problems)
      */
-    WikiGraphNode from(final String term);
+    WikiGraphNode from(final String term, final int depth);
 
     /**
      * Sets the internal language (the default) for this factory.
@@ -55,9 +57,10 @@ public interface WikiGraphNodeFactory {
      * Creates a structural {@link WikiGraphNode} from a random wikipedia page.
      * Blocking behaviour.
      *
+     * @param depth the depth of the node
      * @return he node or null if something went wrong
      */
-    WikiGraphNode random();
+    WikiGraphNode random(final int depth);
 
     /**
      * Returns the internal (default) language for this factory.
