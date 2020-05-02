@@ -4,7 +4,6 @@ import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
 import view.GraphDisplay;
-import view.View;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +34,7 @@ public abstract class NodeRecursion {
 
     protected NodeRecursion(final WikiGraphNodeFactory factory,
                             final PartialWikiGraph graph,
-                            final View view,
+                            final GraphDisplay view,
                             final int maxDepth,
                             final String term) {
         this.factory = factory;
