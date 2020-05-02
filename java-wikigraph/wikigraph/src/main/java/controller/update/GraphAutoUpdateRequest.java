@@ -10,7 +10,7 @@ public class GraphAutoUpdateRequest {
     private final int depth;
     private final String root;
     private final GraphDisplay view = new NoOpView();
-    private final WikiGraph graph;
+    private WikiGraph graph;
 
     public GraphAutoUpdateRequest(WikiGraph graph, WikiGraphNodeFactory nodeFactory, int depth, String root) {
         this.nodeFactory = nodeFactory;
@@ -37,6 +37,10 @@ public class GraphAutoUpdateRequest {
     
     public WikiGraph getOriginal() {
         return this.graph;
+    }
+
+    public void setOriginal(final WikiGraph graph) {
+        this.graph = graph;
     }
 }
 
