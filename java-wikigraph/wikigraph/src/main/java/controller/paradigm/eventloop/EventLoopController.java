@@ -33,45 +33,44 @@ public class EventLoopController implements Controller {
 
     @Override
     public void notifyEvent(final ViewEvent event) {
-        if (event.getType().equals(EventType.EXIT)) {
-            this.vertx.close();
-        } else {
-            switch (event.getType()) {
-                case CLEAR:
-                    mutex.lock();
-                    try {
-                        if (this.last == null) {
-                            this.view.clearGraph();
-                        } else {
-                            this.toClear = true;
-                            this.last.setAborted();
-                        }
-                    } finally {
-                        mutex.unlock();
+        switch (event.getType()) {
+            case EXIT:
+                this.vertx.close();
+                break;
+            case CLEAR:
+                mutex.lock();
+                try {
+                    if (this.last == null) {
+                        this.view.clearGraph();
+                    } else {
+                        this.toClear = true;
+                        this.last.setAborted();
                     }
-                    break;
-                case SEARCH:
-                    startComputing(event.getText(), event.getDepth());
-                    break;
-                case RANDOM_SEARCH:
-                    startComputing(null, event.getDepth());
-                    break;
-                case LANGUAGE:
-                    this.vertx.executeBlocking((Handler<Promise<String>>) p -> {
-                        if (new RESTWikiGraph().setLanguage(event.getText())) {
-                            p.complete(event.getText());
-                        } else {
-                            p.fail("Language doesn't exist");
-                        }
-                    }, result -> {
-                        if (result.succeeded()) {
-                            language = result.result();
-                            event.onComplete(true);
-                        } else {
-                            event.onComplete(false);
-                        }
-                    });
-            }
+                } finally {
+                    mutex.unlock();
+                }
+                break;
+            case SEARCH:
+                startComputing(event.getText(), event.getDepth());
+                break;
+            case RANDOM_SEARCH:
+                startComputing(null, event.getDepth());
+                break;
+            case LANGUAGE:
+                this.vertx.executeBlocking((Handler<Promise<String>>) p -> {
+                    if (new RESTWikiGraph().setLanguage(event.getText())) {
+                        p.complete(event.getText());
+                    } else {
+                        p.fail("Language doesn't exist");
+                    }
+                }, result -> {
+                    if (result.succeeded()) {
+                        language = result.result();
+                        event.onComplete(true);
+                    } else {
+                        event.onComplete(false);
+                    }
+                });
         }
     }
 
