@@ -8,7 +8,6 @@ import controller.paradigm.concurrent.SynchronizedWikiGraph;
 import model.WikiGraphNodeFactory;
 import view.View;
 import view.ViewEvent;
-import view.ViewEvent.EventType;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -86,11 +85,11 @@ public class ExecutorController implements Controller {
                 event.onComplete(true);
                 break;
             case SEARCH:
-                startComputing(event.getText(), event.getDepth());
+                startComputing(event.getText(), event.getInt());
                 event.onComplete(true);
                 break;
             case RANDOM_SEARCH:
-                startComputing(null, event.getDepth());
+                startComputing(null, event.getInt());
                 event.onComplete(true);
                 break;
             case CLEAR:

@@ -10,6 +10,8 @@ import view.ViewEvent.EventType;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -56,8 +58,21 @@ public class SwingView extends JFrame implements GraphStreamView {
         bottomPanel.add(new JLabel("AutoUpdate"));
         JCheckBox autoUpdate = new JCheckBox();
         bottomPanel.add(autoUpdate);
-        bottomPanel.add(new JLabel("Refresh Rate"));
+        bottomPanel.add(new JLabel("Refresh Delay ms:"));
         JSpinner refreshRate = new JSpinner(new SpinnerNumberModel(100, 0, MAX_DELAY, 5));
+        autoUpdate.addActionListener(e -> {
+            if (autoUpdate.isSelected()) {
+                fireEvent(EventType.AUTO_UPDATE,
+                        () -> "",
+                        (int) refreshRate.getValue(),
+                        b -> {});
+            } else {
+                fireEvent(EventType.AUTO_UPDATE,
+                        () -> "",
+                        -1,
+                        b -> {});
+            }
+        });
         bottomPanel.add(refreshRate);
         this.stats = new JLabel();
         this.stats.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 16));
@@ -86,7 +101,7 @@ public class SwingView extends JFrame implements GraphStreamView {
                     }
 
                     @Override
-                    public int getDepth() {
+                    public int getInt() {
                         return (int) depth.getValue();
                     }
                 })
@@ -212,7 +227,7 @@ public class SwingView extends JFrame implements GraphStreamView {
         this.listeners.forEach(l -> l.notifyEvent(e));
     }
 
-    private void fireEvent(final EventType type, final Supplier<String> text, int depth, final Consumer<Boolean> callback) {
+    private void fireEvent(final EventType type, final Supplier<String> text, int number, final Consumer<Boolean> callback) {
         this.fireEvent(new ViewEvent() {
             @Override
             public EventType getType() {
@@ -225,8 +240,8 @@ public class SwingView extends JFrame implements GraphStreamView {
             }
 
             @Override
-            public int getDepth() {
-                return depth;
+            public int getInt() {
+                return number;
             }
 
             @Override
