@@ -1,5 +1,7 @@
 package controller.paradigm.concurrent;
 
+import org.graphstream.graph.Graph;
+
 import java.util.concurrent.locks.Lock;
 
 public interface ConcurrentWikiGraph {
@@ -20,6 +22,10 @@ public interface ConcurrentWikiGraph {
     boolean contains(final String term);
 
     boolean addNode(final String term);
+
+    boolean addEdge(final String idFrom,final String idTo);
+
+    Graph getGraph();
 
     void setRootID(final String term);
 

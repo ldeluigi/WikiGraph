@@ -1,5 +1,11 @@
 package controller.paradigm.concurrent;
 
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.AbstractGraph;
+import org.graphstream.graph.implementations.MultiGraph;
+import org.graphstream.graph.implementations.MultiNode;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,7 +24,7 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
     private final Map<String, Lock> locks = new HashMap<>();
     private AtomicBoolean aborted = new AtomicBoolean(false);
     private String root;
-    private final Set<String> set = new HashSet<>();// TODO graphstream
+    private final Graph graph = new MultiGraph("WikiGraph2");
 
     @Override
     public void setAborted() {
@@ -31,13 +37,41 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
     }
 
     @Override
-    public boolean contains(final String term) {
-        return this.set.contains(term);
+    public boolean contains(final String term) {// TODO check che si comporti come deve
+        return this.graph.getNode(term)!=null;
     }
 
     @Override
     public boolean addNode(final String term) {
-        return this.set.add(term);
+        if (!this.contains(term)) {
+            return this.graph.addNode(term)!=null;
+        } else {
+            System.err.println("INFO: DUPLICATE NODE IGNORED - " + term);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean addEdge(final String idFrom,final String idTo){
+        final Node from = this.graph.getNode(idFrom);
+        if (from == null) {
+            System.err.println("ERROR: (Synchr) node " + idFrom + " not found. Aborting edge " + idFrom + "@@@" + idTo);
+            return false;
+        }
+        final Node to = this.graph.getNode(idTo);
+        if (to == null) {
+            System.err.println("ERROR: (Synchr) node " + idTo + " not found. Aborting edge " + idFrom + "@@@" + idTo);
+            return false;
+        }
+        final String name = idFrom + "@@@" + idTo;
+        if (this.graph.getEdge(name) == null) {
+            return this.graph.addEdge(idFrom + "@@@" + idTo, from, to, true)!=null;
+
+        }else return false;
+    }
+
+    public Graph getGraph(){
+        return this.graph;
     }
 
     @Override
