@@ -1,7 +1,7 @@
 package controller.paradigm.eventloop;
 
 import controller.NodeRecursion;
-import controller.PartialWikiGraph;
+import controller.paradigm.concurrent.ConcurrentWikiGraph;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -9,7 +9,6 @@ import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
 import view.GraphDisplay;
-import view.View;
 
 import java.util.List;
 
@@ -22,10 +21,10 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
     protected VertxNodeRecursion(VertxNodeRecursion father, String term) {
         super(father, term);
         this.vertx = father.getVertx();
-        this.atCompletion = () -> father.childCompleted();
+        this.atCompletion = father::childCompleted;
     }
 
-    public VertxNodeRecursion(Vertx vertx, WikiGraphNodeFactory factory, PartialWikiGraph graph, GraphDisplay view, int maxDepth, String term, Runnable atCompletion) {
+    public VertxNodeRecursion(Vertx vertx, WikiGraphNodeFactory factory, ConcurrentWikiGraph graph, GraphDisplay view, int maxDepth, String term, Runnable atCompletion) {
         super(factory, graph, view, maxDepth, term);
         this.vertx = vertx;
         this.atCompletion = atCompletion;
@@ -56,6 +55,9 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
                     }
                     result = temp;
                 }
+                if (result != null) {
+                    this.getGraph().setRootID(result.term());
+                }
             } else {
                 result = this.getNodeFactory().from(this.getTerm(), this.getDepth());
             }
@@ -76,7 +78,7 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
                     getView().addEdge(getFatherID(), result.term());
                 } else {
                     getView().addNode(result.term(), getDepth(), getNodeFactory().getLanguage());
-                    getGraph().add(result);
+                    getGraph().addNode(result.term());
                     if (getDepth() > 0) {
                         getView().addEdge(getFatherID(), result.term());
                     }
