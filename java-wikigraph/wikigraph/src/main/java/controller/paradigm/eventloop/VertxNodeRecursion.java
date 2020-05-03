@@ -75,11 +75,13 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
                 final WikiGraphNode result = event.result();
                 setID(result.term());
                 if (getGraph().contains(result.term())) {
+                    getGraph().addEdge(getFatherID(), result.term());
                     getView().addEdge(getFatherID(), result.term());
                 } else {
                     getView().addNode(result.term(), getDepth(), getNodeFactory().getLanguage());
                     getGraph().addNode(result.term());
                     if (getDepth() > 0) {
+                        getGraph().addEdge(getFatherID(), result.term());
                         getView().addEdge(getFatherID(), result.term());
                     }
                     if (getDepth() < getMaxDepth()) {
