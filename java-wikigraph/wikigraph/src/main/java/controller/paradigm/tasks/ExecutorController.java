@@ -5,9 +5,7 @@ import controller.Controller;
 import controller.api.RESTWikiGraph;
 import controller.paradigm.concurrent.ConcurrentWikiGraph;
 import controller.paradigm.concurrent.SynchronizedWikiGraph;
-import controller.paradigm.eventloop.VertxNodeRecursion;
 import controller.update.GraphAutoUpdateRequest;
-import controller.update.NoOpView;
 import model.WikiGraphNodeFactory;
 import view.View;
 import view.ViewEvent;
@@ -18,14 +16,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CountedCompleter;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static view.ViewEvent.EventType.RANDOM_SEARCH;
 
 public class ExecutorController implements Controller {
 
@@ -33,9 +28,13 @@ public class ExecutorController implements Controller {
     private final Lock scheduleLock = new ReentrantLock();
     private ScheduledThreadPoolExecutor pool;
     private Optional<ViewEvent> event = Optional.empty();
-    private ConcurrentWikiGraph last = null;
+    private ConcurrentWikiGraph graphBeingComputed = null;
     private final AtomicReference<String> language = new AtomicReference<>(Locale.ENGLISH.getLanguage());
     private boolean isQuiescent = true;
+    private boolean autoUpdate;
+    private GraphAutoUpdateRequest autoUpdateReq;
+    private boolean isUpdating;
+    private int updateDelay;
 
     public ExecutorController(final View view) {
         this.view = view;
@@ -55,7 +54,13 @@ public class ExecutorController implements Controller {
             ConcurrentWikiGraph graph = SynchronizedWikiGraph.empty();
             scheduleLock.lock();
             try {
-                this.last = graph;
+                if (this.graphBeingComputed != null) {
+                    System.out.println("START COMPUTING ABORTED LAST");
+                    this.graphBeingComputed.setAborted();
+                }
+                this.graphBeingComputed = graph;
+                this.isUpdating = false;
+                this.autoUpdateReq = new GraphAutoUpdateRequest(nodeFactory, depth, graph);
             } finally {
                 scheduleLock.unlock();
             }
@@ -65,19 +70,18 @@ public class ExecutorController implements Controller {
                     super.onCompletion(caller);
                     scheduleLock.lock();
                     try {
-                        if (last == graph){
-                            //autoUpdateReq = new GraphAutoUpdateRequest(nodeFactory, depth, graph);
+                        if (graphBeingComputed == graph){
+                            System.out.println(graph.getRootID() + " IS LAST");
+                            graphBeingComputed = null;
                             if (event.isPresent()) {
                                 resolveEvent(event.get());
                                 event = Optional.empty();
+                            } else if (autoUpdate && !graph.isAborted()) {
+                                System.out.println(graph.getRootID() + " STARTS AUTO UPDATING");
+                                startAutoUpdating(graph.getRootID());
                             } else {
                                 isQuiescent = true;
                             }
-                            /*if (autoUpdate && graphForAutoUpdate != null){
-                                System.out.println("updatein");
-                                autoUpdate(graphForAutoUpdate, timeToUpdate);
-                            }*/
-                            last = null;
                         }
                     } finally {
                         scheduleLock.unlock();
@@ -109,6 +113,12 @@ public class ExecutorController implements Controller {
                 event.onComplete(true);
                 break;
             case CLEAR:
+                scheduleLock.lock();
+                try {
+                    this.autoUpdateReq = null;
+                } finally {
+                    scheduleLock.unlock();
+                }
                 this.view.clearGraph();
                 this.isQuiescent = true;
                 event.onComplete(true);
@@ -124,9 +134,10 @@ public class ExecutorController implements Controller {
                 });
                 this.isQuiescent = true;
                 break;
-            /*case AUTO_UPDATE:
+            case AUTO_UPDATE:
                 scheduleLock.lock();
                 try {
+                    this.isQuiescent = true;
                     if (event.getInt() < 0 && this.autoUpdate) {
                         this.autoUpdate = false;
                         System.out.println("OFF AUTO UPDATE");
@@ -149,23 +160,29 @@ public class ExecutorController implements Controller {
                             }
                         }
                     }
-                    event.onComplete(true);
                 } finally {
                     scheduleLock.unlock();
                 }
-                break;*/
+                event.onComplete(true);
+                break;
         }
     }
 
-    /*private void startAutoUpdating(final String forRoot) {
+    private void startAutoUpdating(final String forRoot) {
+        System.out.println(forRoot+" has called startAutoUpdating");
         final ConcurrentWikiGraph graph = new SynchronizedWikiGraph();
         scheduleLock.lock();
         try {
             final String root = this.autoUpdateReq.getOriginal().getRootID();
-            if (this.autoUpdateReq == null || !this.autoUpdateReq.getOriginal().getRootID().equals(forRoot)) {
+            if (this.autoUpdateReq == null || !this.autoUpdateReq.getOriginal().getRootID().equals(forRoot) || !this.autoUpdate) {
                 System.out.println(forRoot + " UPDATE CANCELED");
+                if (this.event.isPresent()) {
+                    resolveEvent(event.get());
+                    event = Optional.empty();
+                }
                 return;
             }
+            this.isQuiescent = false;
             this.graphBeingComputed = graph;
             this.isUpdating = true;
             final WikiGraphNodeFactory nodeFactory = this.autoUpdateReq.getNodeFactory();
@@ -176,33 +193,34 @@ public class ExecutorController implements Controller {
                     super.onCompletion(caller);
                     scheduleLock.lock();
                     try {
-                        if (graphBeingComputed == graph && !graph.isAborted()) {
+                        if (event.isPresent()) {
+                            resolveEvent(event.get());
+                            event = Optional.empty();
+                        } else if (graphBeingComputed == graph && !graph.isAborted()) {
                             System.out.println("CALCULATING DIFFERENCES FOR " + root);
-
-                               // HERE COMPUTE DIFFERENCES
-
-                            graphBeingComputed = null;
+                            // HERE COMPUTE DIFFERENCES
+                            graphBeingComputed = null;// ask for it, non sto computando niente o nessuno è l'ultimo?
                             if (autoUpdate) {
                                 System.out.println("RESCHEDULING UPDATE FOR " + root);
                                 autoUpdateReq.updateOriginal(graph);
-
                                 pool.schedule(() -> startAutoUpdating(root), updateDelay, TimeUnit.MILLISECONDS);
                             } else {
                                 System.out.println("SHUT OFF ");
-                                isUpdating = false;
                             }
                         } else {
                             System.out.println(root + "UPDATES QUIETLY SHUTDOWN");
                         }
+                        isUpdating = false;
+                        isQuiescent = true;
                     } finally {
                         scheduleLock.unlock();
                     }
                 }
-            });
+            }.compute());
         } finally {
             scheduleLock.unlock();
         }
-    }*/
+    }
 
     @Override
     public void notifyEvent(final ViewEvent event) {
@@ -223,8 +241,8 @@ public class ExecutorController implements Controller {
     private void abortIfEventNeeds(final ViewEvent event) {
         List<EventType> events = Arrays.asList(EventType.RANDOM_SEARCH, EventType.SEARCH, EventType.LANGUAGE, EventType.CLEAR);
         System.out.println(event.getType());
-        if (this.last != null && events.contains(event.getType())) {
-            this.last.setAborted();
+        if (this.graphBeingComputed != null && events.contains(event.getType())) {
+            this.graphBeingComputed.setAborted();
         }
     }
 
