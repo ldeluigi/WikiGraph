@@ -77,11 +77,13 @@ public abstract class NodeRecursion {
         if (result != null) {
             this.setID(result.term());
             if (this.getGraph().contains(result.term())) {
+                this.getGraph().addEdge(this.getFatherID(), result.term());
                 this.getView().addEdge(this.getFatherID(), result.term());
             } else {
                 this.getView().addNode(result.term(), this.getDepth(), this.getNodeFactory().getLanguage());
                 this.getGraph().addNode(result.term());
                 if (this.getDepth() > 0) {
+                    this.getGraph().addEdge(this.getFatherID(), result.term());
                     this.getView().addEdge(this.getFatherID(), result.term());
                 }
                 if (this.getDepth() < this.getMaxDepth()) {
