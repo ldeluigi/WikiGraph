@@ -60,15 +60,18 @@ public class EventLoopController implements Controller {
                         this.toClear = true;
                         this.graphBeingComputed.setAborted();
                     }
+                    event.onComplete(true);
                 } finally {
                     mutex.unlock();
                 }
                 break;
             case SEARCH:
                 startComputing(event.getText(), event.getInt());
+                event.onComplete(true);
                 break;
             case RANDOM_SEARCH:
                 startComputing(null, event.getInt());
+                event.onComplete(true);
                 break;
             case LANGUAGE:
                 this.vertx.executeBlocking((Handler<Promise<String>>) p -> {
@@ -97,7 +100,7 @@ public class EventLoopController implements Controller {
                             this.graphBeingComputed = null;
                             this.isUpdating = false;
                         }
-                    } else if (event.getInt() > 0) {
+                    } else if (event.getInt() >= 0) {
                         this.updateDelay = event.getInt();
                         System.out.println("UPDATED DELAY");
                         if (!this.autoUpdate) {
@@ -110,6 +113,7 @@ public class EventLoopController implements Controller {
                             }
                         }
                     }
+                    event.onComplete(true);
                 } finally {
                     mutex.unlock();
                 }
