@@ -1,11 +1,8 @@
 package controller.paradigm.concurrent;
 
-import controller.PartialWikiGraph;
-import model.MutableWikiGraph;
-
 import java.util.concurrent.locks.Lock;
 
-public interface ConcurrentWikiGraph extends PartialWikiGraph {
+public interface ConcurrentWikiGraph {
 
     /**
      * Returns a lock that grants mutual exclusion between threads that are computing the exact
@@ -15,4 +12,16 @@ public interface ConcurrentWikiGraph extends PartialWikiGraph {
      * @return the lock paired with input term
      */
     Lock getLockOn(final String nodeTerm);
+
+    void setAborted();
+
+    boolean isAborted();
+
+    boolean contains(final String term);
+
+    boolean addNode(final String term);
+
+    void setRootID(final String term);
+
+    String getRootID();
 }

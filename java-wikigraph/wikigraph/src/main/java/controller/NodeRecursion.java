@@ -1,5 +1,6 @@
 package controller;
 
+import controller.paradigm.concurrent.ConcurrentWikiGraph;
 import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
@@ -11,7 +12,7 @@ import java.util.Optional;
 public abstract class NodeRecursion {
 
     private final WikiGraphNodeFactory factory;
-    private final PartialWikiGraph graph;
+    private final ConcurrentWikiGraph graph;
     private final GraphDisplay view;
     private final int maxDepth;
     private final String term;
@@ -32,8 +33,10 @@ public abstract class NodeRecursion {
         this.depth = father.getDepth() + 1;
     }
 
+
+
     protected NodeRecursion(final WikiGraphNodeFactory factory,
-                            final PartialWikiGraph graph,
+                            final ConcurrentWikiGraph graph,
                             final GraphDisplay view,
                             final int maxDepth,
                             final String term) {
@@ -65,6 +68,9 @@ public abstract class NodeRecursion {
                 }
                 result = temp;
             }
+            if (result != null) {
+                this.getGraph().setRootID(result.term());
+            }
         } else {
             result = this.getNodeFactory().from(this.getTerm(), this.getDepth());
         }
@@ -74,7 +80,7 @@ public abstract class NodeRecursion {
                 this.getView().addEdge(this.getFatherID(), result.term());
             } else {
                 this.getView().addNode(result.term(), this.getDepth(), this.getNodeFactory().getLanguage());
-                this.getGraph().add(result);
+                this.getGraph().addNode(result.term());
                 if (this.getDepth() > 0) {
                     this.getView().addEdge(this.getFatherID(), result.term());
                 }
@@ -106,10 +112,6 @@ public abstract class NodeRecursion {
         return this.factory;
     }
 
-    public PartialWikiGraph getGraph() {
-        return this.graph;
-    }
-
     public GraphDisplay getView() {
         return this.view;
     }
@@ -128,5 +130,9 @@ public abstract class NodeRecursion {
 
     protected final String getFatherID() {
         return this.fatherID;
+    }
+
+    protected final ConcurrentWikiGraph getGraph() {
+        return this.graph;
     }
 }

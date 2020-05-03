@@ -50,6 +50,9 @@ public abstract class ConcurrentNodeRecursion extends NodeRecursion {
                 }
                 result = temp;
             }
+            if (result != null) {
+                this.getGraph().setRootID(result.term());
+            }
         } else {
             result = this.getNodeFactory().from(this.getTerm(), this.getDepth());
         }
@@ -62,7 +65,7 @@ public abstract class ConcurrentNodeRecursion extends NodeRecursion {
                     this.getView().addEdge(this.getFatherID(), result.term());
                 } else {
                     this.getView().addNode(result.term(), this.getDepth(), this.getNodeFactory().getLanguage());
-                    this.graph.add(result);
+                    this.graph.addNode(result.term());
                     if (this.getDepth() > 0) {
                         this.getView().addEdge(this.getFatherID(), result.term());
                     }

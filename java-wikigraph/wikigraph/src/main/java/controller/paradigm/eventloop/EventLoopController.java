@@ -1,15 +1,14 @@
 package controller.paradigm.eventloop;
 
 import controller.Controller;
-import controller.PartialWikiGraph;
 import controller.api.RESTWikiGraph;
-import controller.paradigm.concurrent.PartialWikiGraphImpl;
+import controller.paradigm.concurrent.ConcurrentWikiGraph;
+import controller.paradigm.concurrent.SynchronizedWikiGraph;
 import controller.update.GraphAutoUpdateRequest;
 import controller.update.NoOpView;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import model.WikiGraph;
 import model.WikiGraphNodeFactory;
 import view.View;
 import view.ViewEvent;
@@ -23,7 +22,7 @@ public class EventLoopController implements Controller {
     private final View view;
     private final Vertx vertx;
     private String language = Locale.ENGLISH.getLanguage();
-    private PartialWikiGraph graphBeingComputed;
+    private ConcurrentWikiGraph graphBeingComputed;
     private boolean toClear;
     private final Lock mutex = new ReentrantLock();
 
@@ -107,7 +106,7 @@ public class EventLoopController implements Controller {
                             if (this.graphBeingComputed == null && this.autoUpdateReq != null) {
                                 if (this.isUpdating) throw new IllegalStateException("is Updating left true");
                                 System.out.println("STARTING AUTO UPDATE");
-                                startAutoUpdating(this.autoUpdateReq.getOriginal().getRoot());
+                                startAutoUpdating(this.autoUpdateReq.getOriginal().getRootID());
                             }
                         }
                     }
@@ -119,17 +118,16 @@ public class EventLoopController implements Controller {
     }
 
     private void startAutoUpdating(final String forRoot) {
-        final PartialWikiGraph graph = new PartialWikiGraphImpl();
+        final ConcurrentWikiGraph graph = new SynchronizedWikiGraph();
         mutex.lock();
         try {
-            final String root = this.autoUpdateReq.getOriginal().getRoot();
-            if (this.autoUpdateReq == null || !this.autoUpdateReq.getOriginal().getRoot().equals(forRoot)) {
+            final String root = this.autoUpdateReq.getOriginal().getRootID();
+            if (this.autoUpdateReq == null || !this.autoUpdateReq.getOriginal().getRootID().equals(forRoot)) {
                 System.out.println(forRoot + " UPDATE CANCELED");
                 return;
             }
             this.graphBeingComputed = graph;
             this.isUpdating = true;
-            final WikiGraph old = this.autoUpdateReq.getOriginal();
             final WikiGraphNodeFactory fac = this.autoUpdateReq.getNodeFactory();
             final int maxDepth = this.autoUpdateReq.getDepth();
             this.vertx.runOnContext(new VertxNodeRecursion(this.vertx,
@@ -148,7 +146,7 @@ public class EventLoopController implements Controller {
                         this.graphBeingComputed = null;
                         if (this.autoUpdate) {
                             System.out.println("RESCHEDULING UPDATE FOR " + root);
-                            this.autoUpdateReq.setOriginal(graph);
+                            this.autoUpdateReq.updateOriginal(graph);
                             this.vertx.setTimer(this.updateDelay, p -> startAutoUpdating(root));
                         } else {
                             System.out.println("SHUT OFF ");
@@ -168,7 +166,7 @@ public class EventLoopController implements Controller {
 
     private void startComputing(String term, int depth) {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
-        final PartialWikiGraph graph = new PartialWikiGraphImpl();
+        final ConcurrentWikiGraph graph = new SynchronizedWikiGraph();
         mutex.lock();
         try {
             if (this.graphBeingComputed != null) {
@@ -177,7 +175,7 @@ public class EventLoopController implements Controller {
             }
             this.graphBeingComputed = graph;
             this.isUpdating = false;
-            this.autoUpdateReq = new GraphAutoUpdateRequest(graph, nodeFactory, depth, term);
+            this.autoUpdateReq = new GraphAutoUpdateRequest(nodeFactory, depth, graph);
         } finally {
             mutex.unlock();
         }
@@ -195,20 +193,20 @@ public class EventLoopController implements Controller {
                             mutex.lock();
                             try {
                                 if (this.graphBeingComputed == graph) {
-                                    System.out.println(term + " IS LAST");
+                                    System.out.println(graph.getRootID() + " IS LAST");
                                     this.graphBeingComputed = null;
                                     if (toClear) {
-                                        System.out.println(term + " CLEARS");
+                                        System.out.println(graph.getRootID() + " CLEARS");
                                         this.view.clearGraph();
                                         this.autoUpdateReq = null;
                                         System.out.println(Thread.currentThread().getName() + " cleared");
                                         this.toClear = false;
                                     } else if (autoUpdate && !graph.isAborted()) {
-                                        System.out.println(term + " STARTS AUTO UPDATING");
-                                        startAutoUpdating(graph.getRoot());
+                                        System.out.println(graph.getRootID() + " STARTS AUTO UPDATING");
+                                        startAutoUpdating(graph.getRootID());
                                     }
                                 } else {
-                                    System.out.println(term + " QUIETLY SHUTS DOWN");
+                                    System.out.println(graph.getRootID() + " QUIETLY SHUTS DOWN");
                                 }
                             } finally {
                                 mutex.unlock();
