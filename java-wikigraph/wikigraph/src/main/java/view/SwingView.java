@@ -10,8 +10,6 @@ import view.ViewEvent.EventType;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -65,12 +63,14 @@ public class SwingView extends JFrame implements GraphStreamView {
                 fireEvent(EventType.AUTO_UPDATE,
                         () -> "",
                         (int) refreshRate.getValue(),
-                        b -> {});
+                        b -> {
+                        });
             } else {
                 fireEvent(EventType.AUTO_UPDATE,
                         () -> "",
                         -1,
-                        b -> {});
+                        b -> {
+                        });
             }
         });
         bottomPanel.add(refreshRate);
@@ -188,7 +188,12 @@ public class SwingView extends JFrame implements GraphStreamView {
 
     @Override
     public void doClear(final Runnable callback) {
-        fireEvent(EventType.CLEAR, () -> "", 0, b -> callback.run());
+        fireEvent(EventType.CLEAR, () -> "", 0, b -> {
+            if (b) {
+                this.setTitle("WikiGraph");
+            }
+            callback.run();
+        });
     }
 
     @Override
@@ -201,8 +206,7 @@ public class SwingView extends JFrame implements GraphStreamView {
                         fireEvent(EventType.SEARCH,
                                 textOrUrl::getText,
                                 (int) depth.getValue(),
-                                b -> {
-                                });
+                                b -> this.setTitle("WikiGraph - Search " + textOrUrl.getText()));
                     } else {
                         SwingUtilities.invokeLater(() ->
                                 JOptionPane.showMessageDialog(language,
