@@ -10,11 +10,11 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 public class MockWikiGraph implements WikiGraphNodeFactory {
-    private List<String> randomName = Arrays.asList(
-            "pippo","pluto","paperino","Cerroni","Deluigi","Magnani","uomo", "poche", "parole", "qualcuno", "che", "si",
-            "vende", "per","poco", "letteralmente", "proprio", "perche", "dire", "cerca", "venirne", "capo",
+    private final List<String> randomName = Arrays.asList(
+            "pippo", "pluto", "paperino", "Cerroni", "Deluigi", "Magnani", "uomo", "poche", "parole", "qualcuno", "che", "si",
+            "vende", "per", "poco", "letteralmente", "proprio", "perche", "dire", "cerca", "venirne", "capo",
             "altrimenti", "indica", "qualcuno", "segreti", "possono", "cruciverba");
-    private Random rand = new Random();
+    private final Random rand = new Random();
 
     @Override
     public List<Pair<String, String>> search(String term) {
@@ -31,7 +31,7 @@ public class MockWikiGraph implements WikiGraphNodeFactory {
         Set<String> sameTerm = new HashSet<>();
         sameTerm.add(term);
         final Set<String> terms = new HashSet<>();
-        IntStream.rangeClosed(0,this.rand.nextInt(2)).forEach(i -> terms.add(this.getRandomName()));
+        IntStream.rangeClosed(0, this.rand.nextInt(2)).forEach(i -> terms.add(this.getRandomName()));
         return new WikiGraphNodeImpl(term, depth, sameTerm, terms);
     }
 

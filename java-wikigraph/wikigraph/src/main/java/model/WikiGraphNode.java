@@ -22,6 +22,7 @@ public interface WikiGraphNode {
 
     /**
      * Returns the depth of the node.
+     *
      * @return the node depth
      */
     int getDepth();

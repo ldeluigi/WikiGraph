@@ -1,24 +1,18 @@
 package controller.update;
 
-import controller.paradigm.concurrent.ConcurrentWikiGraph;
+import controller.utils.WikiGraphManager;
 import model.WikiGraphNodeFactory;
-import view.GraphDisplay;
 
 public class GraphAutoUpdateRequest {
 
     private final WikiGraphNodeFactory nodeFactory;
     private final int depth;
-    private final GraphDisplay view = new NoOpView();
-    private ConcurrentWikiGraph graph;
+    private WikiGraphManager graph;
 
-    public GraphAutoUpdateRequest(WikiGraphNodeFactory nodeFactory, int depth, ConcurrentWikiGraph original) {
+    public GraphAutoUpdateRequest(WikiGraphNodeFactory nodeFactory, int depth, WikiGraphManager original) {
         this.nodeFactory = nodeFactory;
         this.depth = depth;
         this.graph = original;
-    }
-
-    public GraphDisplay getView() {
-        return view;
     }
 
     public int getDepth() {
@@ -29,11 +23,11 @@ public class GraphAutoUpdateRequest {
         return nodeFactory;
     }
 
-    public ConcurrentWikiGraph getOriginal() {
+    public WikiGraphManager getOriginal() {
         return this.graph;
     }
 
-    public void updateOriginal(final ConcurrentWikiGraph graph) {
+    public void updateOriginal(final WikiGraphManager graph) {
         this.graph = graph;
     }
 }

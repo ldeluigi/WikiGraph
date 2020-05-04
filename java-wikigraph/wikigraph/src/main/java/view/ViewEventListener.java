@@ -1,6 +1,4 @@
-package controller;
-
-import view.ViewEvent;
+package view;
 
 import java.util.EventListener;
 

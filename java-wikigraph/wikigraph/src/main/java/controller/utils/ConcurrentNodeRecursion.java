@@ -1,17 +1,14 @@
-package controller.paradigm.concurrent;
+package controller.utils;
 
-import controller.NodeRecursion;
 import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
-import view.GraphDisplay;
-import view.View;
 
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
 public abstract class ConcurrentNodeRecursion extends NodeRecursion {
-    private final ConcurrentWikiGraph graph;
+    private final WikiGraphManager graph;
 
     protected ConcurrentNodeRecursion(final ConcurrentNodeRecursion father, final String term) {
         super(father, term);
@@ -19,14 +16,14 @@ public abstract class ConcurrentNodeRecursion extends NodeRecursion {
     }
 
     protected ConcurrentNodeRecursion(final WikiGraphNodeFactory factory,
-                                      final ConcurrentWikiGraph graph,
+                                      final WikiGraphManager graph,
                                       final int maxDepth,
                                       final String term) {
         super(factory, graph, maxDepth, term);
         this.graph = graph;
     }
 
-    private ConcurrentWikiGraph getConcurrentGraph() {
+    private WikiGraphManager getConcurrentGraph() {
         return this.graph;
     }
 
@@ -69,7 +66,7 @@ public abstract class ConcurrentNodeRecursion extends NodeRecursion {
                         this.graph.addEdge(this.getFatherID(), result.term());
                     }
                     if (this.getDepth() < this.getMaxDepth()) {
-                        for (String child : result.childrenTerms()) {
+                        for (final String child : result.childrenTerms()) {
                             childBirth(child);
                         }
                     }

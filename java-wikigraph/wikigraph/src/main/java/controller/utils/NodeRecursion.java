@@ -1,6 +1,5 @@
-package controller;
+package controller.utils;
 
-import controller.paradigm.concurrent.ConcurrentWikiGraph;
 import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
@@ -11,7 +10,7 @@ import java.util.Optional;
 public abstract class NodeRecursion {
 
     private final WikiGraphNodeFactory factory;
-    private final ConcurrentWikiGraph graph;
+    private final WikiGraphManager graph;
     private final int maxDepth;
     private final String term;
     private final String fatherID;
@@ -31,9 +30,8 @@ public abstract class NodeRecursion {
     }
 
 
-
     protected NodeRecursion(final WikiGraphNodeFactory factory,
-                            final ConcurrentWikiGraph graph,
+                            final WikiGraphManager graph,
                             final int maxDepth,
                             final String term) {
         this.factory = factory;
@@ -122,7 +120,7 @@ public abstract class NodeRecursion {
         return this.fatherID;
     }
 
-    protected final ConcurrentWikiGraph getGraph() {
+    protected final WikiGraphManager getGraph() {
         return this.graph;
     }
 }

@@ -1,4 +1,4 @@
-package controller.paradigm.concurrent;
+package controller.utils;
 
 import controller.update.NoOpView;
 import org.graphstream.graph.Graph;
@@ -19,12 +19,41 @@ import java.util.concurrent.locks.ReentrantLock;
  * - A manager for {@link Lock}s that are separate for each term, to grant mutual exclusion between
  * tasks relative to the same term.
  */
-public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
+public class SynchronizedWikiGraphManager implements WikiGraphManager {
     private final Map<String, Lock> locks = new HashMap<>();
     private final AtomicBoolean aborted = new AtomicBoolean(false);
+    private final Graph graph;
     private String root;
-    private final Graph graph = Graphs.synchronizedGraph(new MultiGraph("WikiGraph2"));
     private GraphDisplay view = new NoOpView();
+
+    private SynchronizedWikiGraphManager(final boolean mutexOnGraph) {
+        final Graph g = new MultiGraph("WikiGraphModel");
+        if (mutexOnGraph) {
+            this.graph = Graphs.synchronizedGraph(g);
+        } else {
+            this.graph = g;
+        }
+    }
+
+    /**
+     * Returns an empty fresh new {@link SynchronizedWikiGraphManager},
+     * with a mutex protection on the internal graph.
+     *
+     * @return a new empty synchronized graph
+     */
+    public static SynchronizedWikiGraphManager threadSafe() {
+        return new SynchronizedWikiGraphManager(true);
+    }
+
+    /**
+     * Returns an empty fresh new {@link SynchronizedWikiGraphManager},
+     * without a mutex protecting the graph.
+     *
+     * @return a new empty synchronized graph
+     */
+    public static SynchronizedWikiGraphManager empty() {
+        return new SynchronizedWikiGraphManager(false);
+    }
 
     @Override
     public void setAborted() {
@@ -76,13 +105,8 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
         return false;
     }
 
-    public Graph getGraph() {
+    public Graph graph() {
         return this.graph;
-    }
-
-    @Override
-    public void setRootID(String term) {
-        this.root = term;
     }
 
     @Override
@@ -91,19 +115,14 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
     }
 
     @Override
+    public void setRootID(String term) {
+        this.root = term;
+    }
+
+    @Override
     public void setGraphDisplay(final GraphDisplay view) {
         this.view = view;
     }
-
-    /**
-     * Returns an empty fresh new {@link SynchronizedWikiGraph}.
-     *
-     * @return a new empty synchronized graph
-     */
-    public static SynchronizedWikiGraph empty() {
-        return new SynchronizedWikiGraph();
-    }
-
 
     @Override
     public Lock getLockOn(final String nodeTerm) {

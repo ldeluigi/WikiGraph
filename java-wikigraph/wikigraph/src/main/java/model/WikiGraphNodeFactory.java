@@ -25,7 +25,7 @@ public interface WikiGraphNodeFactory {
      * "https://en.wikipedia.org/wiki/Albert_Einstein".
      * Blocking behaviour.
      *
-     * @param url the wikipedia page URL
+     * @param url   the wikipedia page URL
      * @param depth the depth of the node
      * @return the node or null if something went wrong (term not found or connection problems)
      */
@@ -37,7 +37,7 @@ public interface WikiGraphNodeFactory {
      * Can be used with {@link WikiGraphNode#childrenTerms()}.
      * Blocking behaviour.
      *
-     * @param term the wikipedia page name
+     * @param term  the wikipedia page name
      * @param depth the depth of the node
      * @return the node or null if something went wrong (term not found or connection problems)
      */
@@ -64,12 +64,14 @@ public interface WikiGraphNodeFactory {
 
     /**
      * Returns the internal (default) language for this factory.
+     *
      * @return the language code
      */
     String getLanguage();
 
     /**
      * Returns the language to which the url refers.
+     *
      * @param url a wikipedia url
      * @return the language code
      */

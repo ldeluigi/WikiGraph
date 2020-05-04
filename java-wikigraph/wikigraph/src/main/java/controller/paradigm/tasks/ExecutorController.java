@@ -2,11 +2,10 @@ package controller.paradigm.tasks;
 
 
 import controller.Controller;
-import controller.api.RESTWikiGraph;
-import controller.paradigm.concurrent.ConcurrentWikiGraph;
-import controller.paradigm.concurrent.SynchronizedWikiGraph;
 import controller.update.GraphAutoUpdateRequest;
-import controller.update.NoOpView;
+import controller.utils.SynchronizedWikiGraphManager;
+import controller.utils.WikiGraphManager;
+import controller.api.RESTWikiGraph;
 import model.WikiGraphNodeFactory;
 import view.View;
 import view.ViewEvent;
@@ -27,10 +26,10 @@ public class ExecutorController implements Controller {
 
     private final View view;
     private final Lock mutex = new ReentrantLock();
+    private final AtomicReference<String> language = new AtomicReference<>(Locale.ENGLISH.getLanguage());
     private ScheduledThreadPoolExecutor pool;
     private Optional<ViewEvent> event = Optional.empty();
-    private ConcurrentWikiGraph graphBeingComputed = null;
-    private final AtomicReference<String> language = new AtomicReference<>(Locale.ENGLISH.getLanguage());
+    private WikiGraphManager graphBeingComputed = null;
     private boolean isQuiescent = true;
     private boolean autoUpdate;
     private GraphAutoUpdateRequest autoUpdateReq;
@@ -52,7 +51,7 @@ public class ExecutorController implements Controller {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
         this.pool.execute(() -> {
             nodeFactory.setLanguage(language.get());
-            ConcurrentWikiGraph graph = SynchronizedWikiGraph.empty();
+            WikiGraphManager graph = SynchronizedWikiGraphManager.threadSafe();
             mutex.lock();
             try {
                 if (this.graphBeingComputed != null) {
@@ -65,13 +64,13 @@ public class ExecutorController implements Controller {
             } finally {
                 mutex.unlock();
             }
-            new ComputeChildrenTask(nodeFactory, graph, this.view, depth, root) {
+            new ComputeChildrenTask(nodeFactory, graph, depth, root) {
                 @Override
                 public void onCompletion(CountedCompleter<?> caller) {
                     super.onCompletion(caller);
                     mutex.lock();
                     try {
-                        if (graphBeingComputed == graph){
+                        if (graphBeingComputed == graph) {
                             System.out.println(graph.getRootID() + " IS LAST");
                             graphBeingComputed = null;
                             if (event.isPresent()) {
@@ -99,7 +98,7 @@ public class ExecutorController implements Controller {
     }
 
     //u need to have lock to call this method
-    private void resolveEvent(final ViewEvent event){
+    private void resolveEvent(final ViewEvent event) {
         switch (event.getType()) {
             case EXIT:
                 this.exit();
@@ -168,8 +167,9 @@ public class ExecutorController implements Controller {
     }
 
     private void startAutoUpdating(final String forRoot) {
-        System.out.println(forRoot+" has called startAutoUpdating");
-        final ConcurrentWikiGraph graph = new SynchronizedWikiGraph();
+        System.out.println(forRoot + " has called startAutoUpdating");
+        final WikiGraphManager graph = SynchronizedWikiGraphManager.threadSafe();
+        graph.setGraphDisplay(this.view);
         mutex.lock();
         try {
             final String root = this.autoUpdateReq.getOriginal().getRootID();
@@ -186,7 +186,7 @@ public class ExecutorController implements Controller {
             this.isUpdating = true;
             final WikiGraphNodeFactory nodeFactory = this.autoUpdateReq.getNodeFactory();
             final int depth = this.autoUpdateReq.getDepth();
-            this.pool.execute(() -> new ComputeChildrenTask(nodeFactory, graph, new NoOpView(), depth, root) {
+            this.pool.execute(() -> new ComputeChildrenTask(nodeFactory, graph, depth, root) {
                 @Override
                 public void onCompletion(CountedCompleter<?> caller) {
                     super.onCompletion(caller);
