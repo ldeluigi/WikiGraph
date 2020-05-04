@@ -32,10 +32,6 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
 
     @Override
     public void compute() {
-        if (this.getGraph().isAborted()) {
-            this.abort();
-            return;
-        }
         this.vertx.executeBlocking((Handler<Promise<WikiGraphNode>>) promise -> {
             if (this.getGraph().isAborted()) {
                 promise.fail("Graph aborted");
@@ -105,7 +101,7 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
     @Override
     protected void childBirth(String term) {
         this.childrenYetToComplete++;
-        this.vertx.runOnContext(new VertxNodeRecursion(this, term));
+        new VertxNodeRecursion(this, term).compute();
     }
 
     @Override
