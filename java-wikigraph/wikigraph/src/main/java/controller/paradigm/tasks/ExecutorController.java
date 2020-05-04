@@ -197,7 +197,7 @@ public class ExecutorController implements Controller {
                             event = Optional.empty();
                         } else if (graphBeingComputed == graph && !graph.isAborted()) {
                             System.out.println("CALCULATING DIFFERENCES FOR " + root);
-                            // HERE COMPUTE DIFFERENCES
+                            // HERE COMPUTE DIFFERENCES   betw graph-autoUpdateReq.getOriginal();
                             graphBeingComputed = null;// ask for it, non sto computando niente o nessuno è l'ultimo?
                             if (autoUpdate) {
                                 System.out.println("RESCHEDULING UPDATE FOR " + root);
