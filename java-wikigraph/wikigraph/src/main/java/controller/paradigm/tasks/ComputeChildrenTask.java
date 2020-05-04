@@ -1,11 +1,8 @@
 package controller.paradigm.tasks;
 
-import controller.paradigm.concurrent.ConcurrentNodeRecursion;
-import controller.paradigm.concurrent.ConcurrentWikiGraph;
+import controller.utils.ConcurrentNodeRecursion;
+import controller.utils.WikiGraphManager;
 import model.WikiGraphNodeFactory;
-import org.graphstream.graph.Graph;
-import view.GraphDisplay;
-import view.View;
 
 import java.util.concurrent.CountedCompleter;
 
@@ -19,9 +16,9 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
         this.nr = rec;
     }
 
-    public ComputeChildrenTask(WikiGraphNodeFactory factory, ConcurrentWikiGraph graph,
-                               GraphDisplay view, int maxDepth, String term) {
-        this.nr = new TaskNodeRecursion(factory, graph, view, maxDepth, term);
+    public ComputeChildrenTask(WikiGraphNodeFactory factory, WikiGraphManager graph,
+                               int maxDepth, String term) {
+        this.nr = new TaskNodeRecursion(factory, graph, maxDepth, term);
     }
 
     @Override
@@ -41,8 +38,8 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
             super(father, term);
         }
 
-        public TaskNodeRecursion(final WikiGraphNodeFactory factory, final ConcurrentWikiGraph graph,
-                                 final GraphDisplay view, final int maxDepth, final String term) {
+        public TaskNodeRecursion(final WikiGraphNodeFactory factory, final WikiGraphManager graph,
+                                 final int maxDepth, final String term) {
             super(factory, graph, maxDepth, term);
         }
 

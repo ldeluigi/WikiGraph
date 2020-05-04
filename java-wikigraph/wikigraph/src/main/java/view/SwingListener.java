@@ -48,7 +48,8 @@ public class SwingListener implements MouseListener, MouseMotionListener, MouseW
 
     private void ctrlClickEvent(final Node nodeClicked) {
         this.view.prepareSearch(nodeClicked.getId());
-        this.view.doClear(() -> this.view.doSearch(() -> {}));
+        this.view.doClear(() -> this.view.doSearch(() -> {
+        }));
     }
 
     private Node getNode(final MouseEvent event) {

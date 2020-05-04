@@ -5,6 +5,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.stream.Sink;
 import view.GraphDisplay;
 
+// TODO mettere i final
 public class GraphDisplaySink implements Sink {
     public static final String DEPTH_ATTRIBUTE = "depth";
 
@@ -84,9 +85,7 @@ public class GraphDisplaySink implements Sink {
     @Override
     public void edgeRemoved(String sourceId, long timeId, String edgeId) {
         final Edge e = this.initialGraph.getEdge(edgeId);
-        final String id0 = e.getNode0().getId();
-        final String id1 = e.getNode1().getId();
-        this.view.removeEdge(id0, id1);
+        this.view.removeEdge(e.getNode0().getId(), e.getNode1().getId());
     }
 
     @Override

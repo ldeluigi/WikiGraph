@@ -1,34 +1,32 @@
 package controller.paradigm.eventloop;
 
 import controller.Controller;
-import controller.api.RESTWikiGraph;
 import controller.graphstream.GraphDisplaySink;
 import controller.graphstream.OrderedGraphDiff;
-import controller.paradigm.concurrent.ConcurrentWikiGraph;
-import controller.paradigm.concurrent.SynchronizedWikiGraph;
 import controller.update.GraphAutoUpdateRequest;
-import controller.update.NoOpView;
+import controller.utils.SynchronizedWikiGraphManager;
+import controller.utils.WikiGraphManager;
+import controller.api.RESTWikiGraph;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import model.WikiGraphNodeFactory;
-import org.graphstream.graph.implementations.MultiGraph;
 import view.View;
 import view.ViewEvent;
 
 import java.util.Locale;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 public class EventLoopController implements Controller {
 
     private final View view;
     private final Vertx vertx;
-    private String language = Locale.ENGLISH.getLanguage();
-    private ConcurrentWikiGraph graphBeingComputed;
-    private boolean toClear;
     private final Lock mutex = new ReentrantLock();
-
+    private String language = Locale.ENGLISH.getLanguage();
+    private WikiGraphManager graphBeingComputed;
+    private boolean toClear;
     private GraphAutoUpdateRequest autoUpdateReq;
     private boolean isUpdating = false;
     private boolean autoUpdate = false;
@@ -38,6 +36,11 @@ public class EventLoopController implements Controller {
         this.view = view;
         view.addEventListener(this);
         this.vertx = Vertx.vertx();
+    }
+
+    @Override
+    public void start() {
+        view.start();
     }
 
     @Override
@@ -111,7 +114,6 @@ public class EventLoopController implements Controller {
                             this.autoUpdate = true;
                             System.out.println("ON AUTO UPDATE");
                             if (this.graphBeingComputed == null && this.autoUpdateReq != null) {
-                                if (this.isUpdating) throw new IllegalStateException("is Updating left true");
                                 System.out.println("STARTING AUTO UPDATE");
                                 startAutoUpdating(this.autoUpdateReq.getOriginal().getRootID());
                             }
@@ -125,59 +127,10 @@ public class EventLoopController implements Controller {
         }
     }
 
-    private void startAutoUpdating(final String forRoot) {
-        final ConcurrentWikiGraph graph = new SynchronizedWikiGraph();
-        mutex.lock();
-        try {
-            final String root = this.autoUpdateReq.getOriginal().getRootID();
-            if (this.autoUpdateReq == null || !this.autoUpdateReq.getOriginal().getRootID().equals(forRoot)) {
-                System.out.println(forRoot + " UPDATE CANCELED");
-                return;
-            }
-            this.graphBeingComputed = graph;
-            this.isUpdating = true;
-            final WikiGraphNodeFactory fac = this.autoUpdateReq.getNodeFactory();
-            final int maxDepth = this.autoUpdateReq.getDepth();
-            this.vertx.runOnContext(new VertxNodeRecursion(this.vertx,
-                    fac,
-                    graph,
-                    new NoOpView(),
-                    maxDepth,
-                    root, () -> {
-                mutex.lock();
-                try {
-                    if (graphBeingComputed == graph && !graph.isAborted()) {
-                        System.out.println("CALCULATING DIFFERENCES FOR " + root);
-                        final OrderedGraphDiff diff = new OrderedGraphDiff(this.autoUpdateReq.getOriginal().getGraph(),
-                                graph.getGraph());
-                        diff.apply(new GraphDisplaySink(this.view,
-                                this.autoUpdateReq.getOriginal().getGraph(),
-                                graph.getGraph(),
-                                this.autoUpdateReq.getNodeFactory().getLanguage()));
-                        this.graphBeingComputed = null;
-                        if (this.autoUpdate) {
-                            System.out.println("RESCHEDULING UPDATE FOR " + root);
-                            this.autoUpdateReq.updateOriginal(graph);
-                            this.vertx.setTimer(this.updateDelay, p -> startAutoUpdating(root));
-                        } else {
-                            System.out.println("SHUT OFF ");
-                            this.isUpdating = false;
-                        }
-                    } else {
-                        System.out.println(root + "UPDATES QUIETLY SHUTDOWN");
-                    }
-                } finally {
-                    mutex.unlock();
-                }
-            }));
-        } finally {
-            mutex.unlock();
-        }
-    }
 
     private void startComputing(String term, int depth) {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
-        final ConcurrentWikiGraph graph = new SynchronizedWikiGraph();
+        final WikiGraphManager graph = SynchronizedWikiGraphManager.empty();
         graph.setGraphDisplay(this.view);
         mutex.lock();
         try {
@@ -192,6 +145,25 @@ public class EventLoopController implements Controller {
             mutex.unlock();
         }
 
+        checkLanguageAsync(nodeFactory,
+                result -> {
+                    if (result) {
+                        new VertxNodeRecursion(this.vertx,
+                                nodeFactory,
+                                graph,
+                                depth,
+                                term,
+                                () -> onComputeComplete(graphBeingComputed)
+                        ).compute();
+                    } else {
+                        System.err.println("Language does not exist");
+                    }
+                }
+        );
+
+    }
+
+    private void checkLanguageAsync(final WikiGraphNodeFactory nodeFactory, final Consumer<Boolean> onResult) {
         this.vertx.executeBlocking(p -> {
                     if (nodeFactory.setLanguage(this.language)) {
                         p.complete();
@@ -199,39 +171,85 @@ public class EventLoopController implements Controller {
                         p.fail("Language doesn't exist, aborting");
                     }
                 },
-                result -> {
-                    if (result.succeeded()) {
-                        new VertxNodeRecursion(this.vertx, nodeFactory, graph, this.view, depth, term, () -> {
-                            mutex.lock();
-                            try {
-                                if (this.graphBeingComputed == graph) {
-                                    System.out.println(graph.getRootID() + " IS LAST");
-                                    this.graphBeingComputed = null;
-                                    if (toClear) {
-                                        System.out.println(graph.getRootID() + " CLEARS");
-                                        this.view.clearGraph();
-                                        this.autoUpdateReq = null;
-                                        System.out.println(Thread.currentThread().getName() + " cleared");
-                                        this.toClear = false;
-                                    } else if (autoUpdate && !graph.isAborted()) {
-                                        System.out.println(graph.getRootID() + " STARTS AUTO UPDATING");
-                                        startAutoUpdating(graph.getRootID());
-                                    }
-                                } else {
-                                    System.out.println(graph.getRootID() + " QUIETLY SHUTS DOWN");
-                                }
-                            } finally {
-                                mutex.unlock();
-                            }
-                        }).compute();
-                    } else {
-                        System.err.println(result.cause().getMessage());
-                    }
-                });
+                result -> onResult.accept(result.succeeded()));
     }
 
-    @Override
-    public void start() {
-        view.start();
+    private void onComputeComplete(final WikiGraphManager graph) {
+        mutex.lock();
+        try {
+            if (this.graphBeingComputed == graph) {
+                System.out.println(graph.getRootID() + " IS LAST");
+                this.graphBeingComputed = null;
+                if (toClear) {
+                    System.out.println(graph.getRootID() + " CLEARS");
+                    this.view.clearGraph();
+                    this.autoUpdateReq = null;
+                    System.out.println(Thread.currentThread().getName() + " cleared");
+                    this.toClear = false;
+                } else if (autoUpdate && !graph.isAborted()) {
+                    System.out.println(graph.getRootID() + " STARTS AUTO UPDATING");
+                    startAutoUpdating(graph.getRootID());
+                }
+            } else {
+                System.out.println(graph.getRootID() + " QUIETLY SHUTS DOWN");
+            }
+        } finally {
+            mutex.unlock();
+        }
+    }
+
+    private void startAutoUpdating(final String forRoot) {
+        final WikiGraphManager graph = SynchronizedWikiGraphManager.empty();
+        mutex.lock();
+        try {
+            if (this.autoUpdateReq == null || !this.autoUpdateReq.getOriginal().getRootID().equals(forRoot)) {
+                System.out.println(forRoot + " UPDATE CANCELED");
+                return;
+            }
+            final String root = this.autoUpdateReq.getOriginal().getRootID();
+            this.graphBeingComputed = graph;
+            this.isUpdating = true;
+            final WikiGraphNodeFactory factory = this.autoUpdateReq.getNodeFactory();
+            final int maxDepth = this.autoUpdateReq.getDepth();
+            this.vertx.runOnContext(new VertxNodeRecursion(
+                    this.vertx,
+                    factory,
+                    graph,
+                    maxDepth,
+                    root,
+                    () -> onAutoUpdateComplete(graph)));
+        } finally {
+            mutex.unlock();
+        }
+    }
+
+
+    private void onAutoUpdateComplete(final WikiGraphManager graph) {
+        final String root = graph.getRootID();
+        mutex.lock();
+        try {
+            if (graphBeingComputed == graph && !graph.isAborted()) {
+                System.out.println("CALCULATING DIFFERENCES FOR " + root);
+                final OrderedGraphDiff diff = new OrderedGraphDiff(this.autoUpdateReq.getOriginal().graph(),
+                        graph.graph());
+                diff.apply(new GraphDisplaySink(this.view,
+                        this.autoUpdateReq.getOriginal().graph(),
+                        graph.graph(),
+                        this.autoUpdateReq.getNodeFactory().getLanguage()));
+                this.graphBeingComputed = null;
+                if (this.autoUpdate) {
+                    System.out.println("RESCHEDULING UPDATE FOR " + root);
+                    this.autoUpdateReq.updateOriginal(graph);
+                    this.vertx.setTimer(this.updateDelay, p -> startAutoUpdating(root));
+                } else {
+                    System.out.println("SHUT OFF ");
+                    this.isUpdating = false;
+                }
+            } else {
+                System.out.println(root + "UPDATES QUIETLY SHUTDOWN");
+            }
+        } finally {
+            mutex.unlock();
+        }
     }
 }

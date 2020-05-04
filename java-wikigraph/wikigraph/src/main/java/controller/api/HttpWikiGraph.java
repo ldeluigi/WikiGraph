@@ -22,6 +22,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
     private static final String LANGUAGE_ENDPOINT =
             "https://commons.wikimedia.org/w/api.php?action=sitematrix&smtype=language&smsiteprop=url&format=json";
     private String locale = "en";
+
     private String apiEndpoint() {
         return apiEndpoint(this.locale);
     }
@@ -170,7 +171,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
 
     @Override
     public WikiGraphNode random(final int depth) {
-        final Connection req = Jsoup.connect(apiEndpoint());
+        final Connection req = Jsoup.connect(apiEndpoint()).ignoreContentType(true);
         req.data("format", "json",
                 "action", "query",
                 "list", "random",
@@ -184,7 +185,7 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
                 if (queryResult.has("random")) {
                     final JSONArray results = queryResult.getJSONArray("random");
                     if (results.length() > 0) {
-                        final JSONObject result =  results.getJSONObject(0);
+                        final JSONObject result = results.getJSONObject(0);
                         if (result.has("title")) {
                             return from(result.getString("title"), depth);
                         }

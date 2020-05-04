@@ -31,6 +31,11 @@
  */
 package controller.graphstream;
 
+import org.graphstream.graph.*;
+import org.graphstream.stream.Sink;
+import org.graphstream.stream.file.FileSinkDGS;
+import org.graphstream.stream.file.FileSourceDGS;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,22 +44,9 @@ import java.util.LinkedList;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.graphstream.graph.Edge;
-import org.graphstream.graph.Element;
-import org.graphstream.graph.ElementNotFoundException;
-import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
-import org.graphstream.stream.Sink;
-import org.graphstream.stream.file.FileSinkDGS;
-import org.graphstream.stream.file.FileSourceDGS;
-
 public class OrderedGraphDiff {
-    protected static enum ElementType {
-        NODE, EDGE, GRAPH
-    }
-
-    private Bridge bridge;
     private final LinkedList<Event> events;
+    private Bridge bridge;
 
     /**
      * Create a new empty diff.
@@ -130,8 +122,7 @@ public class OrderedGraphDiff {
      * Start to record changes. If a record is already started, then it will be
      * ended.
      *
-     * @param g
-     *            the graph to start listening for changes.
+     * @param g the graph to start listening for changes.
      */
     public void start(Graph g) {
         if (bridge != null)
@@ -238,20 +229,22 @@ public class OrderedGraphDiff {
         return buffer.toString();
     }
 
+    protected enum ElementType {
+        NODE, EDGE, GRAPH
+    }
+
     protected abstract class Event {
         /**
          * Apply this event on a given graph.
          *
-         * @param g
-         *            the graph on which the action should be applied
+         * @param g the graph on which the action should be applied
          */
         abstract void apply(String sourceId, long timeId, Sink g);
 
         /**
          * Apply the dual event on a given graph.
          *
-         * @param g
-         *            the graph on which the dual action should be applied.
+         * @param g the graph on which the dual action should be applied.
          */
         abstract void reverse(String sourceId, long timeId, Sink g);
     }

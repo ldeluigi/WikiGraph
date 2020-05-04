@@ -21,7 +21,7 @@ import java.util.Set;
 
 public class RESTWikiGraph extends HttpWikiGraph {
 
-    private RateLimiter rateLimiter = RateLimiter.create(200);
+    private final RateLimiter rateLimiter = RateLimiter.create(200);
 
     private String apiEndpoint(final String lang) {
         return "https://" + lang + ".wikipedia.org/api/rest_v1/page/html/";
