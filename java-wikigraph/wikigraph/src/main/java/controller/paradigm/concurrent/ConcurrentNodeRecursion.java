@@ -63,11 +63,13 @@ public abstract class ConcurrentNodeRecursion extends NodeRecursion {
             lock.lock();
             try {
                 if (this.graph.contains(result.term())) {
+                    this.graph.addEdge(this.getFatherID(), result.term());
                     this.getView().addEdge(this.getFatherID(), result.term());
                 } else {
                     this.getView().addNode(result.term(), this.getDepth(), this.getNodeFactory().getLanguage());
                     this.graph.addNode(result.term());
                     if (this.getDepth() > 0) {
+                        this.graph.addEdge(this.getFatherID(), result.term());
                         this.getView().addEdge(this.getFatherID(), result.term());
                     }
                     if (this.getDepth() < this.getMaxDepth()) {
