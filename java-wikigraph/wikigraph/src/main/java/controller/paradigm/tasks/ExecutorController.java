@@ -6,6 +6,7 @@ import controller.api.RESTWikiGraph;
 import controller.paradigm.concurrent.ConcurrentWikiGraph;
 import controller.paradigm.concurrent.SynchronizedWikiGraph;
 import controller.update.GraphAutoUpdateRequest;
+import controller.update.NoOpView;
 import model.WikiGraphNodeFactory;
 import view.View;
 import view.ViewEvent;
@@ -25,7 +26,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ExecutorController implements Controller {
 
     private final View view;
-    private final Lock scheduleLock = new ReentrantLock();
+    private final Lock mutex = new ReentrantLock();
     private ScheduledThreadPoolExecutor pool;
     private Optional<ViewEvent> event = Optional.empty();
     private ConcurrentWikiGraph graphBeingComputed = null;
@@ -52,7 +53,7 @@ public class ExecutorController implements Controller {
         this.pool.execute(() -> {
             nodeFactory.setLanguage(language.get());
             ConcurrentWikiGraph graph = SynchronizedWikiGraph.empty();
-            scheduleLock.lock();
+            mutex.lock();
             try {
                 if (this.graphBeingComputed != null) {
                     System.out.println("START COMPUTING ABORTED LAST");
@@ -62,13 +63,13 @@ public class ExecutorController implements Controller {
                 this.isUpdating = false;
                 this.autoUpdateReq = new GraphAutoUpdateRequest(nodeFactory, depth, graph);
             } finally {
-                scheduleLock.unlock();
+                mutex.unlock();
             }
             new ComputeChildrenTask(nodeFactory, graph, this.view, depth, root) {
                 @Override
                 public void onCompletion(CountedCompleter<?> caller) {
                     super.onCompletion(caller);
-                    scheduleLock.lock();
+                    mutex.lock();
                     try {
                         if (graphBeingComputed == graph){
                             System.out.println(graph.getRootID() + " IS LAST");
@@ -84,7 +85,7 @@ public class ExecutorController implements Controller {
                             }
                         }
                     } finally {
-                        scheduleLock.unlock();
+                        mutex.unlock();
                     }
                 }
             }.compute();
@@ -113,11 +114,11 @@ public class ExecutorController implements Controller {
                 event.onComplete(true);
                 break;
             case CLEAR:
-                scheduleLock.lock();
+                mutex.lock();
                 try {
                     this.autoUpdateReq = null;
                 } finally {
-                    scheduleLock.unlock();
+                    mutex.unlock();
                 }
                 this.view.clearGraph();
                 this.isQuiescent = true;
@@ -135,7 +136,7 @@ public class ExecutorController implements Controller {
                 this.isQuiescent = true;
                 break;
             case AUTO_UPDATE:
-                scheduleLock.lock();
+                mutex.lock();
                 try {
                     this.isQuiescent = true;
                     if (event.getInt() < 0 && this.autoUpdate) {
@@ -150,18 +151,16 @@ public class ExecutorController implements Controller {
                     } else if (event.getInt() >= 0) {
                         this.updateDelay = event.getInt();
                         System.out.println("UPDATED DELAY");
-                        if (!this.autoUpdate) {
-                            this.autoUpdate = true;
-                            System.out.println("ON AUTO UPDATE");
-                            if (this.graphBeingComputed == null && this.autoUpdateReq != null) {
-                                if (this.isUpdating) throw new IllegalStateException("is Updating left true");
-                                System.out.println("STARTING AUTO UPDATE");
-                                startAutoUpdating(this.autoUpdateReq.getOriginal().getRootID());
-                            }
+                        this.autoUpdate = true;
+                        System.out.println("ON AUTO UPDATE");
+                        if (this.graphBeingComputed == null && this.autoUpdateReq != null) {
+                            if (this.isUpdating) throw new IllegalStateException("is Updating left true");
+                            System.out.println("STARTING AUTO UPDATE");
+                            startAutoUpdating(this.autoUpdateReq.getOriginal().getRootID());
                         }
                     }
                 } finally {
-                    scheduleLock.unlock();
+                    mutex.unlock();
                 }
                 event.onComplete(true);
                 break;
@@ -171,7 +170,7 @@ public class ExecutorController implements Controller {
     private void startAutoUpdating(final String forRoot) {
         System.out.println(forRoot+" has called startAutoUpdating");
         final ConcurrentWikiGraph graph = new SynchronizedWikiGraph();
-        scheduleLock.lock();
+        mutex.lock();
         try {
             final String root = this.autoUpdateReq.getOriginal().getRootID();
             if (this.autoUpdateReq == null || !this.autoUpdateReq.getOriginal().getRootID().equals(forRoot) || !this.autoUpdate) {
@@ -187,11 +186,11 @@ public class ExecutorController implements Controller {
             this.isUpdating = true;
             final WikiGraphNodeFactory nodeFactory = this.autoUpdateReq.getNodeFactory();
             final int depth = this.autoUpdateReq.getDepth();
-            this.pool.execute(() -> new ComputeChildrenTask(nodeFactory, graph, this.view, depth, root) {
+            this.pool.execute(() -> new ComputeChildrenTask(nodeFactory, graph, new NoOpView(), depth, root) {
                 @Override
                 public void onCompletion(CountedCompleter<?> caller) {
                     super.onCompletion(caller);
-                    scheduleLock.lock();
+                    mutex.lock();
                     try {
                         if (event.isPresent()) {
                             resolveEvent(event.get());
@@ -213,18 +212,18 @@ public class ExecutorController implements Controller {
                         isUpdating = false;
                         isQuiescent = true;
                     } finally {
-                        scheduleLock.unlock();
+                        mutex.unlock();
                     }
                 }
             }.compute());
         } finally {
-            scheduleLock.unlock();
+            mutex.unlock();
         }
     }
 
     @Override
     public void notifyEvent(final ViewEvent event) {
-        this.scheduleLock.lock();
+        this.mutex.lock();
         try {
             this.abortIfEventNeeds(event);
             if (this.isQuiescent) {
@@ -234,7 +233,7 @@ public class ExecutorController implements Controller {
                 this.event = Optional.of(event);
             }
         } finally {
-            this.scheduleLock.unlock();
+            this.mutex.unlock();
         }
     }
 
