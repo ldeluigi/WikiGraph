@@ -2,6 +2,8 @@ package controller.paradigm.eventloop;
 
 import controller.Controller;
 import controller.api.RESTWikiGraph;
+import controller.graphstream.GraphDisplaySink;
+import controller.graphstream.OrderedGraphDiff;
 import controller.paradigm.concurrent.ConcurrentWikiGraph;
 import controller.paradigm.concurrent.SynchronizedWikiGraph;
 import controller.update.GraphAutoUpdateRequest;
@@ -10,6 +12,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import model.WikiGraphNodeFactory;
+import org.graphstream.graph.implementations.MultiGraph;
 import view.View;
 import view.ViewEvent;
 
@@ -88,6 +91,7 @@ public class EventLoopController implements Controller {
                         event.onComplete(false);
                     }
                 });
+                break;
             case AUTO_UPDATE:
                 mutex.lock();
                 try {
@@ -144,9 +148,12 @@ public class EventLoopController implements Controller {
                 try {
                     if (graphBeingComputed == graph && !graph.isAborted()) {
                         System.out.println("CALCULATING DIFFERENCES FOR " + root);
-                        /*
-                            HERE COMPUTE DIFFERENCES
-                         */
+                        final OrderedGraphDiff diff = new OrderedGraphDiff(this.autoUpdateReq.getOriginal().getGraph(),
+                                graph.getGraph());
+                        diff.apply(new GraphDisplaySink(this.view,
+                                this.autoUpdateReq.getOriginal().getGraph(),
+                                graph.getGraph(),
+                                this.autoUpdateReq.getNodeFactory().getLanguage()));
                         this.graphBeingComputed = null;
                         if (this.autoUpdate) {
                             System.out.println("RESCHEDULING UPDATE FOR " + root);
@@ -171,6 +178,7 @@ public class EventLoopController implements Controller {
     private void startComputing(String term, int depth) {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
         final ConcurrentWikiGraph graph = new SynchronizedWikiGraph();
+        graph.setGraphDisplay(this.view);
         mutex.lock();
         try {
             if (this.graphBeingComputed != null) {

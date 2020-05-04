@@ -1,6 +1,7 @@
 package controller.paradigm.concurrent;
 
 import org.graphstream.graph.Graph;
+import view.GraphDisplay;
 
 import java.util.concurrent.locks.Lock;
 
@@ -19,15 +20,17 @@ public interface ConcurrentWikiGraph {
 
     boolean isAborted();
 
-    boolean contains(final String term);
+    boolean contains(String term);
 
-    boolean addNode(final String term);
+    boolean addNode(String term, int depth, String language);
 
-    boolean addEdge(final String idFrom,final String idTo);
+    boolean addEdge(String idFrom,String idTo);
 
     Graph getGraph();
 
-    void setRootID(final String term);
+    void setRootID(String term);
 
     String getRootID();
+
+    void setGraphDisplay(GraphDisplay view);
 }
