@@ -3,7 +3,7 @@ package model;
 import java.util.Set;
 
 /**
- * A structural (non-leaf) node of a {@link WikiGraph}.
+ * A structural (non-leaf) node.
  */
 public interface WikiGraphNode {
     /**
