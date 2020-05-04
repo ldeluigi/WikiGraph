@@ -4,7 +4,6 @@ import controller.paradigm.concurrent.ConcurrentWikiGraph;
 import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
-import view.GraphDisplay;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +12,6 @@ public abstract class NodeRecursion {
 
     private final WikiGraphNodeFactory factory;
     private final ConcurrentWikiGraph graph;
-    private final GraphDisplay view;
     private final int maxDepth;
     private final String term;
     private final String fatherID;
@@ -23,7 +21,6 @@ public abstract class NodeRecursion {
     protected NodeRecursion(final NodeRecursion father, final String term) {
         this.factory = father.getNodeFactory();
         this.graph = father.getGraph();
-        this.view = father.getView();
         this.maxDepth = father.getMaxDepth();
         this.term = term;
         if (father.getID().isEmpty()) {
@@ -37,12 +34,10 @@ public abstract class NodeRecursion {
 
     protected NodeRecursion(final WikiGraphNodeFactory factory,
                             final ConcurrentWikiGraph graph,
-                            final GraphDisplay view,
                             final int maxDepth,
                             final String term) {
         this.factory = factory;
         this.graph = graph;
-        this.view = view;
         this.maxDepth = maxDepth;
         this.term = term;
         this.fatherID = null;
@@ -78,13 +73,10 @@ public abstract class NodeRecursion {
             this.setID(result.term());
             if (this.getGraph().contains(result.term())) {
                 this.getGraph().addEdge(this.getFatherID(), result.term());
-                this.getView().addEdge(this.getFatherID(), result.term());
             } else {
-                this.getView().addNode(result.term(), this.getDepth(), this.getNodeFactory().getLanguage());
-                this.getGraph().addNode(result.term());
+                this.getGraph().addNode(result.term(), depth, this.getNodeFactory().getLanguage());
                 if (this.getDepth() > 0) {
                     this.getGraph().addEdge(this.getFatherID(), result.term());
-                    this.getView().addEdge(this.getFatherID(), result.term());
                 }
                 if (this.getDepth() < this.getMaxDepth()) {
                     for (String child : result.childrenTerms()) {
@@ -112,10 +104,6 @@ public abstract class NodeRecursion {
 
     public WikiGraphNodeFactory getNodeFactory() {
         return this.factory;
-    }
-
-    public GraphDisplay getView() {
-        return this.view;
     }
 
     public int getMaxDepth() {

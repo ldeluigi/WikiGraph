@@ -1,15 +1,13 @@
 package controller.paradigm.concurrent;
 
+import controller.update.NoOpView;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
-import org.graphstream.graph.implementations.AbstractGraph;
 import org.graphstream.graph.implementations.MultiGraph;
-import org.graphstream.graph.implementations.MultiNode;
+import view.GraphDisplay;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -22,9 +20,10 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
     private final Map<String, Lock> locks = new HashMap<>();
-    private AtomicBoolean aborted = new AtomicBoolean(false);
+    private final AtomicBoolean aborted = new AtomicBoolean(false);
     private String root;
     private final Graph graph = new MultiGraph("WikiGraph2");
+    private GraphDisplay view = new NoOpView();
 
     @Override
     public void setAborted() {
@@ -38,21 +37,24 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
 
     @Override
     public boolean contains(final String term) {// TODO check che si comporti come deve
-        return this.graph.getNode(term)!=null;
+        return this.graph.getNode(term) != null;
     }
 
     @Override
-    public boolean addNode(final String term) {
+    public boolean addNode(final String term, final int depth, final String language) {
         if (!this.contains(term)) {
-            return this.graph.addNode(term)!=null;
+            if (this.graph.addNode(term) != null) {
+                this.view.addNode(term, depth, language);
+                return true;
+            }
         } else {
             System.err.println("INFO: DUPLICATE NODE IGNORED - " + term);
-            return false;
         }
+        return false;
     }
 
     @Override
-    public boolean addEdge(final String idFrom,final String idTo){
+    public boolean addEdge(final String idFrom, final String idTo) {
         final Node from = this.graph.getNode(idFrom);
         if (from == null) {
             System.err.println("ERROR: (Synchr) node " + idFrom + " not found. Aborting edge " + idFrom + "@@@" + idTo);
@@ -65,12 +67,15 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
         }
         final String name = idFrom + "@@@" + idTo;
         if (this.graph.getEdge(name) == null) {
-            return this.graph.addEdge(idFrom + "@@@" + idTo, from, to, true)!=null;
-
-        }else return false;
+            if (this.graph.addEdge(idFrom + "@@@" + idTo, from, to, true) != null) {
+                this.view.addEdge(idFrom, idTo);
+                return true;
+            }
+        }
+        return false;
     }
 
-    public Graph getGraph(){
+    public Graph getGraph() {
         return this.graph;
     }
 
@@ -82,6 +87,11 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
     @Override
     public String getRootID() {
         return this.root;
+    }
+
+    @Override
+    public void setGraphDisplay(final GraphDisplay view) {
+        this.view = view;
     }
 
     /**

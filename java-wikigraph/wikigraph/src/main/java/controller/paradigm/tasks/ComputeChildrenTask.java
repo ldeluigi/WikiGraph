@@ -43,7 +43,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
 
         public TaskNodeRecursion(final WikiGraphNodeFactory factory, final ConcurrentWikiGraph graph,
                                  final GraphDisplay view, final int maxDepth, final String term) {
-            super(factory, graph, view, maxDepth, term);
+            super(factory, graph, maxDepth, term);
         }
 
         @Override

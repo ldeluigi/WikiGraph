@@ -1,6 +1,7 @@
 package controller.paradigm.eventloop;
 
 import controller.NodeRecursion;
+import controller.graphstream.GraphDisplaySink;
 import controller.paradigm.concurrent.ConcurrentWikiGraph;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -25,7 +26,7 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
     }
 
     public VertxNodeRecursion(Vertx vertx, WikiGraphNodeFactory factory, ConcurrentWikiGraph graph, GraphDisplay view, int maxDepth, String term, Runnable atCompletion) {
-        super(factory, graph, view, maxDepth, term);
+        super(factory, graph, maxDepth, term);
         this.vertx = vertx;
         this.atCompletion = atCompletion;
     }
@@ -72,13 +73,11 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
                 setID(result.term());
                 if (getGraph().contains(result.term())) {
                     getGraph().addEdge(getFatherID(), result.term());
-                    getView().addEdge(getFatherID(), result.term());
                 } else {
-                    getView().addNode(result.term(), getDepth(), getNodeFactory().getLanguage());
-                    getGraph().addNode(result.term());
+                    getGraph().addNode(result.term(), getDepth(), getNodeFactory().getLanguage());
+                    getGraph().getGraph().getNode(result.term()).addAttribute(GraphDisplaySink.DEPTH_ATTRIBUTE, getDepth());
                     if (getDepth() > 0) {
                         getGraph().addEdge(getFatherID(), result.term());
-                        getView().addEdge(getFatherID(), result.term());
                     }
                     if (getDepth() < getMaxDepth()) {
                         for (String child : result.childrenTerms()) {

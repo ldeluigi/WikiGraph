@@ -20,10 +20,9 @@ public abstract class ConcurrentNodeRecursion extends NodeRecursion {
 
     protected ConcurrentNodeRecursion(final WikiGraphNodeFactory factory,
                                       final ConcurrentWikiGraph graph,
-                                      final GraphDisplay view,
                                       final int maxDepth,
                                       final String term) {
-        super(factory, graph, view, maxDepth, term);
+        super(factory, graph, maxDepth, term);
         this.graph = graph;
     }
 
@@ -64,13 +63,10 @@ public abstract class ConcurrentNodeRecursion extends NodeRecursion {
             try {
                 if (this.graph.contains(result.term())) {
                     this.graph.addEdge(this.getFatherID(), result.term());
-                    this.getView().addEdge(this.getFatherID(), result.term());
                 } else {
-                    this.getView().addNode(result.term(), this.getDepth(), this.getNodeFactory().getLanguage());
-                    this.graph.addNode(result.term());
+                    this.graph.addNode(result.term(), this.getDepth(), this.getNodeFactory().getLanguage());
                     if (this.getDepth() > 0) {
                         this.graph.addEdge(this.getFatherID(), result.term());
-                        this.getView().addEdge(this.getFatherID(), result.term());
                     }
                     if (this.getDepth() < this.getMaxDepth()) {
                         for (String child : result.childrenTerms()) {
