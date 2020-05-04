@@ -10,9 +10,25 @@ import view.View;
 public class WikiGraphStart {
 
     public static void main(String[] args) {
-        View view = new SwingView();
-        Controller controller = new ExecutorController(view);
-        controller.start();
+        final View view = new SwingView();
+        Controller controller = null;
+        if (args.length > 0) {
+            if (args[0].equals("executors")) {
+                controller = new ExecutorController(view);
+            } else if (args[0].equals("eventloop")) {
+                controller = new EventLoopController(view);
+            } else if (args[0].equals("rx")) {
+                controller = null;
+            }
+        }
+        if (controller == null) {
+            printHelp();
+        } else {
+            controller.start();
+        }
     }
 
+    private static void printHelp() {
+        System.out.println("Usage: [executors|eventloop|rx]");
+    }
 }
