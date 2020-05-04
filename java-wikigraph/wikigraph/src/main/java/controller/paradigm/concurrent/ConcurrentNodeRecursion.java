@@ -4,6 +4,7 @@ import controller.NodeRecursion;
 import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
+import view.GraphDisplay;
 import view.View;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public abstract class ConcurrentNodeRecursion extends NodeRecursion {
 
     protected ConcurrentNodeRecursion(final WikiGraphNodeFactory factory,
                                       final ConcurrentWikiGraph graph,
-                                      final View view,
+                                      final GraphDisplay view,
                                       final int maxDepth,
                                       final String term) {
         super(factory, graph, view, maxDepth, term);
