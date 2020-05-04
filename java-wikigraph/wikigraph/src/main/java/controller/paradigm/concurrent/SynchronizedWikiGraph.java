@@ -3,6 +3,7 @@ package controller.paradigm.concurrent;
 import controller.update.NoOpView;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.Graphs;
 import org.graphstream.graph.implementations.MultiGraph;
 import view.GraphDisplay;
 
@@ -22,7 +23,7 @@ public class SynchronizedWikiGraph implements ConcurrentWikiGraph {
     private final Map<String, Lock> locks = new HashMap<>();
     private final AtomicBoolean aborted = new AtomicBoolean(false);
     private String root;
-    private final Graph graph = new MultiGraph("WikiGraph2");
+    private final Graph graph = Graphs.synchronizedGraph(new MultiGraph("WikiGraph2"));
     private GraphDisplay view = new NoOpView();
 
     @Override
