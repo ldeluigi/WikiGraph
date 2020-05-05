@@ -2,6 +2,8 @@ package controller.paradigm.tasks;
 
 
 import controller.Controller;
+import controller.graphstream.GraphDisplaySink;
+import controller.graphstream.OrderedGraphDiff;
 import controller.update.GraphAutoUpdateRequest;
 import controller.utils.SynchronizedWikiGraphManager;
 import controller.utils.WikiGraphManager;
@@ -52,6 +54,7 @@ public class ExecutorController implements Controller {
         this.pool.execute(() -> {
             nodeFactory.setLanguage(language.get());
             WikiGraphManager graph = SynchronizedWikiGraphManager.threadSafe();
+            graph.setGraphDisplay(this.view);
             mutex.lock();
             try {
                 if (this.graphBeingComputed != null) {
@@ -169,7 +172,6 @@ public class ExecutorController implements Controller {
     private void startAutoUpdating(final String forRoot) {
         System.out.println(forRoot + " has called startAutoUpdating");
         final WikiGraphManager graph = SynchronizedWikiGraphManager.threadSafe();
-        graph.setGraphDisplay(this.view);
         mutex.lock();
         try {
             final String root = this.autoUpdateReq.getOriginal().getRootID();
@@ -197,8 +199,13 @@ public class ExecutorController implements Controller {
                             event = Optional.empty();
                         } else if (graphBeingComputed == graph && !graph.isAborted()) {
                             System.out.println("CALCULATING DIFFERENCES FOR " + root);
-                            // HERE COMPUTE DIFFERENCES   betw graph-autoUpdateReq.getOriginal();
-                            graphBeingComputed = null;// ask for it, non sto computando niente o nessuno è l'ultimo?
+                            final OrderedGraphDiff diff = new OrderedGraphDiff(autoUpdateReq.getOriginal().graph(),
+                                    graph.graph());
+                            diff.apply(new GraphDisplaySink(view,
+                                    autoUpdateReq.getOriginal().graph(),
+                                    graph.graph(),
+                                    autoUpdateReq.getNodeFactory().getLanguage()));
+                            graphBeingComputed = null;
                             if (autoUpdate) {
                                 System.out.println("RESCHEDULING UPDATE FOR " + root);
                                 autoUpdateReq.updateOriginal(graph);
