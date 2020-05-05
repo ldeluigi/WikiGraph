@@ -1,5 +1,6 @@
 package controller.utils;
 
+import controller.graphstream.GraphDisplaySink;
 import controller.update.NoOpView;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -73,7 +74,9 @@ public class SynchronizedWikiGraphManager implements WikiGraphManager {
     @Override
     public boolean addNode(final String term, final int depth, final String language) {
         if (!this.contains(term)) {
-            if (this.graph.addNode(term) != null) {
+            final Node n = this.graph.addNode(term);
+            if (n != null) {
+                n.addAttribute(GraphDisplaySink.DEPTH_ATTRIBUTE, depth);
                 this.view.addNode(term, depth, language);
                 return true;
             }

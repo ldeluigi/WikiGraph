@@ -112,7 +112,6 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
                 getGraph().addEdge(getFatherID(), node.term());
             } else {
                 getGraph().addNode(node.term(), getDepth(), getNodeFactory().getLanguage());
-                getGraph().graph().getNode(node.term()).addAttribute(GraphDisplaySink.DEPTH_ATTRIBUTE, getDepth());
                 if (getDepth() > 0) {
                     getGraph().addEdge(getFatherID(), node.term());
                 }
