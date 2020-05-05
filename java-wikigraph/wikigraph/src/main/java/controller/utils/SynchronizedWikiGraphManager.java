@@ -34,6 +34,7 @@ public class SynchronizedWikiGraphManager implements WikiGraphManager {
         } else {
             this.graph = g;
         }
+        this.graph.addAttribute("sync", mutexOnGraph);
     }
 
     /**
