@@ -19,6 +19,7 @@ public class SwingView extends JFrame implements GraphStreamView {
     private static final float DIMENSION_ADAPTER = 0.8f;
     private static final int MAX_DEPTH = 8;
     private static final int MAX_DELAY = 1000 * 60 * 60 * 24; // 1 day
+    private static final int DEFAULT_DELAY = 5000;
     private static final int HOVER_SIZE = 30;
     private static final int ROOT_SIZE = 20;
     private static final int SIZE_STEP = 2;
@@ -56,7 +57,7 @@ public class SwingView extends JFrame implements GraphStreamView {
         JCheckBox autoUpdate = new JCheckBox();
         bottomPanel.add(autoUpdate);
         bottomPanel.add(new JLabel("Refresh Delay ms:"));
-        JSpinner refreshRate = new JSpinner(new SpinnerNumberModel(100, 0, MAX_DELAY, 5));
+        JSpinner refreshRate = new JSpinner(new SpinnerNumberModel(DEFAULT_DELAY, 0, MAX_DELAY, 5));
         autoUpdate.addActionListener(e -> {
             if (autoUpdate.isSelected()) {
                 fireEvent(EventType.AUTO_UPDATE,

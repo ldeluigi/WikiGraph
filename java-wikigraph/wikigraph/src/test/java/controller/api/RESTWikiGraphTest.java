@@ -6,13 +6,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import model.WikiGraphNodeFactory;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class RESTWikiGraphTest {
 
     @Test
-    void testSetLanguage() {
+    void testSetLanguage() throws IOException {
         final WikiGraphNodeFactory g = new RESTWikiGraph();
         assertTrue(g.setLanguage("en"));
         assertTrue(g.setLanguage("it"));

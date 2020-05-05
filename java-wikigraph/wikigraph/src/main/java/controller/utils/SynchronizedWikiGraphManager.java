@@ -104,7 +104,7 @@ public class SynchronizedWikiGraphManager implements WikiGraphManager {
         if (this.graph.getEdge(name) == null) {
             final Edge edge = this.graph.addEdge(idFrom + "@@@" + idTo, from, to, true);
             if (edge != null) {
-                edge.addAttribute(" ",""); // bug workaround
+                edge.addAttribute(" ", ""); // bug workaround
                 this.view.addEdge(idFrom, idTo);
                 return true;
             }

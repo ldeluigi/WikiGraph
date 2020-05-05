@@ -7,7 +7,11 @@ import model.WikiGraphNodeFactory;
 
 import java.util.concurrent.CountedCompleter;
 
-
+/**
+ * A {@link CountedCompleter} that recursively populates a {@link WikiGraphManager} graph.
+ * The algorithm is implemented using {@link ConcurrentNodeRecursion} and is executed with
+ * {@link CountedCompleter#fork()}.
+ */
 public class ComputeChildrenTask extends CountedCompleter<Void> {
 
     private final ConcurrentNodeRecursion nr;
@@ -17,6 +21,14 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
         this.nr = rec;
     }
 
+    /**
+     * Creates a task with the given parameters.
+     *
+     * @param factory  see {@link ConcurrentNodeRecursion}
+     * @param graph    see {@link ConcurrentNodeRecursion}
+     * @param maxDepth see {@link ConcurrentNodeRecursion}
+     * @param term     see {@link ConcurrentNodeRecursion}
+     */
     public ComputeChildrenTask(WikiGraphNodeFactory factory, WikiGraphManager graph,
                                int maxDepth, String term) {
         this.nr = new TaskNodeRecursion(factory, graph, maxDepth, term);
