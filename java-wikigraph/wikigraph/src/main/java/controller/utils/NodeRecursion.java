@@ -92,23 +92,23 @@ public abstract class NodeRecursion {
 
     public abstract void abort();
 
-    public int getDepth() {
+    protected final int getDepth() {
         return this.depth;
     }
 
-    public String getTerm() {
+    protected final String getTerm() {
         return this.term;
     }
 
-    public WikiGraphNodeFactory getNodeFactory() {
+    protected final WikiGraphNodeFactory getNodeFactory() {
         return this.factory;
     }
 
-    public int getMaxDepth() {
+    protected final int getMaxDepth() {
         return this.maxDepth;
     }
 
-    public Optional<String> getID() {
+    protected final Optional<String> getID() {
         return this.id;
     }
 
