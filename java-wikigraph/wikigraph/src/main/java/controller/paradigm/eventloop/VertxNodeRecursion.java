@@ -10,6 +10,9 @@ import model.WikiGraphNodeFactory;
 
 import java.util.List;
 
+/**
+ * Recursive graph computation implemented with Vertx.
+ */
 public class VertxNodeRecursion extends NodeRecursion implements Future<WikiGraphManager> {
 
     private final Vertx vertx;
@@ -21,6 +24,15 @@ public class VertxNodeRecursion extends NodeRecursion implements Future<WikiGrap
         this.vertx = father.getVertx();
     }
 
+    /**
+     * Creates a {@link VertxNodeRecursion} with given parameters.
+     *
+     * @param vertx    the vertx instance that manages the graph
+     * @param factory  see {@link NodeRecursion}
+     * @param graph    see {@link NodeRecursion}
+     * @param maxDepth see {@link NodeRecursion}
+     * @param term     see {@link NodeRecursion}
+     */
     public VertxNodeRecursion(Vertx vertx, WikiGraphNodeFactory factory, WikiGraphManager graph, int maxDepth, String term) {
         super(factory, graph, maxDepth, term);
         this.vertx = vertx;

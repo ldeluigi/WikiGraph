@@ -148,24 +148,20 @@ public class HttpWikiGraph implements WikiGraphNodeFactory {
     }
 
     @Override
-    public boolean setLanguage(final String langCode) {
+    public boolean setLanguage(final String langCode) throws IOException {
         Objects.requireNonNull(langCode);
         final String rawJSON;
-        try {
-            rawJSON = Jsoup.connect(LANGUAGE_ENDPOINT).ignoreContentType(true).execute().body();
-            final JSONObject json = new JSONObject(rawJSON).getJSONObject("sitematrix");
-            final boolean ok = IntStream.iterate(0, i -> i + 1).boxed()
-                    .takeWhile(i -> json.has(i.toString()))
-                    .map(i -> json.getJSONObject(i.toString()))
-                    .anyMatch(lan -> lan.has("code") && lan.getString("code")
-                            .equals(langCode));
-            if (ok) {
-                this.locale = langCode;
-                return true;
-            }
-        } catch (IOException ignored) {
+        rawJSON = Jsoup.connect(LANGUAGE_ENDPOINT).ignoreContentType(true).execute().body();
+        final JSONObject json = new JSONObject(rawJSON).getJSONObject("sitematrix");
+        final boolean ok = IntStream.iterate(0, i -> i + 1).boxed()
+                .takeWhile(i -> json.has(i.toString()))
+                .map(i -> json.getJSONObject(i.toString()))
+                .anyMatch(lan -> lan.has("code") && lan.getString("code")
+                        .equals(langCode));
+        if (ok) {
+            this.locale = langCode;
+            return true;
         }
-
         return false;
     }
 

@@ -1,5 +1,6 @@
 package model;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +52,7 @@ public interface WikiGraphNodeFactory {
      * @param langCode like "en", "it", "nap"
      * @return true if language is available and was set correctly
      */
-    boolean setLanguage(final String langCode);
+    boolean setLanguage(final String langCode) throws IOException;
 
     /**
      * Creates a structural {@link WikiGraphNode} from a random wikipedia page.

@@ -14,8 +14,10 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 
+/**
+ * A thread safe {@link Controller} that can be implemented with different concurrent paradigms.
+ */
 public abstract class AbstractController implements Controller {
     private final View view;
     private final Lock mutex = new ReentrantLock();
@@ -27,10 +29,61 @@ public abstract class AbstractController implements Controller {
     private boolean autoUpdate = false;
     private int updateDelay;
 
+    /**
+     * Constructor that initializes the status and subscribes to the {@link View} observable interface.
+     * @param view the view that displays the graph
+     */
     public AbstractController(View view) {
         this.view = view;
         view.addEventListener(this);
     }
+
+    /**
+     * A method that checks if language exists and calls success.run() if so.
+     * If language doesn't, it should call failure.run().
+     * If a problem occurs, it shouldn't call any.
+     *
+     * @param language the language that could be set as the new default
+     * @param success  the callback that confirms that the language exists
+     * @param failure  the callback that confirms that the language does not exist
+     */
+    protected abstract void checkLanguage(String language, Runnable success, Runnable failure);
+
+    /**
+     * Free the resources and exit.
+     */
+    protected abstract void exit();
+
+    /**
+     * Creates a new instance of a wiki graph manager to be used in the recursion.
+     *
+     * @return a new {@link WikiGraphManager}
+     */
+    protected abstract WikiGraphManager wikiGraphManager();
+
+    /**
+     * Computes a {@link WikiGraphManager} graph asynchronously and recursively, populating the given graph instance.
+     * The first thing this should do is customize the {@link WikiGraphNodeFactory}, especially for the language.
+     * Then it should start a computation that calls onComputeComplete  or should call
+     * the failure callback if some fatal error occurred or the graph was aborted.
+     *
+     * @param nodeFactory       the factory used in the recursion
+     * @param graph             the graph that will be populated
+     * @param depth             the maximum depth for the graph
+     * @param term              the root term of the graph
+     * @param language          the language code of wikipedia
+     * @param onComputeComplete the callback for a successful complete computation
+     * @param failure           the callback for abortion or errors
+     */
+    protected abstract void computeAsync(WikiGraphNodeFactory nodeFactory, WikiGraphManager graph, int depth, String term, String language, Runnable onComputeComplete, Runnable failure);
+
+    /**
+     * Schedules in time a new update of last graph computed.
+     *
+     * @param updateDelay the delay in milliseconds
+     * @param autoUpdate  the callback that should be scheduled
+     */
+    protected abstract void schedule(int updateDelay, Runnable autoUpdate);
 
     @Override
     public void start() {
@@ -114,10 +167,6 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    protected abstract void checkLanguage(String language, Runnable success, Runnable failure);
-
-    protected abstract void exit();
-
     private void startComputing(String term, int depth) {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
         final WikiGraphManager graph = wikiGraphManager();
@@ -140,16 +189,12 @@ public abstract class AbstractController implements Controller {
                 depth,
                 term,
                 this.language.get(),
-                this::onComputeComplete,
+                () -> onComputeComplete(graph),
                 () -> {
                     clearIfShould();
                     System.out.println("SEARCH ABORTED");
                 });
     }
-
-    protected abstract WikiGraphManager wikiGraphManager();
-
-    protected abstract void computeAsync(WikiGraphNodeFactory nodeFactory, WikiGraphManager graph, int depth, String term, String language, Consumer<WikiGraphManager> onComputeComplete, Runnable failure);
 
     private void onComputeComplete(final WikiGraphManager graph) {
         mutex.lock();
@@ -199,7 +244,7 @@ public abstract class AbstractController implements Controller {
                     maxDepth,
                     root,
                     this.language.get(),
-                    this::onAutoUpdateComplete,
+                    () -> onAutoUpdateComplete(graph),
                     () -> System.out.println(root + "UPDATES ABORTED"));
         } finally {
             mutex.unlock();
@@ -235,6 +280,4 @@ public abstract class AbstractController implements Controller {
             mutex.unlock();
         }
     }
-
-    protected abstract void schedule(int updateDelay, Runnable autoUpdate);
 }
