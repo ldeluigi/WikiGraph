@@ -7,6 +7,11 @@ import model.WikiGraphNodeFactory;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
+/**
+ * A thread safe implementation for a {@link NodeRecursion}.
+ * Note: thread safeness on the graph itself ({@link WikiGraphManager#graph()}
+ * is not guaranteed and thus must be enforced externally.
+ */
 public abstract class ConcurrentNodeRecursion extends NodeRecursion {
     private final WikiGraphManager graph;
 

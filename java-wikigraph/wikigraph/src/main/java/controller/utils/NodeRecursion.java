@@ -7,6 +7,9 @@ import model.WikiGraphNodeFactory;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Serial implementation of the algorithm that recursively computes the graph.
+ */
 public abstract class NodeRecursion {
 
     private final WikiGraphNodeFactory factory;
@@ -42,6 +45,9 @@ public abstract class NodeRecursion {
         this.depth = 0;
     }
 
+    /**
+     * Starts the recursive computation.
+     */
     public void compute() {
         if (this.graph.isAborted()) {
             abort();
@@ -86,10 +92,21 @@ public abstract class NodeRecursion {
         complete();
     }
 
+    /**
+     * Hook called at completion.
+     */
     protected abstract void complete();
 
+    /**
+     * Method that recursively spawns and starts children computation.
+     * Called one time for each child.
+     * @param term the term for the child birth
+     */
     protected abstract void childBirth(final String term);
 
+    /**
+     * Hook called when computation is aborted.
+     */
     public abstract void abort();
 
     protected final int getDepth() {

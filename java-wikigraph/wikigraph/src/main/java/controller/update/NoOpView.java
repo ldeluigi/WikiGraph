@@ -2,6 +2,9 @@ package controller.update;
 
 import view.GraphDisplay;
 
+/**
+ * A view that does nothing.
+ */
 public class NoOpView implements GraphDisplay {
     @Override
     public void addNode(String id, int depth, String lang) {
