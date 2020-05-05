@@ -2,6 +2,7 @@ package controller.utils;
 
 import controller.graphstream.GraphDisplaySink;
 import controller.update.NoOpView;
+import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.Graphs;
@@ -101,7 +102,9 @@ public class SynchronizedWikiGraphManager implements WikiGraphManager {
         }
         final String name = idFrom + "@@@" + idTo;
         if (this.graph.getEdge(name) == null) {
-            if (this.graph.addEdge(idFrom + "@@@" + idTo, from, to, true) != null) {
+            final Edge edge = this.graph.addEdge(idFrom + "@@@" + idTo, from, to, true);
+            if (edge != null) {
+                edge.addAttribute(" ",""); // bug workaround
                 this.view.addEdge(idFrom, idTo);
                 return true;
             }
