@@ -1,5 +1,6 @@
 package controller.paradigm.tasks;
 
+import controller.utils.AbortedOperationException;
 import controller.utils.ConcurrentNodeRecursion;
 import controller.utils.WikiGraphManager;
 import model.WikiGraphNodeFactory;
@@ -24,12 +25,6 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
     @Override
     public void compute() {
         this.nr.compute();
-    }
-
-    @Override
-    public boolean onExceptionalCompletion(final Throwable ex, final CountedCompleter<?> caller) {
-        ex.printStackTrace();
-        return false;
     }
 
     private class TaskNodeRecursion extends ConcurrentNodeRecursion {
@@ -57,7 +52,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
 
         @Override
         public void abort() {
-            tryComplete();
+            onExceptionalCompletion(new AbortedOperationException(), ComputeChildrenTask.this);
         }
     }
 }

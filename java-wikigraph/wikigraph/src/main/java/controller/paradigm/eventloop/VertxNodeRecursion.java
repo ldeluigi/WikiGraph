@@ -1,34 +1,29 @@
 package controller.paradigm.eventloop;
 
+import controller.utils.AbortedOperationException;
 import controller.utils.NodeRecursion;
-import controller.graphstream.GraphDisplaySink;
 import controller.utils.WikiGraphManager;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
 
 import java.util.List;
 
-public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
+public class VertxNodeRecursion extends NodeRecursion implements Future<WikiGraphManager> {
 
     private final Vertx vertx;
-    private final Runnable atCompletion;
+    private final Promise<WikiGraphManager> promise = Promise.promise();
     private int childrenYetToComplete = 0;
 
     protected VertxNodeRecursion(VertxNodeRecursion father, String term) {
         super(father, term);
         this.vertx = father.getVertx();
-        this.atCompletion = father::childCompleted;
     }
 
-    public VertxNodeRecursion(Vertx vertx, WikiGraphNodeFactory factory, WikiGraphManager graph, int maxDepth, String term, Runnable atCompletion) {
+    public VertxNodeRecursion(Vertx vertx, WikiGraphNodeFactory factory, WikiGraphManager graph, int maxDepth, String term) {
         super(factory, graph, maxDepth, term);
         this.vertx = vertx;
-        this.atCompletion = atCompletion;
     }
 
     @Override
@@ -38,18 +33,21 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
 
     @Override
     protected void complete() {
-        this.atCompletion.run();
+        this.promise.complete(this.getGraph());
     }
 
     @Override
     protected void childBirth(String term) {
         this.childrenYetToComplete++;
-        new VertxNodeRecursion(this, term).compute();
+        final VertxNodeRecursion v = new VertxNodeRecursion(this, term);
+        v.onSuccess(g -> this.childCompleted())
+                .onFailure(t -> this.abort());
+        v.compute();
     }
 
     @Override
     public void abort() {
-        this.atCompletion.run();
+        this.promise.tryFail(new AbortedOperationException());
     }
 
     private Vertx getVertx() {
@@ -61,11 +59,6 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
         if (this.childrenYetToComplete == 0) {
             complete();
         }
-    }
-
-    @Override
-    public void handle(Void event) {
-        this.compute();
     }
 
     private void blockingCode(final Promise<WikiGraphNode> promise) {
@@ -101,7 +94,7 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
     }
 
     private void nodeHandler(final AsyncResult<WikiGraphNode> result) {
-        if (this.getGraph().isAborted()) {
+        if (result.failed() || this.getGraph().isAborted()) {
             this.abort();
             return;
         }
@@ -125,5 +118,40 @@ public class VertxNodeRecursion extends NodeRecursion implements Handler<Void> {
         if (this.childrenYetToComplete == 0) {
             complete();
         }
+    }
+
+    @Override
+    public boolean isComplete() {
+        return this.promise.future().isComplete();
+    }
+
+    @Override
+    public Future<WikiGraphManager> onComplete(Handler<AsyncResult<WikiGraphManager>> handler) {
+        return this.promise.future().onComplete(handler);
+    }
+
+    @Override
+    public Handler<AsyncResult<WikiGraphManager>> getHandler() {
+        return this.promise.future().getHandler();
+    }
+
+    @Override
+    public WikiGraphManager result() {
+        return this.promise.future().result();
+    }
+
+    @Override
+    public Throwable cause() {
+        return this.promise.future().cause();
+    }
+
+    @Override
+    public boolean succeeded() {
+        return this.promise.future().succeeded();
+    }
+
+    @Override
+    public boolean failed() {
+        return this.promise.future().failed();
     }
 }
