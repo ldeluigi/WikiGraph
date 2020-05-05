@@ -243,7 +243,7 @@ public abstract class AbstractController implements Controller {
                     graph,
                     maxDepth,
                     root,
-                    this.language.get(),
+                    factory.getLanguage(),
                     () -> onAutoUpdateComplete(graph),
                     () -> System.out.println(root + "UPDATES ABORTED"));
         } finally {
