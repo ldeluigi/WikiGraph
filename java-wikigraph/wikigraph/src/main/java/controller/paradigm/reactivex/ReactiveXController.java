@@ -7,8 +7,8 @@ import controller.paradigm.tasks.ComputeChildrenTask;
 import controller.utils.SynchronizedWikiGraphManager;
 import controller.utils.WikiGraphManager;
 import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.*;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import model.WikiGraphNodeFactory;
 import view.View;
 
@@ -26,8 +26,7 @@ public class ReactiveXController extends AbstractController {
 
     @Override
     protected void checkLanguage(String language, Runnable success, Runnable failure) {
-        //TODO controllare se è sullo stesso thread
-        Observable.fromSingle(obs -> {
+        Observable.just(language).subscribeOn(Schedulers.io()).subscribe(obs -> {
             try {
                 if (new RESTWikiGraph().setLanguage(language)) {
                     success.run();
@@ -51,20 +50,24 @@ public class ReactiveXController extends AbstractController {
     @Override
     protected void computeAsync(WikiGraphNodeFactory nodeFactory, WikiGraphManager graph, int depth, String term, String language, Runnable onComputeComplete, Runnable failure) {
         //TODO da vedere
-        Observable.fromSingle(observer -> {
-            try {
-                nodeFactory.setLanguage(language);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        Observable.just(language)
+                .subscribeOn(Schedulers.io())
+                .map(obs -> nodeFactory.setLanguage(language))
+                .doOnError(obs -> failure.run())
+                .subscribe(languageIsSetCorrectly -> {
+                    if (languageIsSetCorrectly){
+                        this.process();
+                    }
+                }, throwable -> failure.run(), () -> onComputeComplete.run());
+    }
+
+    private void process() {
     }
 
     @Override
     protected void schedule(int updateDelay, Runnable autoUpdate) {
-        //TODO controllare se è sullo stesso thread
-        Completable.timer(updateDelay, TimeUnit.SECONDS)
-                .doOnComplete(() -> {
+        Completable.timer(updateDelay, TimeUnit.MICROSECONDS)
+                .subscribe(() -> {
                     try {
                         autoUpdate.run();
                     } catch (Exception e) {
