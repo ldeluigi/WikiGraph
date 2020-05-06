@@ -10,6 +10,8 @@ import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,11 +65,16 @@ public class RecursiveGraphOperation extends Observable<WikiGraphManager> {
                         if (term.isEmpty()) { //random
                             result = this.factory.random(0);
                         } else { //search
-                            WikiGraphNode temp = this.factory.from(term.get(), 0);
-                            if (temp == null) {
-                                final List<Pair<String, String>> closest = this.factory.search(term.get());
-                                if (closest.size() > 0) {
-                                    temp = this.factory.from(closest.get(0).getKey(), 0);
+                            WikiGraphNode temp;
+                            try {
+                                temp = this.factory.from(new URL(term.get()),depth);
+                            } catch (MalformedURLException | IllegalArgumentException e) {
+                                temp = this.factory.from(term.get(), 0);
+                                if (temp == null) {
+                                    final List<Pair<String, String>> closest = this.factory.search(term.get());
+                                    if (closest.size() > 0) {
+                                        temp = this.factory.from(closest.get(0).getKey(), 0);
+                                    }
                                 }
                             }
                             result = temp;
