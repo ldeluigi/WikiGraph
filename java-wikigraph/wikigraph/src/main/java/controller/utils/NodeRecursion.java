@@ -21,15 +21,15 @@ public abstract class NodeRecursion {
     private Optional<String> id = Optional.empty();
 
     protected NodeRecursion(final NodeRecursion father, final String term) {
-        this.factory = father.getNodeFactory();
-        this.graph = father.getGraph();
-        this.maxDepth = father.getMaxDepth();
+        this.factory = father.factory;
+        this.graph = father.graph;
+        this.maxDepth = father.maxDepth;
         this.term = term;
-        if (father.getID().isEmpty()) {
+        if (father.id.isEmpty()) {
             throw new IllegalArgumentException("Father has not yet computed");
         }
-        this.fatherID = father.getID().get();
-        this.depth = father.getDepth() + 1;
+        this.fatherID = father.id.get();
+        this.depth = father.depth + 1;
     }
 
 
@@ -123,10 +123,6 @@ public abstract class NodeRecursion {
 
     protected final int getMaxDepth() {
         return this.maxDepth;
-    }
-
-    protected final Optional<String> getID() {
-        return this.id;
     }
 
     protected final void setID(final String id) {
