@@ -2,6 +2,7 @@ package start;
 
 import controller.Controller;
 import controller.paradigm.eventloop.EventLoopController;
+import controller.paradigm.reactivex.ReactiveXController;
 import controller.paradigm.tasks.ExecutorController;
 import view.SwingView;
 import view.View;
@@ -18,7 +19,7 @@ public class WikiGraphStart {
             } else if (args[0].equals("eventloop")) {
                 controller = new EventLoopController(view);
             } else if (args[0].equals("rx")) {
-                controller = null;
+                controller = new ReactiveXController(view);
             }
         }
         if (controller == null) {
