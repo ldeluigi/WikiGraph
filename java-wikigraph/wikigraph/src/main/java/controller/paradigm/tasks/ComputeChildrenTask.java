@@ -64,7 +64,7 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
 
         @Override
         public void abort() {
-            onExceptionalCompletion(new AbortedOperationException(), ComputeChildrenTask.this);
+            tryComplete();
         }
     }
 }

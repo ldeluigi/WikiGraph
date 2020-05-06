@@ -74,11 +74,16 @@ public class ExecutorController extends AbstractController {
             new ComputeChildrenTask(nodeFactory, graph, depth, term) {
                 @Override
                 public void onCompletion(CountedCompleter<?> caller) {
-                    onComputeComplete.run();
+                    if (graph.isAborted()) {
+                        failure.run();
+                    } else {
+                        onComputeComplete.run();
+                    }
                 }
 
                 @Override
                 public boolean onExceptionalCompletion(Throwable ex, CountedCompleter<?> caller) {
+                    System.out.println("EXCEPTIONAL COMPLETION");
                     failure.run();
                     return false;
                 }
