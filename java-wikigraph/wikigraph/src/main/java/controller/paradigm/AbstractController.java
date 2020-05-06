@@ -274,7 +274,7 @@ public abstract class AbstractController implements Controller {
                     this.isUpdating = false;
                 }
             } else {
-                System.out.println(root + "UPDATES QUIETLY SHUTDOWN");
+                System.out.println(root + " UPDATES QUIETLY SHUTDOWN");
             }
         } finally {
             mutex.unlock();

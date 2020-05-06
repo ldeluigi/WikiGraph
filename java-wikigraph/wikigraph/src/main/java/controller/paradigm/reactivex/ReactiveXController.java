@@ -2,12 +2,10 @@ package controller.paradigm.reactivex;
 
 import controller.api.RESTWikiGraph;
 import controller.paradigm.AbstractController;
-import controller.paradigm.eventloop.EventLoopController;
-import controller.paradigm.tasks.ComputeChildrenTask;
 import controller.utils.SynchronizedWikiGraphManager;
 import controller.utils.WikiGraphManager;
-import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.*;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import model.WikiGraphNodeFactory;
 import view.View;
@@ -22,25 +20,27 @@ public class ReactiveXController extends AbstractController {
      *
      * @param view the view that displays the graph
      */
-    public ReactiveXController(View view) { super(view); }
+    public ReactiveXController(View view) {
+        super(view);
+    }
 
     @Override
     protected void checkLanguage(String language, Runnable success, Runnable failure) {
-        Observable.just(language).subscribeOn(Schedulers.io()).subscribe(obs -> {
-            try {
-                if (new RESTWikiGraph().setLanguage(language)) {
+        Observable.just(language).subscribeOn(Schedulers.io()).map(l -> new RESTWikiGraph().setLanguage(l))
+        .subscribe(b -> {
+            if (b != null) {
+                if (b) {
                     success.run();
                 } else {
                     failure.run();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         });
     }
 
     @Override
-    protected void exit() { }
+    protected void exit() {
+    }
 
     @Override
     protected WikiGraphManager wikiGraphManager() {
@@ -48,25 +48,19 @@ public class ReactiveXController extends AbstractController {
     }
 
     @Override
-    protected void computeAsync(WikiGraphNodeFactory nodeFactory, WikiGraphManager graph, int depth, String term, String language, Runnable onComputeComplete, Runnable failure) {
-        //TODO da vedere
-        Observable.just(language)
-                .subscribeOn(Schedulers.io())
-                .map(obs -> nodeFactory.setLanguage(language))
-                .doOnError(obs -> failure.run())
-                .subscribe(languageIsSetCorrectly -> {
-                    if (languageIsSetCorrectly){
-                        this.process();
-                    }
-                }, throwable -> failure.run(), () -> onComputeComplete.run());
-    }
-
-    private void process() {
+    protected void computeAsync(WikiGraphNodeFactory nodeFactory, WikiGraphManager graph,
+                                int depth, String term, String language,
+                                Runnable onComputeComplete, Runnable failure) {
+        new RecursiveGraphOperation(nodeFactory, depth, term, graph)
+                .singleOrError()
+                .onErrorComplete(t -> {failure.run(); return true;})
+                .doOnSuccess(g -> onComputeComplete.run())
+                .subscribe();
     }
 
     @Override
     protected void schedule(int updateDelay, Runnable autoUpdate) {
-        Completable.timer(updateDelay, TimeUnit.MICROSECONDS)
+        Completable.timer(updateDelay, TimeUnit.MILLISECONDS)
                 .subscribe(() -> {
                     try {
                         autoUpdate.run();
