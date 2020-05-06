@@ -8,6 +8,8 @@ import model.Pair;
 import model.WikiGraphNode;
 import model.WikiGraphNodeFactory;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 /**
@@ -83,11 +85,16 @@ public class VertxNodeRecursion extends NodeRecursion implements Future<WikiGrap
             if (this.getTerm() == null) { //random
                 result = this.getNodeFactory().random(0);
             } else { //search
-                WikiGraphNode temp = this.getNodeFactory().from(this.getTerm(), 0);
-                if (temp == null) {
-                    final List<Pair<String, String>> closest = this.getNodeFactory().search(this.getTerm());
-                    if (closest.size() > 0) {
-                        temp = this.getNodeFactory().from(closest.get(0).getKey(), 0);
+                WikiGraphNode temp;
+                try {
+                    temp = this.getNodeFactory().from(new URL(this.getTerm()),this.getDepth());
+                } catch (MalformedURLException | IllegalArgumentException e) {
+                    temp = this.getNodeFactory().from(this.getTerm(), 0);
+                    if (temp == null) {
+                        final List<Pair<String, String>> closest = this.getNodeFactory().search(this.getTerm());
+                        if (closest.size() > 0) {
+                            temp = this.getNodeFactory().from(closest.get(0).getKey(), 0);
+                        }
                     }
                 }
                 result = temp;
