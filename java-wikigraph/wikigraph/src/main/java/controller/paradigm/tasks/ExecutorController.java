@@ -48,7 +48,7 @@ public class ExecutorController extends AbstractController {
     }
 
     @Override
-    protected void checkLanguage(String language, Runnable success, Runnable failure) {
+    protected void checkLanguage(final String language, final Runnable success, final Runnable failure) {
         this.pool.execute(() -> {
             try {
                 if (new RESTWikiGraph().setLanguage(language)) {
@@ -63,8 +63,9 @@ public class ExecutorController extends AbstractController {
     }
 
     @Override
-    protected void computeAsync(WikiGraphNodeFactory nodeFactory, WikiGraphManager graph, int depth, String term,
-                                String language, Runnable onComputeComplete, Runnable failure) {
+    protected void computeAsync(final WikiGraphNodeFactory nodeFactory, final WikiGraphManager graph,
+                                final int depth, final String term, final String language,
+                                final Runnable onComputeComplete, final Runnable failure) {
         this.pool.execute(() -> {
             try {
                 nodeFactory.setLanguage(language);
@@ -92,7 +93,7 @@ public class ExecutorController extends AbstractController {
     }
 
     @Override
-    protected void schedule(int updateDelay, Runnable autoUpdate) {
+    protected void schedule(final int updateDelay, final Runnable autoUpdate) {
         this.pool.schedule(autoUpdate, updateDelay, TimeUnit.MILLISECONDS);
     }
 }

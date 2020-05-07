@@ -35,7 +35,8 @@ public class VertxNodeRecursion extends NodeRecursion implements Future<WikiGrap
      * @param maxDepth see {@link NodeRecursion}
      * @param term     see {@link NodeRecursion}
      */
-    public VertxNodeRecursion(Vertx vertx, WikiGraphNodeFactory factory, WikiGraphManager graph, int maxDepth, String term) {
+    public VertxNodeRecursion(final Vertx vertx, final WikiGraphNodeFactory factory, final WikiGraphManager graph,
+                              final int maxDepth, final String term) {
         super(factory, graph, maxDepth, term);
         this.vertx = vertx;
     }
@@ -51,7 +52,7 @@ public class VertxNodeRecursion extends NodeRecursion implements Future<WikiGrap
     }
 
     @Override
-    protected void childBirth(String term) {
+    protected void childBirth(final String term) {
         this.childrenYetToComplete++;
         final VertxNodeRecursion v = new VertxNodeRecursion(this, term);
         v.onSuccess(g -> this.childCompleted())
@@ -145,7 +146,7 @@ public class VertxNodeRecursion extends NodeRecursion implements Future<WikiGrap
     }
 
     @Override
-    public Future<WikiGraphManager> onComplete(Handler<AsyncResult<WikiGraphManager>> handler) {
+    public Future<WikiGraphManager> onComplete(final Handler<AsyncResult<WikiGraphManager>> handler) {
         return this.promise.future().onComplete(handler);
     }
 

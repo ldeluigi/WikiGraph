@@ -7,19 +7,19 @@ import view.GraphDisplay;
  */
 public class NoOpView implements GraphDisplay {
     @Override
-    public void addNode(String id, int depth, String lang) {
+    public void addNode(final String id, final int depth, final String lang) {
     }
 
     @Override
-    public void addEdge(String idFrom, String idTo) {
+    public void addEdge(final String idFrom, final String idTo) {
     }
 
     @Override
-    public void removeNode(String id) {
+    public void removeNode(final String id) {
     }
 
     @Override
-    public void removeEdge(String idFrom, String idTo) {
+    public void removeEdge(final String idFrom, final String idTo) {
     }
 
     @Override

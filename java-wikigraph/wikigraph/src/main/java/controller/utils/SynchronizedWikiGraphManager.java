@@ -122,7 +122,7 @@ public class SynchronizedWikiGraphManager implements WikiGraphManager {
     }
 
     @Override
-    public void setRootID(String term) {
+    public void setRootID(final String term) {
         this.root = term;
     }
 

@@ -18,7 +18,7 @@ public class GraphAutoUpdateRequest {
      * @param depth the max depth of the graph
      * @param original the original graph for comparison
      */
-    public GraphAutoUpdateRequest(WikiGraphNodeFactory nodeFactory, int depth, WikiGraphManager original) {
+    public GraphAutoUpdateRequest(final WikiGraphNodeFactory nodeFactory, final int depth, final WikiGraphManager original) {
         this.nodeFactory = nodeFactory;
         this.depth = depth;
         this.graph = original;

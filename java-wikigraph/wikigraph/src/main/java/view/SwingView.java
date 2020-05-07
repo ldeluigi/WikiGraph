@@ -177,7 +177,7 @@ public class SwingView extends JFrame implements GraphStreamView {
     }
 
     @Override
-    public void addEventListener(ViewEventListener listener) {
+    public void addEventListener(final ViewEventListener listener) {
         this.listeners.add(listener);
     }
 
@@ -231,7 +231,8 @@ public class SwingView extends JFrame implements GraphStreamView {
         this.listeners.forEach(l -> l.notifyEvent(e));
     }
 
-    private void fireEvent(final EventType type, final Supplier<String> text, int number, final Consumer<Boolean> callback) {
+    private void fireEvent(final EventType type, final Supplier<String> text,
+                           int number, final Consumer<Boolean> callback) {
         this.fireEvent(new ViewEvent() {
             @Override
             public EventType getType() {

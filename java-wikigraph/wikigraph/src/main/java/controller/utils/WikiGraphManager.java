@@ -33,7 +33,7 @@ public interface WikiGraphManager {
      * @param term the term
      * @return true if it's present in the graph
      */
-    boolean contains(String term);
+    boolean contains(final String term);
 
     /**
      * Adds a node to the graph.
@@ -42,7 +42,7 @@ public interface WikiGraphManager {
      * @param language the node wikipedia language
      * @return true if the node was added and wasn't already present, false otherwise
      */
-    boolean addNode(String term, int depth, String language);
+    boolean addNode(final String term, final int depth, final String language);
 
     /**
      * Adds a directed edge to the graph.
@@ -51,7 +51,7 @@ public interface WikiGraphManager {
      * @return true if edge wasn't already added and both node exists, so the edge is now in the graph;
      * false otherwise
      */
-    boolean addEdge(String idFrom, String idTo);
+    boolean addEdge(final String idFrom, final String idTo);
 
     /**
      * Returns the graph-stream graph associated with this computation.
@@ -69,12 +69,12 @@ public interface WikiGraphManager {
      * Sets the root ID for this graph.
      * @param term the ID of the root node
      */
-    void setRootID(String term);
+    void setRootID(final String term);
 
     /**
      * Sets the output display for the graph. Updated only in real time
      * during graph population.
      * @param view a {@link GraphDisplay}
      */
-    void setGraphDisplay(GraphDisplay view);
+    void setGraphDisplay(final GraphDisplay view);
 }
