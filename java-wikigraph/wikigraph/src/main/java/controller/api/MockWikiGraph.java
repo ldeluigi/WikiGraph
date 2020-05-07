@@ -17,17 +17,17 @@ public class MockWikiGraph implements WikiGraphNodeFactory {
     private final Random rand = new Random();
 
     @Override
-    public List<Pair<String, String>> search(String term) {
+    public List<Pair<String, String>> search(final String term) {
         return null;
     }
 
     @Override
-    public WikiGraphNode from(URL url, final int depth) {
+    public WikiGraphNode from(final URL url, final int depth) {
         return this.random(depth);
     }
 
     @Override
-    public WikiGraphNode from(String term, int depth) {
+    public WikiGraphNode from(final String term, final int depth) {
         Set<String> sameTerm = new HashSet<>();
         sameTerm.add(term);
         final Set<String> terms = new HashSet<>();
@@ -50,12 +50,12 @@ public class MockWikiGraph implements WikiGraphNodeFactory {
     }
 
     @Override
-    public String getLanguage(URL url) {
+    public String getLanguage(final URL url) {
         return "en";
     }
 
     @Override
-    public boolean setLanguage(String langCode) {
+    public boolean setLanguage(final String langCode) {
         return false;
     }
 }

@@ -24,7 +24,7 @@ public class EventLoopController extends AbstractController {
      *
      * @param view the view where data is displayed
      */
-    public EventLoopController(View view) {
+    public EventLoopController(final View view) {
         super(view);
     }
 
@@ -45,7 +45,7 @@ public class EventLoopController extends AbstractController {
     }
 
     @Override
-    protected void checkLanguage(String language, Runnable success, Runnable failure) {
+    protected void checkLanguage(final String language, final Runnable success, final Runnable failure) {
         checkLanguageFuture(new RESTWikiGraph(), language)
                 .onSuccess(exists -> {
                     if (exists) {
@@ -77,8 +77,9 @@ public class EventLoopController extends AbstractController {
     }
 
     @Override
-    protected void computeAsync(WikiGraphNodeFactory nodeFactory, WikiGraphManager graph, int depth, String term,
-                                String language, Runnable onComputeComplete, Runnable failure) {
+    protected void computeAsync(final WikiGraphNodeFactory nodeFactory, final WikiGraphManager graph, final int depth,
+                                final String term, final String language, final Runnable onComputeComplete,
+                                final Runnable failure) {
         checkLanguageFuture(nodeFactory, language)
                 .flatMap(Void -> {
                     final VertxNodeRecursion v = new VertxNodeRecursion(this.vertx,
@@ -95,7 +96,7 @@ public class EventLoopController extends AbstractController {
     }
 
     @Override
-    protected void schedule(int updateDelay, Runnable autoUpdate) {
+    protected void schedule(final int updateDelay, final Runnable autoUpdate) {
         this.vertx.setTimer(Math.max(updateDelay, 1), p -> autoUpdate.run());
     }
 }

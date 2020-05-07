@@ -23,78 +23,78 @@ public class GraphDisplaySink implements Sink {
     }
 
     @Override
-    public void graphAttributeAdded(String sourceId, long timeId, String attribute, Object value) {
+    public void graphAttributeAdded(final String sourceId, final long timeId, final String attribute, final Object value) {
 
     }
 
     @Override
-    public void graphAttributeChanged(String sourceId, long timeId, String attribute, Object oldValue, Object newValue) {
+    public void graphAttributeChanged(final String sourceId, final long timeId, final String attribute, final Object oldValue, final Object newValue) {
 
     }
 
     @Override
-    public void graphAttributeRemoved(String sourceId, long timeId, String attribute) {
+    public void graphAttributeRemoved(final String sourceId, final long timeId, final String attribute) {
 
     }
 
     @Override
-    public void nodeAttributeAdded(String sourceId, long timeId, String nodeId, String attribute, Object value) {
+    public void nodeAttributeAdded(final String sourceId, final long timeId, final String nodeId, final String attribute, final Object value) {
 
     }
 
     @Override
-    public void nodeAttributeChanged(String sourceId, long timeId, String nodeId, String attribute, Object oldValue, Object newValue) {
+    public void nodeAttributeChanged(final String sourceId, final long timeId, final String nodeId, final String attribute, final Object oldValue, final Object newValue) {
         // TODO something
     }
 
     @Override
-    public void nodeAttributeRemoved(String sourceId, long timeId, String nodeId, String attribute) {
+    public void nodeAttributeRemoved(final String sourceId, final long timeId, final String nodeId, final String attribute) {
 
     }
 
     @Override
-    public void edgeAttributeAdded(String sourceId, long timeId, String edgeId, String attribute, Object value) {
+    public void edgeAttributeAdded(final String sourceId, final long timeId, final String edgeId, final String attribute, final Object value) {
 
     }
 
     @Override
-    public void edgeAttributeChanged(String sourceId, long timeId, String edgeId, String attribute, Object oldValue, Object newValue) {
+    public void edgeAttributeChanged(final String sourceId, final long timeId, final String edgeId, final String attribute, final Object oldValue, final Object newValue) {
 
     }
 
     @Override
-    public void edgeAttributeRemoved(String sourceId, long timeId, String edgeId, String attribute) {
+    public void edgeAttributeRemoved(final String sourceId, final long timeId, final String edgeId, final String attribute) {
 
     }
 
     @Override
-    public void nodeAdded(String sourceId, long timeId, String nodeId) {
+    public void nodeAdded(final String sourceId, final long timeId, final String nodeId) {
         this.view.addNode(nodeId, this.finalGraph.getNode(nodeId).getAttribute("depth"), this.lang);
     }
 
     @Override
-    public void nodeRemoved(String sourceId, long timeId, String nodeId) {
+    public void nodeRemoved(final String sourceId, final long timeId, final String nodeId) {
         this.view.removeNode(nodeId);
     }
 
     @Override
-    public void edgeAdded(String sourceId, long timeId, String edgeId, String fromNodeId, String toNodeId, boolean directed) {
+    public void edgeAdded(final String sourceId, final long timeId, final String edgeId, final String fromNodeId, final String toNodeId, final boolean directed) {
         this.view.addEdge(fromNodeId, toNodeId);
     }
 
     @Override
-    public void edgeRemoved(String sourceId, long timeId, String edgeId) {
+    public void edgeRemoved(final String sourceId, final long timeId, final String edgeId) {
         final Edge e = this.initialGraph.getEdge(edgeId);
         this.view.removeEdge(e.getNode0().getId(), e.getNode1().getId());
     }
 
     @Override
-    public void graphCleared(String sourceId, long timeId) {
+    public void graphCleared(final String sourceId, final long timeId) {
 
     }
 
     @Override
-    public void stepBegins(String sourceId, long timeId, double step) {
+    public void stepBegins(final String sourceId, final long timeId, final double step) {
 
     }
 }

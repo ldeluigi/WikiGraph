@@ -29,8 +29,8 @@ public class ComputeChildrenTask extends CountedCompleter<Void> {
      * @param maxDepth see {@link ConcurrentNodeRecursion}
      * @param term     see {@link ConcurrentNodeRecursion}
      */
-    public ComputeChildrenTask(WikiGraphNodeFactory factory, WikiGraphManager graph,
-                               int maxDepth, String term) {
+    public ComputeChildrenTask(final WikiGraphNodeFactory factory, final WikiGraphManager graph,
+                               final int maxDepth, final String term) {
         this.nr = new TaskNodeRecursion(factory, graph, maxDepth, term);
     }
 

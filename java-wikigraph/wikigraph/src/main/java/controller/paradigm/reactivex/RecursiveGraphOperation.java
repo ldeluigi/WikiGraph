@@ -48,7 +48,7 @@ public class RecursiveGraphOperation extends Observable<WikiGraphManager> {
     }
 
     @Override
-    protected void subscribeActual(@NonNull Observer<? super WikiGraphManager> observer) {
+    protected void subscribeActual(final @NonNull Observer<? super WikiGraphManager> observer) {
         this.obs.subscribe(observer);
     }
 

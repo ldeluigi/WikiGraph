@@ -11,7 +11,7 @@ public interface ViewEvent {
         return 0;
     }
 
-    default void onComplete(boolean success) {
+    default void onComplete(final boolean success) {
     }
 
     enum EventType {

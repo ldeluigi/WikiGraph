@@ -33,7 +33,7 @@ public abstract class AbstractController implements Controller {
      * Constructor that initializes the status and subscribes to the {@link View} observable interface.
      * @param view the view that displays the graph
      */
-    public AbstractController(View view) {
+    public AbstractController(final View view) {
         this.view = view;
         view.addEventListener(this);
     }
@@ -47,7 +47,7 @@ public abstract class AbstractController implements Controller {
      * @param success  the callback that confirms that the language exists
      * @param failure  the callback that confirms that the language does not exist
      */
-    protected abstract void checkLanguage(String language, Runnable success, Runnable failure);
+    protected abstract void checkLanguage(final String language, final Runnable success, final Runnable failure);
 
     /**
      * Free the resources and exit.
@@ -75,7 +75,9 @@ public abstract class AbstractController implements Controller {
      * @param onComputeComplete the callback for a successful complete computation
      * @param failure           the callback for abortion or errors
      */
-    protected abstract void computeAsync(WikiGraphNodeFactory nodeFactory, WikiGraphManager graph, int depth, String term, String language, Runnable onComputeComplete, Runnable failure);
+    protected abstract void computeAsync(final WikiGraphNodeFactory nodeFactory, final WikiGraphManager graph,
+                                         final int depth, final String term, final String language,
+                                         final Runnable onComputeComplete, final Runnable failure);
 
     /**
      * Schedules in time a new update of last graph computed.
@@ -83,7 +85,7 @@ public abstract class AbstractController implements Controller {
      * @param updateDelay the delay in milliseconds
      * @param autoUpdate  the callback that should be scheduled
      */
-    protected abstract void schedule(int updateDelay, Runnable autoUpdate);
+    protected abstract void schedule(final int updateDelay, final Runnable autoUpdate);
 
     @Override
     public void start() {
@@ -167,7 +169,7 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    private void startComputing(String term, int depth) {
+    private void startComputing(final String term, final int depth) {
         final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
         final WikiGraphManager graph = wikiGraphManager();
         graph.setGraphDisplay(this.view);
