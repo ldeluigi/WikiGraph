@@ -5,7 +5,9 @@ import org.graphstream.graph.Graph;
 import org.graphstream.stream.Sink;
 import view.GraphDisplay;
 
-// TODO mettere i final
+/**
+ * Collects the differences between two graphs and applies them to a view.
+ */
 public class GraphDisplaySink implements Sink {
     public static final String DEPTH_ATTRIBUTE = "depth";
 

@@ -109,7 +109,7 @@ public class VertxNodeRecursion extends NodeRecursion implements Future<WikiGrap
         if (result != null) {
             promise.complete(result);
         } else {
-            promise.fail(this.getTerm() + " not found.");
+            promise.complete();
         }
     }
 

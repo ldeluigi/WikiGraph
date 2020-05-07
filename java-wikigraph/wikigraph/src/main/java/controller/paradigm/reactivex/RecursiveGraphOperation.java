@@ -14,8 +14,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 public class RecursiveGraphOperation extends Observable<WikiGraphManager> {
+    private final Executor executor;
 
     private final WikiGraphManager graph;
     private final WikiGraphNodeFactory factory;
@@ -32,19 +34,22 @@ public class RecursiveGraphOperation extends Observable<WikiGraphManager> {
         this.maxDepth = father.maxDepth;
         this.depth = father.depth + 1;
         this.fatherID = father.id;
-        this.obs = nameOfMethod(term);
+        this.executor = father.executor;
+        this.obs = setupRecursiveRxAlgorithm(term);
     }
 
     public RecursiveGraphOperation(final WikiGraphNodeFactory factory,
                                    final int maxDepth,
                                    final String root,
-                                   final WikiGraphManager graph) {
+                                   final WikiGraphManager graph,
+                                   final Executor executor) {
         this.factory = factory;
         this.maxDepth = maxDepth;
         this.graph = graph;
         this.depth = 0;
         this.fatherID = null;
-        this.obs = nameOfMethod(root);
+        this.executor = executor;
+        this.obs = setupRecursiveRxAlgorithm(root);
     }
 
     @Override
@@ -52,9 +57,9 @@ public class RecursiveGraphOperation extends Observable<WikiGraphManager> {
         this.obs.subscribe(observer);
     }
 
-    private Observable<WikiGraphManager> nameOfMethod(final String root) {
+    private Observable<WikiGraphManager> setupRecursiveRxAlgorithm(final String root) {
         return Observable.fromCallable(() -> Optional.ofNullable(root))
-                .observeOn(Schedulers.io())
+                .observeOn(Schedulers.from(this.executor))
                 .map(term -> {
                     if (this.graph.isAborted()) {
                         throw new AbortedOperationException();

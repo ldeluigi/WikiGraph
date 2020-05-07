@@ -10,10 +10,17 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import model.WikiGraphNodeFactory;
 import view.View;
 
-import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class ReactiveXController extends AbstractController {
+
+    public static int MAX_CONCURRENCY() {
+        return Runtime.getRuntime().availableProcessors() * 5;
+    }
+
+    private ExecutorService executor;
 
     /**
      * Creates a {@link ReactiveXController} that uses Observable and Single
@@ -39,7 +46,14 @@ public class ReactiveXController extends AbstractController {
     }
 
     @Override
+    public void start() {
+        this.executor = Executors.newFixedThreadPool(MAX_CONCURRENCY());
+        super.start();
+    }
+
+    @Override
     protected void exit() {
+        this.executor.shutdown();
     }
 
     @Override
@@ -51,7 +65,7 @@ public class ReactiveXController extends AbstractController {
     protected void computeAsync(final WikiGraphNodeFactory nodeFactory, final WikiGraphManager graph,
                                 final int depth, final String term, final String language,
                                 final Runnable onComputeComplete, final Runnable failure) {
-        new RecursiveGraphOperation(nodeFactory, depth, term, graph)
+        new RecursiveGraphOperation(nodeFactory, depth, term, graph, this.executor)
                 .singleOrError()
                 .onErrorComplete(t -> {failure.run(); return true;})
                 .doOnSuccess(g -> onComputeComplete.run())
