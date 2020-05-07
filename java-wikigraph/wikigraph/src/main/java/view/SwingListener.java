@@ -104,7 +104,7 @@ public class SwingListener implements MouseListener, MouseMotionListener, MouseW
     public void mouseMoved(final MouseEvent mouseEvent) {
         Node nodeHovered = getNode(mouseEvent);
         if (nodeHovered != lastHovered) {
-            if (lastHovered != null && lastHovered.getGraph().getNodeCount() > 0) {
+            if (lastHovered != null && lastHovered.getGraph().getNodeSet().contains(lastHovered)) {
                 lastHovered.addAttribute("ui.class", oldClasses);
             }
             if (nodeHovered != null) {
