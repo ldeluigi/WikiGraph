@@ -1,6 +1,7 @@
 package controller.utils;
 
 import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
 import view.GraphDisplay;
 
 import java.util.concurrent.locks.Lock;
@@ -77,4 +78,11 @@ public interface WikiGraphManager {
      * @param view a {@link GraphDisplay}
      */
     void setGraphDisplay(final GraphDisplay view);
+
+    /**
+     * update depth attribute to "id" {@link Node}
+     * @param id of the Node that needs to be updated
+     * @param depth new depth of the node
+     */
+    void updateDepthNode(final String id, final int depth);
 }
