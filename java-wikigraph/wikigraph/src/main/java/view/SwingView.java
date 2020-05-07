@@ -232,7 +232,7 @@ public class SwingView extends JFrame implements GraphStreamView {
     }
 
     private void fireEvent(final EventType type, final Supplier<String> text,
-                           int number, final Consumer<Boolean> callback) {
+                           final int number, final Consumer<Boolean> callback) {
         this.fireEvent(new ViewEvent() {
             @Override
             public EventType getType() {
