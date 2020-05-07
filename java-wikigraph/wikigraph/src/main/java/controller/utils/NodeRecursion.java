@@ -76,6 +76,9 @@ public abstract class NodeRecursion {
         if (result != null) {
             this.setID(result.term());
             if (this.getGraph().contains(result.term())) {
+                if ((int)this.graph.graph().getNode(result.term()).getAttribute("depth") > this.getDepth()){
+                    this.graph.updateDepthNode(result.term(), this.getDepth());
+                }
                 this.getGraph().addEdge(this.getFatherID(), result.term());
             } else {
                 this.getGraph().addNode(result.term(), depth, this.getNodeFactory().getLanguage());
