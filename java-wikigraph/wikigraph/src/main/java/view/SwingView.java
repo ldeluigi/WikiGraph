@@ -3,12 +3,14 @@ package view;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
+import org.graphstream.stream.SourceBase;
 import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
 import view.ViewEvent.EventType;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.annotation.ElementType;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -130,6 +132,13 @@ public class SwingView extends JFrame implements GraphStreamView {
             } else {
                 System.err.println("INFO: DUPLICATE NODE IGNORED - " + id);
             }
+        });
+    }
+
+    @Override
+    public void updateDepthNode(final String id, final int depth) {
+        SwingUtilities.invokeLater(() -> {
+            this.graph.getNode(id).changeAttribute("ui.class", "d" + depth);
         });
     }
 

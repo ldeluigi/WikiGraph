@@ -1,5 +1,6 @@
 package controller.update;
 
+import org.graphstream.stream.SourceBase;
 import view.GraphDisplay;
 
 /**
@@ -9,6 +10,11 @@ public class NoOpView implements GraphDisplay {
     @Override
     public void addNode(final String id, final int depth, final String lang) {
     }
+
+    @Override
+    public void updateDepthNode(String id, int depth) {
+    }
+
 
     @Override
     public void addEdge(final String idFrom, final String idTo) {
