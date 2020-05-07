@@ -132,6 +132,12 @@ public class SynchronizedWikiGraphManager implements WikiGraphManager {
     }
 
     @Override
+    public void updateDepthNode(String id, int depth) {
+        this.graph.changeAttribute(GraphDisplaySink.DEPTH_ATTRIBUTE, depth);
+        this.view.updateDepthNode(id,depth);
+    }
+
+    @Override
     public Lock getLockOn(final String nodeTerm) {
         synchronized (this.locks) {
             if (this.locks.containsKey(nodeTerm)) {
