@@ -1,6 +1,7 @@
 package controller.paradigm;
 
 import controller.Controller;
+import controller.api.MockWikiGraph;
 import controller.api.RESTWikiGraph;
 import controller.graphstream.GraphDisplaySink;
 import controller.graphstream.OrderedGraphDiff;
@@ -170,7 +171,7 @@ public abstract class AbstractController implements Controller {
     }
 
     private void startComputing(final String term, final int depth) {
-        final WikiGraphNodeFactory nodeFactory = new RESTWikiGraph();
+        final WikiGraphNodeFactory nodeFactory = "1".equals(System.getenv("DEBUG")) ? new MockWikiGraph() : new RESTWikiGraph();
         final WikiGraphManager graph = wikiGraphManager();
         graph.setGraphDisplay(this.view);
         mutex.lock();
