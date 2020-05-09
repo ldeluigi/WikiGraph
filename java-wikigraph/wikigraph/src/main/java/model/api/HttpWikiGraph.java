@@ -1,4 +1,4 @@
-package controller.api;
+package model.api;
 
 import model.*;
 import org.json.JSONArray;

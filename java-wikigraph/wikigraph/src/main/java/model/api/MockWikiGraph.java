@@ -1,4 +1,4 @@
-package controller.api;
+package model.api;
 
 import model.Pair;
 import model.WikiGraphNode;

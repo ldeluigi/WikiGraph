@@ -1,4 +1,4 @@
-package controller.api;
+package model.api;
 
 import com.google.common.util.concurrent.RateLimiter;
 import model.WikiGraphNode;

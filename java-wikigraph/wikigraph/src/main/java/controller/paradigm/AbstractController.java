@@ -1,8 +1,8 @@
 package controller.paradigm;
 
 import controller.Controller;
-import controller.api.MockWikiGraph;
-import controller.api.RESTWikiGraph;
+import model.api.MockWikiGraph;
+import model.api.RESTWikiGraph;
 import controller.graphstream.GraphDisplaySink;
 import controller.graphstream.OrderedGraphDiff;
 import controller.update.GraphAutoUpdateRequest;
