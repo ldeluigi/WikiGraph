@@ -1,7 +1,7 @@
 package controller.paradigm.tasks;
 
 
-import controller.api.RESTWikiGraph;
+import model.api.RESTWikiGraph;
 import controller.paradigm.AbstractController;
 import controller.utils.SynchronizedWikiGraphManager;
 import controller.utils.WikiGraphManager;
