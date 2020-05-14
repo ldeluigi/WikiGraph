@@ -23,7 +23,7 @@ public class ReactiveXController extends AbstractController {
     private ExecutorService executor;
 
     /**
-     * Creates a {@link ReactiveXController} that uses Observable and Single
+     * Creates a {@link ReactiveXController} that uses Observable, Single and Completable
      *
      * @param view the view that displays the graph
      */
