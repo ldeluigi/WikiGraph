@@ -118,7 +118,7 @@ public class VertxNodeRecursion extends NodeRecursion implements Future<WikiGrap
             this.abort();
             return;
         }
-        if (result.succeeded()) {
+        if (result.succeeded() && result.result() != null) {
             final WikiGraphNode node = result.result();
             setID(node.term());
             if (getGraph().contains(node.term())) {
