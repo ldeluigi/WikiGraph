@@ -58,7 +58,7 @@ public class ReactiveXController extends AbstractController {
 
     @Override
     protected WikiGraphManager wikiGraphManager() {
-        return SynchronizedWikiGraphManager.threadSafe();
+        return SynchronizedWikiGraphManager.empty();
     }
 
     @Override
