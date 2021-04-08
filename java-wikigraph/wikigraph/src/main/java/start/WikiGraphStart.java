@@ -5,21 +5,23 @@ import controller.paradigm.eventloop.EventLoopController;
 import controller.paradigm.reactivex.ReactiveXController;
 import controller.paradigm.tasks.ExecutorController;
 import view.SwingView;
-import view.View;
 
 
 public class WikiGraphStart {
 
     public static void main(String[] args) {
-        final View view = new SwingView();
         Controller controller = null;
         if (args.length > 0) {
-            if (args[0].equals("executors")) {
-                controller = new ExecutorController(view);
-            } else if (args[0].equals("eventloop")) {
-                controller = new EventLoopController(view);
-            } else if (args[0].equals("rx")) {
-                controller = new ReactiveXController(view);
+            switch (args[0]) {
+                case "executors":
+                    controller = new ExecutorController(new SwingView());
+                    break;
+                case "eventloop":
+                    controller = new EventLoopController(new SwingView());
+                    break;
+                case "rx":
+                    controller = new ReactiveXController(new SwingView());
+                    break;
             }
         }
         if (controller == null) {
